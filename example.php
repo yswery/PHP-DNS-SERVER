@@ -9,7 +9,8 @@ $ds_records = array(
         'A' => '111.111.111.111',
         'MX' => '112.112.112.112',
         'NS' => 'ns1.test.com',
-        'TXT' => 'Some text.'
+        'TXT' => 'Some text.',
+	'AAAA' => 'DEAD:01::BEEF'
     ),
     'test2.com' => array(
         // allow multiple records of same type

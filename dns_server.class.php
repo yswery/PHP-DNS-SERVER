@@ -191,6 +191,9 @@ class PHP_DNS_SERVER {
 			case $this->DS_TYPE_A:
 				$data['value'] = inet_ntop($val);
 				break;
+			case $this->DS_TYPE_AAAA:
+				$data['value'] = inet_ntop($val);
+				break;
 			case $this->DS_TYPE_NS:
 				$foo_offset = 0;
 				$data['value'] = $this->ds_decode_label($val, $foo_offset);
@@ -347,6 +350,11 @@ class PHP_DNS_SERVER {
 				$enc = inet_pton($val);
 				if(strlen($enc) != 4)
 					$enc = "\0\0\0\0";
+				return $enc;
+			case $this->DS_TYPE_AAAA:
+				$enc = inet_pton($val);
+				if (strlen($enc) != 16) 
+					$enc = str_repeat("\0", 16);
 				return $enc;
 			case $this->DS_TYPE_NS:
 				return $this->ds_encode_label($val, $offset);
