@@ -245,10 +245,10 @@ class PHP_DNS_SERVER {
 				$data['type'] = $this->DS_TYPE_OPT;
 				$data['value'] = array(
 					'type' => $this->DS_TYPE_OPT,
-					'ext_code' => DS_TTL >> 24 & 0xff,
+					'ext_code' => $this->DS_TTL >> 24 & 0xff,
 					'udp_payload_size' => 4096,
-					'version' => DS_TTL >> 16 & 0xff,
-					'flags' => $this->ds_decode_flags(DS_TTL & 0xffff)
+					'version' => $this->DS_TTL >> 16 & 0xff,
+					'flags' => $this->ds_decode_flags($this->DS_TTL & 0xffff)
 				);
 				break;
 			default:
@@ -382,7 +382,7 @@ class PHP_DNS_SERVER {
 			case $this->DS_TYPE_OPT:
 				$res = array(
 						'class' => $val['udp_payload_size'],
-						'ttl' => (($val['ext_code'] & 0xff) << 24) | (($val['version'] & 0xff) << 16) | (ds_encode_flags($val['flags']) & 0xffff),
+						'ttl' => (($val['ext_code'] & 0xff) << 24) | (($val['version'] & 0xff) << 16) | ($this->ds_encode_flags($val['flags']) & 0xffff),
 						'data' => '', // TODO: encode data
 				);
 
