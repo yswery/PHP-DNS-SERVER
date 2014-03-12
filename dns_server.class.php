@@ -17,7 +17,7 @@ class PHP_DNS_SERVER {
 	private $DS_TYPES = array(1 => 'A', 2 => 'NS', 5 => 'CNAME', 6 => 'SOA', 12 => 'PTR', 15 => 'MX', 16 => 'TXT', 28 => 'AAAA', 41 => 'OPT', 252 => 'AXFR', 255 => 'ANY'); 
 	
 
-	public function __construct($dns_records = array(), $bind_ip = '127.0.0.1', $bind_port = 53, $default_ttl = 300, $max_packet_len = 512){
+	public function __construct($dns_records = array(), $bind_ip = '0.0.0.0', $bind_port = 53, $default_ttl = 300, $max_packet_len = 512){
 		$this->DS_PORT = $bind_port;
 		$this->DS_IP = $bind_ip;
 		$this->DS_TTL = $default_ttl;
