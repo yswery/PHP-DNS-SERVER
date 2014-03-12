@@ -1,4 +1,4 @@
-<? 
+<?php
 
 require "dns_server.class.php"; 
 
