@@ -1,28 +1,23 @@
 <?php
 
+// REGISTER AUTOLOADER
+spl_autoload_register(function ($class) {
+ $file = __DIR__ . DIRECTORY_SEPARATOR . str_replace('\\', '/', $class) . '.php';
+
+ if (file_exists($file)) {
+  require $file;
+ }
+});
+
+use StorageProvider\JsonStorageProvider;
+
 require "dns_server.class.php"; 
 
-
-// dns records
-$ds_records = array(
-    'test.com' => array(
-        'A' => '111.111.111.111',
-        'MX' => '112.112.112.112',
-        'NS' => 'ns1.test.com',
-        'TXT' => 'Some text.',
-	'AAAA' => 'DEAD:01::BEEF'
-    ),
-    'test2.com' => array(
-        // allow multiple records of same type
-        'A' => array(
-            '111.111.111.111',
-            '112.112.112.112'
-        )
-    )
-);
+$record_file = 'dns_record.json';
+$storage = new JsonStorageProvider($record_file);
 
 // Creating a new instance of our class
-$dns = new PHP_DNS_SERVER($ds_records);
+$dns = new PHP_DNS_SERVER($storage);
 
 // Starting our DNS server
 $dns->start();

@@ -16,12 +16,14 @@ class PHP_DNS_SERVER {
 	private $DS_TYPE_ANY = 255;
 	private $DS_TYPES = array(1 => 'A', 2 => 'NS', 5 => 'CNAME', 6 => 'SOA', 12 => 'PTR', 15 => 'MX', 16 => 'TXT', 28 => 'AAAA', 41 => 'OPT', 252 => 'AXFR', 255 => 'ANY'); 
 	
+	private $ds_storage;
 
-	public function __construct($dns_records = array(), $bind_ip = '0.0.0.0', $bind_port = 53, $default_ttl = 300, $max_packet_len = 512){
+	public function __construct($ds_storage, $bind_ip = '0.0.0.0', $bind_port = 53, $default_ttl = 300, $max_packet_len = 512){
 		$this->DS_PORT = $bind_port;
 		$this->DS_IP = $bind_ip;
 		$this->DS_TTL = $default_ttl;
 		$this->DS_MAX_LENGTH = $max_packet_len;
+		$this->ds_storage = $ds_storage;
 		
 		ini_set('display_errors', TRUE);
 		ini_set('error_reporting', E_ALL);
@@ -32,7 +34,6 @@ class PHP_DNS_SERVER {
 		if(!extension_loaded('sockets') || !function_exists('socket_create')){
 			$this->ds_error(E_USER_ERROR, 'Socket extension or function not found.', __FILE__, __LINE__);
 		}
-		$this->dns_records = $dns_records;
 	}
 	
 	public function start(){
@@ -77,7 +78,7 @@ class PHP_DNS_SERVER {
 		$answer = $this->ds_decode_rr($buffer, $offset, $data['ancount']);
 		$authority = $this->ds_decode_rr($buffer, $offset, $data['nscount']);
 		$additional = $this->ds_decode_rr($buffer, $offset, $data['arcount']);
-		$answer = $this->ds_get_answer($question);
+		$answer = $this->ds_storage->get_answer($question);
 		$flags['qr'] = 1;
 		$flags['ra'] = 0;
 		
@@ -392,7 +393,7 @@ class PHP_DNS_SERVER {
 		}
 	}
 	
-	private function ds_error($code, $error, $file, $line){
+	public function ds_error($code, $error, $file, $line){
 		if(!(error_reporting() & $code)){
 			return;
 		}
@@ -419,44 +420,9 @@ class PHP_DNS_SERVER {
 		
 		die(sprintf('DNS Server error: [%s] "%s" in file "%s" on line "%d".%s', $type, $error, $file, $line, PHP_EOL));
 	}
-	
-	private function ds_get_answer($question){
-		$answer = array();
-		$domain = trim($question[0]['qname'], '.');
-		$type = $this->DS_TYPES[$question[0]['qtype']];
 
-		if(isset($this->dns_records[$domain]) && isset($this->dns_records[$domain][$type])){
-			if(is_array($this->dns_records[$domain][$type])){
-				foreach($this->dns_records[$domain][$type] as $ip){
-					$answer[] = array(
-						'name' => $question[0]['qname'],
-						'class' => $question[0]['qclass'],
-						'ttl' => $this->DS_TTL,
-						'data' => array(
-							'type' => $question[0]['qtype'],
-							'value' => $ip
-						)
-					);
-				}
-			} else {
-				$answer[] = array(
-					'name' => $question[0]['qname'],
-					'class' => $question[0]['qclass'],
-					'ttl' => $this->DS_TTL,
-					'data' => array(
-						'type' => $question[0]['qtype'],
-						'value' => $this->dns_records[$domain][$type]
-					)
-				);
-			}
-		}
-		
-		return $answer;
+	public static function get_ds_types() {
+		return $this->$DS_TYPES;
 	}
-
-	
-	
-	
-
 
 }
