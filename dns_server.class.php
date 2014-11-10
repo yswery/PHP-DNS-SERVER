@@ -370,7 +370,7 @@ class PHP_DNS_SERVER {
 			case $this->DS_TYPE_PTR:
 				return $this->ds_encode_label($val, $offset);
 			case $this->DS_TYPE_MX:
-				return pack('n', 10) . ds_encode_label($val, $offset + 2);
+				return pack('n', 10) . $this->ds_encode_label($val, $offset + 2);
 			case $this->DS_TYPE_TXT:
 				if(strlen($val) > 255)
 					$val = substr($val, 0, 255);
