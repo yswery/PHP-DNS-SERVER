@@ -1,26 +1,12 @@
 <?php
 
-// REGISTER AUTOLOADER
-spl_autoload_register(function ($class) {
- $file = __DIR__ . DIRECTORY_SEPARATOR . str_replace('\\', '/', $class) . '.php';
-
- if (file_exists($file)) {
-  require $file;
- }
-});
-
-use StorageProvider\JsonStorageProvider;
-
-require "dns_server.class.php"; 
+require "vendor/autoload.php";
 
 $record_file = 'dns_record.json';
-$storage = new JsonStorageProvider($record_file);
+$storage = new yswery\DNS\JsonStorageProvider($record_file);
 
 // Creating a new instance of our class
-$dns = new PHP_DNS_SERVER($storage);
+$dns = new yswery\DNS\Server($storage);
 
 // Starting our DNS server
 $dns->start();
-
-
-?>

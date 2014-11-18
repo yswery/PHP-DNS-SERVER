@@ -32,7 +32,7 @@ Here is an example of some DNS records
 ```
 <?
 
-require "dns_server.class.php";
+require "vendor/autoload.php";
 
 // dns records
 $ds_records = array(
@@ -52,7 +52,7 @@ $ds_records = array(
 );
 
 // Creating a new instance of our class
-$dns = new PHP_DNS_SERVER($ds_records);
+$dns = new \yswery\DNS\Server($ds_records);
 
 // Starting our DNS server
 $dns->start();
