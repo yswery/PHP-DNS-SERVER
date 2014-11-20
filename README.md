@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/yswery/PHP-DNS-SERVER.svg?branch=master)](https://travis-ci.org/yswery/PHP-DNS-SERVER)
+
 PHP DNS Server
 ==============
 
