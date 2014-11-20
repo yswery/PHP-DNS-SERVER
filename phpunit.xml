@@ -2,4 +2,7 @@
     <testsuite name="dns-server-tests">
         <directory suffix="Test.php">tests</directory>
     </testsuite>
+    <logging>
+        <log type="coverage-clover" target="tests/clover.xml"/>
+    </logging>
 </phpunit>
