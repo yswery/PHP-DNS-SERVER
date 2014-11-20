@@ -1,0 +1,5 @@
+<phpunit bootstrap="tests/bootstrap.php">
+    <testsuite name="dns-server-tests">
+        <directory suffix="Test.php">tests</directory>
+    </testsuite>
+</phpunit>
