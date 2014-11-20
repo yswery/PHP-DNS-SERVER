@@ -71,3 +71,9 @@ $ dig @127.0.0.1 test2.com A +short
 112.112.112.112
 ```
 
+##Running Tests
+
+Unit tests using PHPUnit are provided. A simple script is located in the root.
+
+* run composer install --dev to install PHPUnit and dependencies
+* run ./phpunit from the root to run the tests
