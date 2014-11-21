@@ -2,6 +2,8 @@
 
 namespace yswery\DNS;
 
+use \Exception;
+
 class JsonStorageProvider extends AbstractStorageProvider {
 
     private $dns_records;
@@ -10,7 +12,7 @@ class JsonStorageProvider extends AbstractStorageProvider {
 
     public function __construct($record_file, $default_ttl = 300)
     {
-        $handle = fopen($record_file, "r");
+        $handle = @fopen($record_file, "r");
         if(!$handle) {
             throw new Exception('Unable to open dns record file.');
         }
