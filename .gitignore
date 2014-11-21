@@ -2,3 +2,4 @@ composer.lock
 .project
 /vendor/
 .README.md.html
+/.idea
