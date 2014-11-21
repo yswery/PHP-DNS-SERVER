@@ -36,4 +36,22 @@ class RecordTypeEnumTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(false === $typeName);
     }
 
+    public function testGetTypes()
+    {
+        $expected = array(
+            'A' => 1,
+            'NS' => 2,
+            'CNAME' => 5,
+            'SOA' => 6,
+            'PTR' => 12,
+            'MX' => 15,
+            'TXT' => 16,
+            'AAAA' => 28,
+            'OPT' => 41,
+            'AXFR' => 252,
+            'ANY' => 255,
+        );
+        $this->assertTrue($this->recordTypes->get_types() === $expected);
+    }
+
 }
