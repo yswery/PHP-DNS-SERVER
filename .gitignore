@@ -4,3 +4,4 @@ composer.lock
 .README.md.html
 /.idea
 /tests/clover.xml
+/nbproject
