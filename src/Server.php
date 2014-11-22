@@ -351,18 +351,24 @@ class Server {
                     $enc = str_repeat("\0", 16);
                 return $enc;
             case RecordTypeEnum::TYPE_NS:
+                $val = rtrim($val,'.').'.';
                 return $this->ds_encode_label($val, $offset);
             case RecordTypeEnum::TYPE_CNAME:
+                $val = rtrim($val,'.').'.';
                 return $this->ds_encode_label($val, $offset);
             case RecordTypeEnum::TYPE_SOA:
                 $res = '';
+                $val['mname'] = rtrim($val['mname'],'.').'.';
+                $val['rname'] = rtrim($val['rname'],'.').'.';
                 $res .= $this->ds_encode_label($val['mname'], $offset);
                 $res .= $this->ds_encode_label($val['rname'], $offset +strlen($res));
-                $res .= pack('NNNNN', $val['serial'], $val['refresh'], $val['retry'], $val['expire'], $val['minimum']);
+                $res .= pack('NNNNN', $val['serial'], $val['refresh'], $val['retry'], $val['expire'], $val['minimum-ttl']);
                 return $res;
             case RecordTypeEnum::TYPE_PTR:
+                $val = rtrim($val,'.').'.';
                 return $this->ds_encode_label($val, $offset);
             case RecordTypeEnum::TYPE_MX:
+                $val = rtrim($val,'.').'.';
                 return pack('n', 10) . $this->ds_encode_label($val, $offset +2);
             case RecordTypeEnum::TYPE_TXT:
                 if(strlen($val) > 255)
