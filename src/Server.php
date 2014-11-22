@@ -4,20 +4,6 @@ namespace yswery\DNS;
 
 class Server {
 
-    // available record types
-    private $DS_TYPE_A = 1;
-    private $DS_TYPE_NS = 2;
-    private $DS_TYPE_CNAME = 5;
-    private $DS_TYPE_SOA = 6;
-    private $DS_TYPE_PTR = 12;
-    private $DS_TYPE_MX = 15;
-    private $DS_TYPE_TXT = 16;
-    private $DS_TYPE_AAAA = 28;
-    private $DS_TYPE_OPT = 41;
-    private $DS_TYPE_AXFR = 252;
-    private $DS_TYPE_ANY = 255;
-    private $DS_TYPES = array(1 => 'A', 2 => 'NS', 5 => 'CNAME', 6 => 'SOA', 12 => 'PTR', 15 => 'MX', 16 => 'TXT', 28 => 'AAAA', 41 => 'OPT', 252 => 'AXFR', 255 => 'ANY');
-
     private $ds_storage;
 
     public function __construct($ds_storage, $bind_ip = '0.0.0.0', $bind_port = 53, $default_ttl = 300, $max_packet_len = 512)
@@ -200,21 +186,21 @@ class Server {
         $data = array();
 
         switch($type) {
-            case $this->DS_TYPE_A:
+            case RecordTypeEnum::TYPE_A:
                 $data['value'] = inet_ntop($val);
                 break;
-            case $this->DS_TYPE_AAAA:
+            case $RecordTypeEnum::TYPE_AAAA:
                 $data['value'] = inet_ntop($val);
                 break;
-            case $this->DS_TYPE_NS:
+            case RecordTypeEnum::TYPE_NS:
                 $foo_offset = 0;
                 $data['value'] = $this->ds_decode_label($val, $foo_offset);
                 break;
-            case $this->DS_TYPE_CNAME:
+            case RecordTypeEnum::TYPE_CNAME:
                 $foo_offset = 0;
                 $data['value'] = $this->ds_decode_label($val, $foo_offset);
                 break;
-            case $this->DS_TYPE_SOA:
+            case RecordTypeEnum::TYPE_SOA:
                 $data['value'] = array();
                 $offset = 0;
                 $data['value']['mname'] = $this->ds_decode_label($val, $offset);
@@ -226,15 +212,15 @@ class Server {
                 }
 
                 break;
-            case $this->DS_TYPE_PTR:
+            case RecordTypeEnum::TYPE_PTR:
                 $foo_offset = 0;
                 $data['value'] = $this->ds_decode_label($val, $foo_offset);
                 break;
-            case $this->DS_TYPE_MX:
+            case RecordTypeEnum::TYPE_MX:
                 $tmp = unpack('n', $val);
                 $data['value'] = array('priority' => $tmp[0], 'host' => substr($val, 2), );
                 break;
-            case $this->DS_TYPE_TXT:
+            case RecordTypeEnum::TYPE_TXT:
                 $len = ord($val[0]);
 
                 if((strlen($val) +1) < $len) {
@@ -244,15 +230,15 @@ class Server {
 
                 $data['value'] = substr($val, 1, $len);
                 break;
-            case $this->DS_TYPE_AXFR:
+            case RecordTypeEnum::TYPE_AXFR:
                 $data['value'] = NULL;
                 break;
-            case $this->DS_TYPE_ANY:
+            case RecordTypeEnum::TYPE_ANY:
                 $data['value'] = NULL;
                 break;
-            case $this->DS_TYPE_OPT:
-                $data['type'] = $this->DS_TYPE_OPT;
-                $data['value'] = array('type' => $this->DS_TYPE_OPT, 'ext_code' => $this->DS_TTL>>24 &0xff, 'udp_payload_size' => 4096, 'version' => $this->DS_TTL>>16 &0xff, 'flags' => $this->ds_decode_flags($this->DS_TTL &0xffff));
+            case RecordTypeEnum::TYPE_OPT:
+                $data['type'] = RecordTypeEnum::TYPE_OPT;
+                $data['value'] = array('type' => RecordTypeEnum::TYPE_OPT, 'ext_code' => $this->DS_TTL>>24 &0xff, 'udp_payload_size' => 4096, 'version' => $this->DS_TTL>>16 &0xff, 'flags' => $this->ds_decode_flags($this->DS_TTL &0xffff));
                 break;
             default:
                 $data['value'] = $val;
@@ -354,40 +340,40 @@ class Server {
     private function ds_encode_type($type, $val = NULL, $offset = NULL)
     {
         switch ($type) {
-            case $this->DS_TYPE_A:
+            case RecordTypeEnum::TYPE_A:
                 $enc = inet_pton($val);
                 if(strlen($enc) != 4)
                     $enc = "\0\0\0\0";
                 return $enc;
-            case $this->DS_TYPE_AAAA:
+            case RecordTypeEnum::TYPE_AAAA:
                 $enc = inet_pton($val);
                 if(strlen($enc) != 16)
                     $enc = str_repeat("\0", 16);
                 return $enc;
-            case $this->DS_TYPE_NS:
+            case RecordTypeEnum::TYPE_NS:
                 return $this->ds_encode_label($val, $offset);
-            case $this->DS_TYPE_CNAME:
+            case RecordTypeEnum::TYPE_CNAME:
                 return $this->ds_encode_label($val, $offset);
-            case $this->DS_TYPE_SOA:
+            case RecordTypeEnum::TYPE_SOA:
                 $res = '';
                 $res .= $this->ds_encode_label($val['mname'], $offset);
                 $res .= $this->ds_encode_label($val['rname'], $offset +strlen($res));
                 $res .= pack('NNNNN', $val['serial'], $val['refresh'], $val['retry'], $val['expire'], $val['minimum']);
                 return $res;
-            case $this->DS_TYPE_PTR:
+            case RecordTypeEnum::TYPE_PTR:
                 return $this->ds_encode_label($val, $offset);
-            case $this->DS_TYPE_MX:
+            case RecordTypeEnum::TYPE_MX:
                 return pack('n', 10) . $this->ds_encode_label($val, $offset +2);
-            case $this->DS_TYPE_TXT:
+            case RecordTypeEnum::TYPE_TXT:
                 if(strlen($val) > 255)
                     $val = substr($val, 0, 255);
 
                 return chr(strlen($val)) . $val;
-            case $this->DS_TYPE_AXFR:
+            case RecordTypeEnum::TYPE_AXFR:
                 return '';
-            case $this->DS_TYPE_ANY:
+            case RecordTypeEnum::TYPE_ANY:
                 return '';
-            case $this->DS_TYPE_OPT:
+            case RecordTypeEnum::TYPE_OPT:
                 $res = array('class' => $val['udp_payload_size'], 'ttl' => (($val['ext_code'] &0xff)<<24) |(($val['version'] &0xff)<<16) |($this->ds_encode_flags($val['flags']) &0xffff), 'data' => '',
                 // // TODO: encode data
                 );
@@ -409,11 +395,6 @@ class Server {
         $type = isset($codes[$code]) ? $codes[$code] : 'Unknown Error';
 
         die(sprintf('DNS Server error: [%s] "%s" in file "%s" on line "%d".%s', $type, $error, $file, $line, PHP_EOL));
-    }
-
-    public static function get_ds_types()
-    {
-        return $this->$DS_TYPES;
     }
 
 }

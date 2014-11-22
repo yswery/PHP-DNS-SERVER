@@ -2,37 +2,27 @@
 
 class RecordTypeEnumTest extends PHPUnit_Framework_TestCase {
 
-    /**
-     * @var yswery\DNS\RecordTypeEnum
-     */
-    protected $recordTypes;
-
-    public function setUp()
-    {
-        $this->recordTypes = new \yswery\DNS\RecordTypeEnum;
-    }
-
     public function testGetsHostRecordIndex()
     {
-        $hostIndex = $this->recordTypes->get_type_index('A');
+        $hostIndex = \yswery\DNS\RecordTypeEnum::get_type_index('A');
         $this->assertTrue($hostIndex === \yswery\DNS\RecordTypeEnum::TYPE_A);
     }
 
     public function testDoesNotGetInvalidRecordTypeIndex()
     {
-        $hostIndex = $this->recordTypes->get_type_index('BLAH');
+        $hostIndex = \yswery\DNS\RecordTypeEnum::get_type_index('BLAH');
         $this->assertTrue($hostIndex === false);
     }
 
     public function testGetsNameFromType()
     {
-        $typeName = $this->recordTypes->get_name(\yswery\DNS\RecordTypeEnum::TYPE_A);
+        $typeName = \yswery\DNS\RecordTypeEnum::get_name(\yswery\DNS\RecordTypeEnum::TYPE_A);
         $this->assertTrue('A' === $typeName);
     }
 
     public function testDoesNotGetInvalidNameFromType()
     {
-        $typeName = $this->recordTypes->get_name(932);
+        $typeName = \yswery\DNS\RecordTypeEnum::get_name(932);
         $this->assertTrue(false === $typeName);
     }
 
@@ -51,7 +41,7 @@ class RecordTypeEnumTest extends PHPUnit_Framework_TestCase {
             'AXFR' => 252,
             'ANY' => 255,
         );
-        $this->assertTrue($this->recordTypes->get_types() === $expected);
+        $this->assertTrue(\yswery\DNS\RecordTypeEnum::get_types() === $expected);
     }
 
 }
