@@ -4,51 +4,66 @@ namespace yswery\DNS;
 
 use \Exception;
 
-class JsonStorageProvider extends AbstractStorageProvider {
-
-    private $dns_records;
-    private $DS_TTL;
-
-    public function __construct($record_file, $default_ttl = 300)
-    {
-        $handle = @fopen($record_file, "r");
-        if(!$handle) {
-            throw new Exception('Unable to open dns record file.');
-        }
-
-        $dns_json = fread($handle, filesize($record_file));
-        fclose($handle);
-
-        $dns_records = json_decode($dns_json, true);
-        if(!$dns_records) {
-            throw new Exception('Unable to parse dns record file.');
-        }
-        
-        if(!is_int($default_ttl)) {
-            throw new Exception('Default TTL must be an integer.');
-        }
-        $this->DS_TTL = $default_ttl;
-
-        $this->dns_records = $dns_records;
-    }
-
+class RecursiveProvider extends AbstractStorageProvider {
+    
+    private $dns_answer_names = array(
+        'DNS_A' => 'ip',
+        'DNS_AAAA' => 'ipv6',
+        'DNS_CNAME' => 'target',
+        'DNS_TXT' => 'txt',
+        'DNS_MX' => 'target',
+        'DNS_NS' => 'target',
+        'DNS_SOA' => array('mname', 'rname', 'serial', 'retry', 'refresh', 'expire', 'minimum-ttl'),
+        'DNS_PTR' => 'target',
+    );
+    
     public function get_answer($question)
     {
         $answer = array();
         $domain = trim($question[0]['qname'], '.');
         $type = RecordTypeEnum::get_name($question[0]['qtype']);
-
-        if(isset($this->dns_records[$domain]) &&isset($this->dns_records[$domain][$type])) {
-            if(is_array($this->dns_records[$domain][$type])) {
-                foreach($this->dns_records[$domain][$type] as $ip) {
-                    $answer[] = array('name' => $question[0]['qname'], 'class' => $question[0]['qclass'], 'ttl' => $this->DS_TTL, 'data' => array('type' => $question[0]['qtype'], 'value' => $ip));
-                }
-            } else {
-                $answer[] = array('name' => $question[0]['qname'], 'class' => $question[0]['qclass'], 'ttl' => $this->DS_TTL, 'data' => array('type' => $question[0]['qtype'], 'value' => $this->dns_records[$domain][$type]));
-            }
+        
+        $records = $this->get_records_recursivly($domain, $type);
+        foreach($records as $record) {
+            $answer[] = array('name' => $question[0]['qname'], 'class' => $question[0]['qclass'], 'ttl' => $record['ttl'], 'data' => array('type' => $question[0]['qtype'], 'value' => $record['answer']));
         }
-
+     
         return $answer;
     }
+    
+    private function get_records_recursivly($domain, $type)
+    {
+        $result = array();
+        $dns_const_name =  $this->get_dns_cost_name($type);
+        
+        if (!$dns_const_name) {
+           throw new Exception('Not supported dns type to query.'); 
+        }
+        
+        $dns_answer_name = $this->dns_answer_names[$dns_const_name];
+        $records = dns_get_record($domain, constant($dns_const_name));
 
+        foreach($records as $record) {
+            if(is_array($dns_answer_name)) {
+                foreach($dns_answer_name as $name) {
+                    $answer[$name] = $record[$name];
+                }
+            } else{
+                $answer = $record[$dns_answer_name];
+            }
+            $result[] = array('answer' => $answer, 'ttl' => $record['ttl']);
+        }
+
+        return $result;
+    }
+    
+    private function get_dns_cost_name($type)
+    {
+        $const_name = "DNS_".strtoupper($type);
+        $name = defined($const_name) ? $const_name : false;
+        
+        return $name;
+    }
+    
 }
+
