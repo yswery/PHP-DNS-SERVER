@@ -2,10 +2,11 @@
 
 require "vendor/autoload.php";
 
+// JSON formatted DNS records file
 $record_file = 'dns_record.json';
 $jsonStorageProvider = new yswery\DNS\JsonStorageProvider($record_file);
 
-// New recursive provider
+// Recursive provider acting as a fallback to the JsonStorageProvider
 $recursiveProvider = new yswery\DNS\RecursiveProvider($options);
 
 $stackableResolver = new yswery\DNS\StackableResolver(array($jsonStorageProvider, $recursiveProvider));
