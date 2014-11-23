@@ -39,7 +39,7 @@ class JsonStorageProvider extends AbstractStorageProvider {
         $type = RecordTypeEnum::get_name($question[0]['qtype']);
 
         if(isset($this->dns_records[$domain]) &&isset($this->dns_records[$domain][$type])) {
-            if(is_array($this->dns_records[$domain][$type])) {
+            if(is_array($this->dns_records[$domain][$type]) && $type != 'SOA') {
                 foreach($this->dns_records[$domain][$type] as $ip) {
                     $answer[] = array('name' => $question[0]['qname'], 'class' => $question[0]['qclass'], 'ttl' => $this->DS_TTL, 'data' => array('type' => $question[0]['qtype'], 'value' => $ip));
                 }
