@@ -22,6 +22,8 @@ class StackableResolver {
                 return $answer;
             }
         }
+        
+        return array();
     }
 
 }
