@@ -189,7 +189,7 @@ class Server {
             case RecordTypeEnum::TYPE_A:
                 $data['value'] = inet_ntop($val);
                 break;
-            case $RecordTypeEnum::TYPE_AAAA:
+            case RecordTypeEnum::TYPE_AAAA:
                 $data['value'] = inet_ntop($val);
                 break;
             case RecordTypeEnum::TYPE_NS:
