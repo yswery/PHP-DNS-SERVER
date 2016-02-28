@@ -37,7 +37,7 @@ class RecursiveProvider extends AbstractStorageProvider {
 
         $records = $this->get_records_recursivly($domain, $type);
         foreach($records as $record) {
-            $answer[] = array('name' => $question[0]['qname'], 'class' => $question[0]['qclass'], 'ttl' => $record['ttl'], 'data' => array('type' => $question[0]['qtype'], 'value' => $record['answer']));
+            $answer[] = array('name' => (isset($record["domain"])?$record["domain"]:$question[0]['qname']), 'class' => $question[0]['qclass'], 'ttl' => $record['ttl'], 'data' => array('type' => (isset($record['type'])?RecordTypeEnum::get_type_index($record['type']):$question[0]['qtype']), 'value' => $record['answer']));
         }
 
         return $answer;
@@ -54,7 +54,7 @@ class RecursiveProvider extends AbstractStorageProvider {
         $dns_const_name =  $this->get_dns_cost_name($type);
 
         if (!$dns_const_name) {
-            return $result; //why throw error? if the provider does not support it, just return nothing, otherwise the service is down.
+            throw new Exception('Not supported dns type to query.');
         }
 
         $dns_answer_name = $this->dns_answer_names[$dns_const_name];
