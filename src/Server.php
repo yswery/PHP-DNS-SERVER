@@ -62,6 +62,8 @@ class Server {
 
     private function ds_handle_query($buffer, $ip, $port)
     {
+	$_SERVER['client_ip'] = $ip;
+	$_SERVER['client_port'] = $port;
         $data = unpack('npacket_id/nflags/nqdcount/nancount/nnscount/narcount', $buffer);
         $flags = $this->ds_decode_flags($data['flags']);
         $offset = 12;
