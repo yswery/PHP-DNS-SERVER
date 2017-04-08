@@ -6,7 +6,6 @@ use \Exception;
 
 class RecursiveProvider extends AbstractStorageProvider
 {
-
     private $dns_answer_names = array(
         'DNS_A' => 'ip',
         'DNS_AAAA' => 'ipv6',
@@ -65,6 +64,4 @@ class RecursiveProvider extends AbstractStorageProvider
 
         return $name;
     }
-
 }
-

@@ -18,7 +18,7 @@ class Server
         $this->DS_MAX_LENGTH = $max_packet_len;
         $this->ds_storage = $ds_storage;
 
-        ini_set('display_errors', TRUE);
+        ini_set('display_errors', true);
         ini_set('error_reporting', E_ALL);
 
         set_error_handler(array($this, 'ds_error'), E_ALL);
@@ -30,11 +30,6 @@ class Server
     }
 
     public function start()
-    {
-        $this->ds_listen();
-    }
-
-    private function ds_listen()
     {
         $ds_socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 
@@ -48,10 +43,10 @@ class Server
             $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
         }
 
-        while (TRUE) {
-            $buffer = $ip = $port = NULL;
+        while (true) {
+            $buffer = $ip = $port = null;
 
-            if (!socket_recvfrom($ds_socket, $buffer, $this->DS_MAX_LENGTH, NULL, $ip, $port)) {
+            if (!socket_recvfrom($ds_socket, $buffer, $this->DS_MAX_LENGTH, null, $ip, $port)) {
                 $error = sprintf('Cannot read from socket ip: %s, port: %d (socket error: %s).', $ip, $port, socket_strerror(socket_last_error($ds_socket)));
                 $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
             } else {
@@ -112,8 +107,9 @@ class Server
         $res = array();
 
         for ($i = 0; $i < $count; ++$i) {
-            if ($offset > strlen($pkt))
+            if ($offset > strlen($pkt)) {
                 return false;
+            }
             $qname = $this->ds_decode_label($pkt, $offset);
             $tmp = unpack('nqtype/nqclass', substr($pkt, $offset, 4));
             $offset += 4;
@@ -125,7 +121,7 @@ class Server
 
     private function ds_decode_label($pkt, &$offset)
     {
-        $end_offset = NULL;
+        $end_offset = null;
         $qname = '';
 
         while (1) {
@@ -145,12 +141,14 @@ class Server
                 continue;
             }
 
-            if ($len > (strlen($pkt) - $offset))
-                return NULL;
+            if ($len > (strlen($pkt) - $offset)) {
+                return null;
+            }
 
             if ($len == 0) {
-                if ($qname == '')
+                if ($qname == '') {
                     $qname = '.';
+                }
                 ++$offset;
                 break;
             }
@@ -219,7 +217,7 @@ class Server
                 $len = ord($val[0]);
 
                 if ((strlen($val) + 1) < $len) {
-                    $data['value'] = NULL;
+                    $data['value'] = null;
                     break;
                 }
 
@@ -227,7 +225,7 @@ class Server
                 break;
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:
-                $data['value'] = NULL;
+                $data['value'] = null;
                 break;
             case RecordTypeEnum::TYPE_OPT:
                 $data['type'] = RecordTypeEnum::TYPE_OPT;
@@ -256,7 +254,7 @@ class Server
         return $val;
     }
 
-    private function ds_encode_label($str, $offset = NULL)
+    private function ds_encode_label($str, $offset = null)
     {
         if ($str == '.') {
             return "\0";
@@ -306,14 +304,18 @@ class Server
 
             if (is_array($data)) {
                 // overloading written data
-                if (!isset($data['type']))
+                if (!isset($data['type'])) {
                     $data['type'] = $rr['data']['type'];
-                if (!isset($data['data']))
+                }
+                if (!isset($data['data'])) {
                     $data['data'] = '';
-                if (!isset($data['class']))
+                }
+                if (!isset($data['class'])) {
                     $data['class'] = $rr['class'];
-                if (!isset($data['ttl']))
+                }
+                if (!isset($data['ttl'])) {
                     $data['ttl'] = $rr['ttl'];
+                }
                 $offset += strlen($data['data']);
                 $res .= pack('nnNn', $data['type'], $data['class'], $data['ttl'], strlen($data['data'])) . $data['data'];
             } else {
@@ -325,19 +327,21 @@ class Server
         return $res;
     }
 
-    private function ds_encode_type($type, $val = NULL, $offset = NULL)
+    private function ds_encode_type($type, $val = null, $offset = null)
     {
         $enc = '';
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
                 $enc = inet_pton($val);
-                if (strlen($enc) != 4)
+                if (strlen($enc) != 4) {
                     $enc = "\0\0\0\0";
+                }
                 break;
             case RecordTypeEnum::TYPE_AAAA:
                 $enc = inet_pton($val);
-                if (strlen($enc) != 16)
+                if (strlen($enc) != 16) {
                     $enc = str_repeat("\0", 16);
+                }
                 break;
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
@@ -357,8 +361,9 @@ class Server
                 $enc = pack('n', 10) . $this->ds_encode_label($val, $offset + 2);
                 break;
             case RecordTypeEnum::TYPE_TXT:
-                if (strlen($val) > 255)
+                if (strlen($val) > 255) {
                     $val = substr($val, 0, 255);
+                }
 
                 $enc = chr(strlen($val)) . $val;
                 break;

@@ -50,7 +50,9 @@ class RecordTypeEnum
     public static function get_type_index($name)
     {
         $key = trim(strtoupper($name));
-        if (!array_key_exists($key, self::$types)) return false;
+        if (!array_key_exists($key, self::$types)) {
+            return false;
+        }
         return self::$types[$key];
     }
 
@@ -61,5 +63,4 @@ class RecordTypeEnum
     {
         return self::$types;
     }
-
 }

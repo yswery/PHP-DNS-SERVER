@@ -26,5 +26,4 @@ class StackableResolver
 
         return array();
     }
-
 }

@@ -6,7 +6,6 @@ use \Exception;
 
 class JsonStorageProvider extends AbstractStorageProvider
 {
-
     private $dns_records;
     private $DS_TTL;
 
@@ -51,5 +50,4 @@ class JsonStorageProvider extends AbstractStorageProvider
 
         return $answer;
     }
-
 }
