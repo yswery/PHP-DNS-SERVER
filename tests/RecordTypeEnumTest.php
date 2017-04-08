@@ -40,8 +40,37 @@ class RecordTypeEnumTest extends PHPUnit_Framework_TestCase {
             'OPT' => 41,
             'AXFR' => 252,
             'ANY' => 255,
+            'AFSDB' => 18,
+            'APL' => 42,
+            'CAA' => 257,
+            'CDNSKEY' => 60,
+            'CDS' => 59,
+            'CERT' => 37,
+            'DHCID' => 49,
+            'DLV' => 32769,
+            'DNSKEY' => 48,
+            'DS' => 43,
+            'IPSECKEY' => 45,
+            'KEY' => 25,
+            'KX' => 36,
+            'LOC' => 29,
+            'NAPTR' => 35,
+            'NSEC' => 47,
+            'NSEC3' => 50,
+            'NSEC3PARAM' => 51,
+            'RRSIG' => 46,
+            'RP' => 17,
+            'SIG' => 24,
+            'SRV' => 33,
+            'SSHFP' => 44,
+            'TA' => 32768,
+            'TKEY' => 249,
+            'TLSA' => 52,
+            'TSIG' => 250,
+            'URI' => 256,
+            'DNAME' => 39,
         );
+
         $this->assertTrue(\yswery\DNS\RecordTypeEnum::get_types() === $expected);
     }
-
 }
