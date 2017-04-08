@@ -2,8 +2,9 @@
 
 namespace yswery\DNS;
 
-class RecordTypeEnum {
-    
+class RecordTypeEnum
+{
+
     /**
      * @var array
      */
@@ -20,7 +21,7 @@ class RecordTypeEnum {
         'AXFR' => 252,
         'ANY' => 255,
     );
-    
+
     const TYPE_A = 1;
     const TYPE_NS = 2;
     const TYPE_CNAME = 5;
@@ -32,27 +33,27 @@ class RecordTypeEnum {
     const TYPE_OPT = 41;
     const TYPE_AXFR = 252;
     const TYPE_ANY = 255;
-    
+
     /**
-     * @param int $typeIndex    The index of the type contained in the question
+     * @param int $typeIndex The index of the type contained in the question
      * @return string|false
      */
     public static function get_name($typeIndex)
     {
         return array_search($typeIndex, self::$types);
     }
-    
+
     /**
-     * @param string $name      The name of the record type, e.g. = 'A' or 'MX' or 'SOA'
+     * @param string $name The name of the record type, e.g. = 'A' or 'MX' or 'SOA'
      * @return int|false
      */
     public static function get_type_index($name)
     {
         $key = trim(strtoupper($name));
-        if(!array_key_exists($key, self::$types)) return false;
+        if (!array_key_exists($key, self::$types)) return false;
         return self::$types[$key];
     }
-    
+
     /**
      * @return array
      */
@@ -60,5 +61,5 @@ class RecordTypeEnum {
     {
         return self::$types;
     }
-    
+
 }

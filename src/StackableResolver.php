@@ -2,7 +2,8 @@
 
 namespace yswery\DNS;
 
-class StackableResolver {
+class StackableResolver
+{
 
     /**
      * @var array
@@ -14,7 +15,7 @@ class StackableResolver {
         $this->resolvers = $resolvers;
     }
 
-    public function get_answer($question) 
+    public function get_answer($question)
     {
         foreach ($this->resolvers as $resolver) {
             $answer = $resolver->get_answer($question);
@@ -22,7 +23,7 @@ class StackableResolver {
                 return $answer;
             }
         }
-        
+
         return array();
     }
 
