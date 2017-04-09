@@ -7,7 +7,7 @@ $record_file = 'dns_record.json';
 $jsonStorageProvider = new yswery\DNS\JsonStorageProvider($record_file);
 
 // Recursive provider acting as a fallback to the JsonStorageProvider
-$recursiveProvider = new yswery\DNS\RecursiveProvider($options);
+$recursiveProvider = new yswery\DNS\RecursiveProvider;
 
 $stackableResolver = new yswery\DNS\StackableResolver(array($jsonStorageProvider, $recursiveProvider));
 
