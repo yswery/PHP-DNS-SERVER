@@ -6,7 +6,11 @@ use \Exception;
 
 class JsonStorageProvider extends AbstractStorageProvider
 {
+    /**
+     * @var array
+     */
     private $dns_records;
+
     private $DS_TTL;
 
     public function __construct($record_file, $default_ttl = 300)
@@ -49,5 +53,13 @@ class JsonStorageProvider extends AbstractStorageProvider
         }
 
         return $answer;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDnsRecords()
+    {
+        return $this->dns_records;
     }
 }

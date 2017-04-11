@@ -1,7 +1,7 @@
 <?php
 
-class JsonStorageProviderTest extends PHPUnit_Framework_TestCase {
-    
+class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
+{
     /**
      * @var yswery\DNS\JsonStorageProvider
      */
@@ -10,6 +10,31 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase {
     public function setUp()
     {
         $this->storage = new \yswery\DNS\JsonStorageProvider(__DIR__ . '/test_records.json');
+    }
+
+    /**
+     * Tests that the constructor reads the JSON
+     * in a predictable and consistent way.
+     */
+    public function testGetDnsRecords()
+    {
+        $expected = array(
+            'test.com' => array(
+                'A' => '111.111.111.111',
+                'MX' => '112.112.112.112',
+                'NS' => 'ns1.test.com',
+                'TXT' => 'Some text.',
+                'AAAA' => 'DEAD:01::BEEF',
+            ),
+            'test2.com' => array(
+                'A' => array(
+                    '111.111.111.111',
+                    '112.112.112.112',
+                )
+            ),
+        );
+
+        $this->assertEquals($expected, $this->storage->getDnsRecords());
     }
     
     public function testHostRecordResolves()
