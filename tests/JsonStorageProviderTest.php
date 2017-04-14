@@ -1,7 +1,9 @@
 <?php
 
-class JsonStorageProviderTest extends PHPUnit_Framework_TestCase {
-    
+use yswery\DNS\JsonStorageProvider;
+
+class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
+{
     /**
      * @var yswery\DNS\JsonStorageProvider
      */
@@ -9,7 +11,32 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase {
     
     public function setUp()
     {
-        $this->storage = new \yswery\DNS\JsonStorageProvider(__DIR__ . '/test_records.json');
+        $this->storage = new JsonStorageProvider(__DIR__ . '/test_records.json');
+    }
+
+    /**
+     * Tests that the constructor reads the JSON
+     * in a predictable and consistent way.
+     */
+    public function testGetDnsRecords()
+    {
+        $expected = array(
+            'test.com' => array(
+                'A' => '111.111.111.111',
+                'MX' => '112.112.112.112',
+                'NS' => 'ns1.test.com',
+                'TXT' => 'Some text.',
+                'AAAA' => 'DEAD:01::BEEF',
+            ),
+            'test2.com' => array(
+                'A' => array(
+                    '111.111.111.111',
+                    '112.112.112.112',
+                )
+            ),
+        );
+
+        $this->assertEquals($expected, $this->storage->getDnsRecords());
     }
     
     public function testHostRecordResolves()
@@ -76,15 +103,19 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase {
 
     public function testConstructorThrowsExceptions()
     {
-        $this->setExpectedException('Exception', 'Unable to open dns record file.');
-        $jsonAdapter = new \yswery\DNS\JsonStorageProvider('blah.json');
-        $this->setExpectedException('Exception', 'Unable to parse dns record file.');
-        $jsonAdapter = new \yswery\DNS\JsonStorageProvider('invalid_dns_records.json');
+        $this->setExpectedException('\Exception', 'The file "blah.json" does not exist.');
+        $jsonAdapter = new JsonStorageProvider('blah.json');
+
+        $this->setExpectedException('\Exception', 'Unable to parse JSON file: "invalid_dns_records.json".');
+        $jsonAdapter = new JsonStorageProvider('invalid_dns_records.json');
+        
+        $this->setExpectedException('\InvalidArgumentException', 'Default TTL must be an integer.');
+        $jsonAdapter = new JsonStorageProvider(__DIR__ . 'test_records.json', '300');
     }
 
     public function testConstructorLoadsRecords()
     {
-        $this->storage = new \yswery\DNS\JsonStorageProvider(__DIR__ . '/test_records.json');
+        $this->storage = new JsonStorageProvider(__DIR__ . '/test_records.json');
         $this->assertTrue($this->storage !== false);
     }
     
