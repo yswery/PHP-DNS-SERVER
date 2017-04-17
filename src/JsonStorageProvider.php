@@ -3,7 +3,7 @@
 namespace yswery\DNS;
 
 use \Exception;
-use Psr\Log\InvalidArgumentException;
+use \InvalidArgumentException;
 
 class JsonStorageProvider extends AbstractStorageProvider
 {
