@@ -32,7 +32,11 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
                 'A' => array(
                     '111.111.111.111',
                     '112.112.112.112',
-                )
+                ),
+                'MX' => array(
+                    'priority' => 25,
+                    'target' => 'mail-gw1.test2.com.'
+                ),
             ),
         );
 
