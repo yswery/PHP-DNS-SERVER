@@ -74,7 +74,8 @@ Unit tests using PHPUnit are provided. A simple script is located in the root.
 * run `composer install --dev` to install PHPUnit and dependencies
 * run `./phpunit` from the root to run the tests
 
-#License
+
+## License
 
 The MIT License (MIT)
 
