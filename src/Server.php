@@ -256,7 +256,7 @@ class Server
 
     private function ds_encode_label($str, $offset = null)
     {
-        if ($str == '.') {
+        if ($str === '.') {
             return "\0";
         }
 
@@ -332,15 +332,12 @@ class Server
         $enc = '';
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
-                $enc = inet_pton($val);
-                if (strlen($enc) != 4) {
-                    $enc = "\0\0\0\0";
-                }
-                break;
             case RecordTypeEnum::TYPE_AAAA:
                 $enc = inet_pton($val);
-                if (strlen($enc) != 16) {
-                    $enc = str_repeat("\0", 16);
+                // Check that the IP address is valid, if not, return an invalid address
+                $n = (RecordTypeEnum::TYPE_A === $type) ? 4 : 16;
+                if (strlen($enc) !== $n) {
+                    $enc = str_repeat("\0", $n);
                 }
                 break;
             case RecordTypeEnum::TYPE_NS:
@@ -353,12 +350,19 @@ class Server
                 $val['mname'] = rtrim($val['mname'], '.') . '.';
                 $val['rname'] = rtrim($val['rname'], '.') . '.';
                 $enc .= $this->ds_encode_label($val['mname'], $offset);
-                $enc .= $this->ds_encode_label($val['rname'], $offset + strlen($res));
+                $enc .= $this->ds_encode_label($val['rname'], $offset + strlen($enc));
                 $enc .= pack('NNNNN', $val['serial'], $val['refresh'], $val['retry'], $val['expire'], $val['minimum-ttl']);
                 break;
             case RecordTypeEnum::TYPE_MX:
-                $val = rtrim($val, '.') . '.';
-                $enc = pack('n', 10) . $this->ds_encode_label($val, $offset + 2);
+                if (!is_array($val)) {
+                    $val = array(
+                        'priority' => 10,
+                        'target' => $val,
+                    );
+                }
+
+                $enc = pack('n', (int) $val['priority']);
+                $enc .= $this->ds_encode_label(rtrim($val['target'], '.') . '.', $offset + 2);
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 if (strlen($val) > 255) {
@@ -372,8 +376,12 @@ class Server
                 $enc = '';
                 break;
             case RecordTypeEnum::TYPE_OPT:
-                $enc = array('class' => $val['udp_payload_size'], 'ttl' => (($val['ext_code'] & 0xff) << 24) | (($val['version'] & 0xff) << 16) | ($this->ds_encode_flags($val['flags']) & 0xffff), 'data' => '',
-                    // // TODO: encode data
+                $enc = array(
+                    'class' =>  $val['udp_payload_size'],
+                    'ttl' =>    (($val['ext_code'] & 0xff) << 24) |
+                                (($val['version'] & 0xff) << 16) |
+                                ($this->ds_encode_flags($val['flags']) & 0xffff),
+                    'data' =>   '', // TODO: encode data
                 );
                 break;
             default:
