@@ -52,6 +52,12 @@ class JsonStorageProvider extends AbstractStorageProvider
      */
     public function get_answer($question)
     {
+
+        $ret = array(
+            'answer'        => array(),
+            'authoritative' => true,
+        );
+
         $q_name  = $question[0]['qname'];
         $q_type  = $question[0]['qtype'];
         $q_class = $question[0]['qclass'];
@@ -60,7 +66,7 @@ class JsonStorageProvider extends AbstractStorageProvider
 
         // If there is no resource record or the record does not have the type, return an empty array.
         if (!array_key_exists($domain, $this->dns_records) || !isset($this->dns_records[$domain][$type])) {
-            return array();
+            return $ret;
         }
 
         $answer = array();
@@ -78,10 +84,7 @@ class JsonStorageProvider extends AbstractStorageProvider
             );
         }
 
-        $ret = array(
-          'answer' => $answer,
-          'authoritative' => true,
-        );
+        $ret['answer'] = $answer;
 
         return $ret;
     }
