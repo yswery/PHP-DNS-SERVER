@@ -31,6 +31,7 @@ class StackableResolver
                   $ret['authoritative'] = true;
                 }
             }
+            break;
         }
 
         return $ret;
