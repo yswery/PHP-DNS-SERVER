@@ -104,7 +104,7 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
             ),
         );
         $result = $this->storage->get_answer($question);
-        $answer = $result;
+        $answer = $result['answer'];
         $this->assertTrue($answer === $expected);
     }
 
