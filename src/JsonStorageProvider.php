@@ -78,7 +78,12 @@ class JsonStorageProvider extends AbstractStorageProvider
             );
         }
 
-        return $answer;
+        $ret = array(
+          'answer' => $answer,
+          'authoritative' => true,
+        );
+
+        return $ret;
     }
 
     /**

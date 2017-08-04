@@ -17,13 +17,22 @@ class StackableResolver
 
     public function get_answer($question)
     {
+        $ret = array(
+          'answer' => array(),
+          'authoritative' => false,
+        );
+
         foreach ($this->resolvers as $resolver) {
             $answer = $resolver->get_answer($question);
             if ($answer) {
-                return $answer;
+                $ret['answer'] = $answer;
+
+                if ($resolver instanceof JsonStorageProvider) {
+                  $ret['authoritative'] = true;
+                }
             }
         }
 
-        return array();
+        return $ret;
     }
 }
