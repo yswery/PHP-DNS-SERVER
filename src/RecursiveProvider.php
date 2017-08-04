@@ -20,7 +20,9 @@ class RecursiveProvider extends AbstractStorageProvider
     public function get_answer($question)
     {
         $answer = array();
-        $domain = trim($question[0]['qname'], '.');
+
+        $domain = $question[0]['qname'];
+
         $type = RecordTypeEnum::get_name($question[0]['qtype']);
 
         $records = $this->get_records_recursivly($domain, $type);
