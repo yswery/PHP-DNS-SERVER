@@ -1,6 +1,8 @@
 <?php
 
 namespace yswery\DNS;
+use yswery\DNS\RecursiveProvider;
+use yswery\DNS\StackableResolver;
 
 class Server
 {
@@ -68,9 +70,15 @@ class Server
         $question = $this->ds_decode_question_rr($buffer, $offset, $data['qdcount']);
         $authority = $this->ds_decode_rr($buffer, $offset, $data['nscount']);
         $additional = $this->ds_decode_rr($buffer, $offset, $data['arcount']);
-        $answer = $this->ds_storage->get_answer($question);
+
+        $result = $this->ds_storage->get_answer($question);
+        $answer = $result['answer'];
+        $is_authoritative = $result['authoritative'];
+
+        // set dns header flags
         $flags['qr'] = 1;
         $flags['ra'] = 0;
+        $flags['aa'] = $is_authoritative ? 1 : 0;
 
         $qdcount = count($question);
         $ancount = count($answer);
