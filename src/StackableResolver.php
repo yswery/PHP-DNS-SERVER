@@ -18,14 +18,14 @@ class StackableResolver
     public function get_answer($question)
     {
         $ret = array(
-          'answer' => array(),
+          'answer'        => array(),
           'authoritative' => false,
         );
 
         foreach ($this->resolvers as $resolver) {
-            $answer = $resolver->get_answer($question);
-            if ($answer) {
-                $ret['answer'] = $answer;
+            $result = $resolver->get_answer($question);
+            if ($result['answer']) {
+                $ret['answer'] = $result['answer'];
 
                 if ($resolver instanceof JsonStorageProvider) {
                   $ret['authoritative'] = true;

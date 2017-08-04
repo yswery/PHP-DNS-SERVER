@@ -20,7 +20,7 @@ class RecursiveProvider extends AbstractStorageProvider
     public function get_answer($question)
     {
         $ret = array(
-          'answer' => array(),
+          'answer'        => array(),
           'authoritative' => false,
         );
 
@@ -29,7 +29,15 @@ class RecursiveProvider extends AbstractStorageProvider
 
         $records = $this->get_records_recursivly($domain, $type);
         foreach ($records as $record) {
-            $ret['answer'][] = array('name' => $question[0]['qname'], 'class' => $question[0]['qclass'], 'ttl' => $record['ttl'], 'data' => array('type' => $question[0]['qtype'], 'value' => $record['answer']));
+            $ret['answer'][] = array(
+                'name'  => $question[0]['qname'],
+                'class' => $question[0]['qclass'],
+                'ttl'   => $record['ttl'],
+                'data'  => array(
+                    'type'  => $question[0]['qtype'],
+                    'value' => $record['answer']
+                )
+            );
         }
 
         return $ret;

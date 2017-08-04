@@ -52,11 +52,11 @@ class JsonStorageProvider extends AbstractStorageProvider
      */
     public function get_answer($question)
     {
-        $q_name = $question[0]['qname'];
-        $q_type = $question[0]['qtype'];
+        $q_name  = $question[0]['qname'];
+        $q_type  = $question[0]['qtype'];
         $q_class = $question[0]['qclass'];
-        $domain = trim($q_name, '.');
-        $type = RecordTypeEnum::get_name($q_type);
+        $domain  = trim($q_name, '.');
+        $type    = RecordTypeEnum::get_name($q_type);
 
         // If there is no resource record or the record does not have the type, return an empty array.
         if (!array_key_exists($domain, $this->dns_records) || !isset($this->dns_records[$domain][$type])) {
@@ -68,11 +68,11 @@ class JsonStorageProvider extends AbstractStorageProvider
 
         foreach ($data as $rdata) {
             $answer[] = array(
-                'name' => $q_name,
+                'name'  => $q_name,
                 'class' => $q_class,
-                'ttl' => $this->DS_TTL,
-                'data' => array(
-                    'type' => $q_type,
+                'ttl'   => $this->DS_TTL,
+                'data'  => array(
+                    'type'  => $q_type,
                     'value' => $rdata,
                 ),
             );
