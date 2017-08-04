@@ -69,8 +69,18 @@ class Server
         $authority = $this->ds_decode_rr($buffer, $offset, $data['nscount']);
         $additional = $this->ds_decode_rr($buffer, $offset, $data['arcount']);
         $answer = $this->ds_storage->get_answer($question);
+
         $flags['qr'] = 1;
-        $flags['ra'] = 0;
+
+        $ra = false;
+        if ($this->ds_storage instanceof StackableResolver) {
+            foreach ($this->ds_storage->get_resolvers() as $resolver) {
+                $ra |= ($resolver == 'RecursiveProvider');
+            }
+        } else if ($this->ds_storage instanceof RecursiveProvider) {
+            $ra = true;
+        }
+        $flags['ra'] = $ra ? 1 : 0;
 
         $qdcount = count($question);
         $ancount = count($answer);
