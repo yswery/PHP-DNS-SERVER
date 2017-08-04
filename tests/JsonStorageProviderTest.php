@@ -8,7 +8,7 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
      * @var yswery\DNS\JsonStorageProvider
      */
     protected $storage;
-    
+
     public function setUp()
     {
         $this->storage = new JsonStorageProvider(__DIR__ . '/test_records.json');
@@ -42,7 +42,7 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals($expected, $this->storage->getDnsRecords());
     }
-    
+
     public function testHostRecordResolves()
     {
         $question = array(array(
@@ -59,7 +59,8 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
                 'value' => '111.111.111.111',
             ),
         ));
-        $answer = $this->storage->get_answer($question);
+        $result = $this->storage->get_answer($question);
+        $answer = $result['answer'];
         $this->assertTrue($answer === $expected);
     }
 
@@ -70,7 +71,8 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
             'qtype' => \yswery\DNS\RecordTypeEnum::TYPE_A,
             'qclass' => 1,
         ));
-        $answer = $this->storage->get_answer($question);
+        $result = $this->storage->get_answer($question);
+        $answer = $result['answer'];
         $this->assertTrue($answer === array());
     }
 
@@ -101,7 +103,8 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
                 ),
             ),
         );
-        $answer = $this->storage->get_answer($question);
+        $result = $this->storage->get_answer($question);
+        $answer = $result;
         $this->assertTrue($answer === $expected);
     }
 
@@ -112,7 +115,7 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
 
         $this->setExpectedException('\Exception', 'Unable to parse JSON file: "invalid_dns_records.json".');
         $jsonAdapter = new JsonStorageProvider('invalid_dns_records.json');
-        
+
         $this->setExpectedException('\InvalidArgumentException', 'Default TTL must be an integer.');
         $jsonAdapter = new JsonStorageProvider(__DIR__ . 'test_records.json', '300');
     }
@@ -122,5 +125,5 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
         $this->storage = new JsonStorageProvider(__DIR__ . '/test_records.json');
         $this->assertTrue($this->storage !== false);
     }
-    
+
 }
