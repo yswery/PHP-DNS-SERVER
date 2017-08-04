@@ -72,7 +72,12 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
             'qclass' => 1,
         ));
         $result = $this->storage->get_answer($question);
-        $answer = $result['answer'];
+
+        if (array_key_exists('answer', $result)) {
+            $answer = $result['answer'];
+        } else {
+            $answer = array();
+        }
         $this->assertTrue($answer === array());
     }
 
