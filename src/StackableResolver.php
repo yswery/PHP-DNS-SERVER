@@ -10,6 +10,14 @@ class StackableResolver
      */
     protected $resolvers;
 
+    public function get_resolvers() {
+        $resolvers_names = array();
+        foreach ($this->resolvers as $resolver) {
+            $resolver_names[] = (new \ReflectionClass($resolver))->getShortName();
+        }
+      return $resolver_names;
+    }
+
     public function __construct(array $resolvers = array())
     {
         $this->resolvers = $resolvers;
