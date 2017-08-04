@@ -30,8 +30,8 @@ class StackableResolver
                 if ($resolver instanceof JsonStorageProvider) {
                   $ret['authoritative'] = true;
                 }
+                break;
             }
-            break;
         }
 
         return $ret;
