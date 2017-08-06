@@ -71,6 +71,7 @@ class Server
         $answer = $this->ds_storage->get_answer($question);
         $flags['qr'] = 1;
         $flags['ra'] = 0;
+        $flags['aa'] = $this->ds_storage->is_authority($question[0]['qname']) ? 1 : 0;
 
         $qdcount = count($question);
         $ancount = count($answer);

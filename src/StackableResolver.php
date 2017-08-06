@@ -26,4 +26,19 @@ class StackableResolver
 
         return array();
     }
+
+    /**
+     * Check if any resolver knows about a domain
+     *
+     * @param  string  $domain the domain to check for
+     * @return boolean         true if some resolver holds info about $domain
+     */
+    public function is_authority($domain) {
+        foreach ($this->resolvers as $resolver) {
+            if ($resolver->is_authority($domain)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
