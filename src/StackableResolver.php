@@ -26,4 +26,20 @@ class StackableResolver
 
         return array();
     }
+
+    /**
+     * Check if any of the resoolvers supports recursion
+     *
+     * @return boolean true if any resolver supports recursion
+     */
+
+    public function allows_recursion() {
+        foreach ($this->resolvers as $resolver) {
+            if ($resolver->allows_recursion()) {
+              return true;
+            }
+        }
+
+        return false;
+    }
 }
