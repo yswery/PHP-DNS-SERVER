@@ -9,7 +9,7 @@ This is an Authoritative DNS Server written in pure PHP.
 It will listen to DNS request on the default port (Default: port 53) and give answers about any domain that it has DNS records for.
 This class can be used to give DNS responses dynamically based on your pre-existing PHP code.
 
-Support Record Types
+Supported Record Types
 ====================
 
 * A
