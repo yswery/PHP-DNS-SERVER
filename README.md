@@ -54,7 +54,7 @@ $dns = new yswery\DNS\Server($stackableResolver);
 $dns->start();
 ```
 
-And Here is us querying it and seeing the response
+And here is us querying it and seeing the response
 ```
 $ dig @127.0.0.1 test.com A +short
 111.111.111.111
