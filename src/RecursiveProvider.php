@@ -39,7 +39,7 @@ class RecursiveProvider extends AbstractStorageProvider
         $dns_const_name = $this->get_dns_cost_name($type);
 
         if (!$dns_const_name) {
-            throw new Exception('Not supported dns type to query.');
+            throw new Exception('Unsupported dns type to query.');
         }
 
         $dns_answer_name = $this->dns_answer_names[$dns_const_name];
