@@ -32,7 +32,6 @@ class StackableResolver
      *
      * @return boolean true if any resolver supports recursion
      */
-
     public function allows_recursion() {
         foreach ($this->resolvers as $resolver) {
             if ($resolver->allows_recursion()) {
@@ -40,6 +39,18 @@ class StackableResolver
             }
         }
 
+    /*
+     * Check if any resolver knows about a domain
+     *
+     * @param  string  $domain the domain to check for
+     * @return boolean         true if some resolver holds info about $domain
+     */
+    public function is_authority($domain) {
+        foreach ($this->resolvers as $resolver) {
+            if ($resolver->is_authority($domain)) {
+                return true;
+            }
+        }
         return false;
     }
 }

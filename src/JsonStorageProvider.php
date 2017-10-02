@@ -97,13 +97,24 @@ class JsonStorageProvider extends AbstractStorageProvider
         return $this->dns_records;
     }
 
+    
     /**
      * Getter method for $recursion_available property
      *
      * @return boolean
      */
-
     public function allows_recursion() {
         return $this->recursion_available;
+    }
+  
+     /*
+     * Check if the resolver knows about a domain
+     *
+     * @param  string  $domain the domain to check for
+     * @return boolean         true if the resolver holds info about $domain
+     */
+    public function is_authority($domain) {
+        $domain = trim($domain, '.');
+        return array_key_exists($domain, $this->dns_records);
     }
 }
