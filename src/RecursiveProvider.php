@@ -66,4 +66,14 @@ class RecursiveProvider extends AbstractStorageProvider
 
         return $name;
     }
+
+    /**
+     * Check if the resolver knows about a domain
+     *
+     * @param  string  $domain the domain to check for
+     * @return boolean         true if the resolver holds info about $domain
+     */
+    public function is_authority($domain) {
+        return false;
+    }
 }
