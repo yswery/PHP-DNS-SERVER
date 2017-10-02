@@ -18,6 +18,11 @@ class JsonStorageProvider extends AbstractStorageProvider
     private $DS_TTL;
 
     /**
+     * @var boolean
+     */
+    private $recursion_available;
+
+    /**
      * JsonStorageProvider constructor.
      *
      * @param string $record_file The filepath of the JSON-formatted DNS Zone file.
@@ -44,6 +49,7 @@ class JsonStorageProvider extends AbstractStorageProvider
 
         $this->DS_TTL = $default_ttl;
         $this->dns_records = $dns_records;
+        $this->recursion_available = false;
     }
 
     /**
@@ -91,7 +97,17 @@ class JsonStorageProvider extends AbstractStorageProvider
         return $this->dns_records;
     }
 
+    
     /**
+     * Getter method for $recursion_available property
+     *
+     * @return boolean
+     */
+    public function allows_recursion() {
+        return $this->recursion_available;
+    }
+  
+     /*
      * Check if the resolver knows about a domain
      *
      * @param  string  $domain the domain to check for

@@ -28,6 +28,18 @@ class StackableResolver
     }
 
     /**
+     * Check if any of the resoolvers supports recursion
+     *
+     * @return boolean true if any resolver supports recursion
+     */
+    public function allows_recursion() {
+        foreach ($this->resolvers as $resolver) {
+            if ($resolver->allows_recursion()) {
+              return true;
+            }
+        }
+
+    /*
      * Check if any resolver knows about a domain
      *
      * @param  string  $domain the domain to check for
