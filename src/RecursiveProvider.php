@@ -7,7 +7,7 @@ use \Exception;
 class RecursiveProvider extends AbstractStorageProvider
 {
 
-    private $recursion_available;
+    private $recursion_available = true;
 
     private $dns_answer_names = array(
         'DNS_A' => 'ip',
@@ -19,10 +19,6 @@ class RecursiveProvider extends AbstractStorageProvider
         'DNS_SOA' => array('mname', 'rname', 'serial', 'retry', 'refresh', 'expire', 'minimum-ttl'),
         'DNS_PTR' => 'target',
     );
-
-    public function __construct() {
-        $this->recursion_available = true;
-    }
 
     public function get_answer($question)
     {
