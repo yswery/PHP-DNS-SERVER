@@ -38,6 +38,7 @@ class StackableResolver
               return true;
             }
         }
+    }
 
     /*
      * Check if any resolver knows about a domain
