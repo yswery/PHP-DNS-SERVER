@@ -10,7 +10,7 @@
       "TXT":"Some text.",
       "AAAA":"DEAD:01::BEEF",
       "CNAME":"www2.test.com",
-      "SOA":{  
+      "SOA":[{  
          "mname":"ns1.test.com",
          "rname":"admin.test.com",
          "serial":"2014111100",
@@ -18,7 +18,7 @@
          "refresh":"1800",
          "expire":"8600",
          "minimum-ttl":"300"
-      }
+      }]
    },
    "test2.com":{  
       "A":[  
