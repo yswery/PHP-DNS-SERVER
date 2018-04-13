@@ -13,16 +13,16 @@ class RecursiveResolver implements ResolverInterface
 
     private $allowsRecursion = true;
 
-    private $dns_answer_names = array(
+    private $dns_answer_names = [
         'DNS_A' => 'ip',
         'DNS_AAAA' => 'ipv6',
         'DNS_CNAME' => 'target',
         'DNS_TXT' => 'txt',
         'DNS_MX' => 'target',
         'DNS_NS' => 'target',
-        'DNS_SOA' => array('mname', 'rname', 'serial', 'retry', 'refresh', 'expire', 'minimum-ttl'),
+        'DNS_SOA' => ['mname', 'rname', 'serial', 'retry', 'refresh', 'expire', 'minimum-ttl'],
         'DNS_PTR' => 'target',
-    );
+    ];
 
     /**
      * @param array $query

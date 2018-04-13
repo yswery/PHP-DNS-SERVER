@@ -279,7 +279,7 @@ class Server
                 break;
             case RecordTypeEnum::TYPE_MX:
                 $tmp = unpack('n', $val);
-                $data['value'] = array('priority' => $tmp[0], 'host' => substr($val, 2),);
+                $data['value'] = ['priority' => $tmp[0], 'host' => substr($val, 2)];
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 $len = ord($val[0]);
@@ -297,13 +297,13 @@ class Server
                 break;
             case RecordTypeEnum::TYPE_OPT:
                 $data['type'] = RecordTypeEnum::TYPE_OPT;
-                $data['value'] = array(
+                $data['value'] = [
                     'type' => RecordTypeEnum::TYPE_OPT,
                     'ext_code' => $this->ttl >> 24 & 0xff,
                     'udp_payload_size' => 4096,
                     'version' => $this->ttl >> 16 & 0xff,
                     'flags' => $this->ds_decode_flags($this->ttl & 0xffff),
-                );
+                ];
                 break;
             default:
                 $data = false;
@@ -436,10 +436,10 @@ class Server
                 break;
             case RecordTypeEnum::TYPE_MX:
                 if (!is_array($val)) {
-                    $val = array(
+                    $val = [
                         'priority' => 10,
                         'target' => $val,
-                    );
+                    ];
                 }
 
                 $enc = pack('n', (int)$val['priority']);
@@ -457,13 +457,13 @@ class Server
                 $enc = '';
                 break;
             case RecordTypeEnum::TYPE_OPT:
-                $enc = array(
+                $enc = [
                     'class' => $val['udp_payload_size'],
                     'ttl' => (($val['ext_code'] & 0xff) << 24) |
                         (($val['version'] & 0xff) << 16) |
                         ($this->ds_encode_flags($val['flags']) & 0xffff),
                     'data' => '', // TODO: encode data
-                );
+                ];
                 break;
             default:
                 $enc = $val;

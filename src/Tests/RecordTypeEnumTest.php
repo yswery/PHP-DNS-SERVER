@@ -38,7 +38,7 @@ class RecordTypeEnumTest extends \PHPUnit_Framework_TestCase {
 
     public function testGetTypes()
     {
-        $expected = array(
+        $expected = [
             'A' => 1,
             'NS' => 2,
             'CNAME' => 5,
@@ -79,7 +79,7 @@ class RecordTypeEnumTest extends \PHPUnit_Framework_TestCase {
             'TSIG' => 250,
             'URI' => 256,
             'DNAME' => 39,
-        );
+        ];
 
         $this->assertTrue(\yswery\DNS\RecordTypeEnum::get_types() === $expected);
     }
