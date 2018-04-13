@@ -13,8 +13,8 @@ use Symfony\Component\Yaml\Yaml;
 use yswery\DNS\Event\ConsoleEventSubscriber;
 use yswery\DNS\StackableResolver;
 use yswery\DNS\Server;
-use yswery\DNS\RecursiveProvider;
-use yswery\DNS\JsonStorageProvider;
+use yswery\DNS\RecursiveResolver;
+use yswery\DNS\JsonResolver;
 
 /**
  * Class ServerCommand
@@ -43,9 +43,9 @@ class ServerCommand extends Command
     {
         $resolver = new StackableResolver(
             [
-                new JsonStorageProvider('config/dns.example.json'),
+                new JsonResolver('config/dns.example.json'),
                 // JSON formatted DNS records file
-                new RecursiveProvider()
+                new RecursiveResolver()
                 // Recursive provider acting as a fallback to the JsonStorageProvider
             ]
         );

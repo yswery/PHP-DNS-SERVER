@@ -5,23 +5,25 @@
 
 namespace yswery\DNS;
 
-class GoogleDNSForwarder extends AbstractStorageProvider
+/**
+ * Class GoogleDNSForwarder
+ */
+class GoogleResolver implements ResolverInterface
 {
     /**
-     * @inheritdoc
+     * @param array $query
      *
-     * @param $question
+     * @return array
      */
-    public function get_answer($question)
+    public function getAnswer($query)
     {
         $curl = curl_init();
 
-        $q_name = $question[0]['qname'];
-        $q_type = $question[0]['qtype'];
-        $q_class = $question[0]['qclass'];
+        $name = $query[0]['qname'];
+        $type = $query[0]['qtype'];
+        $class = $query[0]['qclass'];
 
-        // Set query data here with the URL
-        curl_setopt($curl, CURLOPT_URL, 'https://dns.google.com/resolve?name=' . $q_name);
+        curl_setopt($curl, CURLOPT_URL, 'https://dns.google.com/resolve?name='.$name);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_TIMEOUT, 3);
         $content = trim(curl_exec($curl));
@@ -31,22 +33,20 @@ class GoogleDNSForwarder extends AbstractStorageProvider
 
         $answer = [];
         if (isset($response['Answer'])) {
-
-            foreach($response['Answer'] as $item) {
-
+            foreach ($response['Answer'] as $item) {
                 if (!filter_var($item['data'], FILTER_VALIDATE_IP)) {
                     continue;
                 }
 
-                $answer[] = array(
-                    'name' => $q_name,
-                    'class' => $q_class,
+                $answer[] = [
+                    'name' => $name,
+                    'class' => $class,
                     'ttl' => 300,
-                    'data' => array(
-                        'type' => $q_type,
+                    'data' => [
+                        'type' => $type,
                         'value' => $item['data'],
-                    ),
-                );
+                    ],
+                ];
             }
         }
 
@@ -58,7 +58,7 @@ class GoogleDNSForwarder extends AbstractStorageProvider
      *
      * @return bool
      */
-    public function allows_recursion()
+    public function allowsRecursion()
     {
         return false;
     }
@@ -70,9 +70,8 @@ class GoogleDNSForwarder extends AbstractStorageProvider
      *
      * @return bool
      */
-    public function is_authority($domain)
+    public function isAuthority($domain)
     {
         return false;
     }
-
 }

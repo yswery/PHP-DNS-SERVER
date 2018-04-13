@@ -8,7 +8,7 @@ namespace yswery\DNS;
 /**
  * Class StackableResolver
  */
-class StackableResolver
+class StackableResolver implements ResolverInterface
 {
     /**
      * @var array
@@ -26,14 +26,14 @@ class StackableResolver
     }
 
     /**
-     * @param $question
+     * @param $query
      *
      * @return array
      */
-    public function get_answer($question)
+    public function getAnswer($query)
     {
         foreach ($this->resolvers as $resolver) {
-            $answer = $resolver->get_answer($question);
+            $answer = $resolver->getAnswer($query);
             if ($answer) {
                 return $answer;
             }
@@ -47,10 +47,10 @@ class StackableResolver
      *
      * @return boolean true if any resolver supports recursion
      */
-    public function allows_recursion()
+    public function allowsRecursion()
     {
         foreach ($this->resolvers as $resolver) {
-            if ($resolver->allows_recursion()) {
+            if ($resolver->allowsRecursion()) {
                 return true;
             }
         }
@@ -62,10 +62,10 @@ class StackableResolver
      * @param  string  $domain the domain to check for
      * @return boolean         true if some resolver holds info about $domain
      */
-    public function is_authority($domain)
+    public function isAuthority($domain)
     {
         foreach ($this->resolvers as $resolver) {
-            if ($resolver->is_authority($domain)) {
+            if ($resolver->isAuthority($domain)) {
                 return true;
             }
         }

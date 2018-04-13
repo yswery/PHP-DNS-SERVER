@@ -5,14 +5,14 @@ require "vendor/autoload.php";
 use Symfony\Component\Yaml\Yaml;
 use yswery\DNS\StackableResolver;
 use yswery\DNS\Server;
-use yswery\DNS\RecursiveProvider;
-use yswery\DNS\JsonStorageProvider;
+use yswery\DNS\RecursiveResolver;
+use yswery\DNS\JsonResolver;
 
 // instantiate resolver
 $resolver = new StackableResolver(
     [
-        new JsonStorageProvider('config/dns.example.json'), // JSON formatted DNS records file
-        new RecursiveProvider(),                                       // Recursive provider acting as a fallback to the JsonStorageProvider
+        new JsonResolver('config/dns.example.json'), // JSON formatted DNS records file
+        new RecursiveResolver(),                                       // Recursive provider acting as a fallback to the JsonStorageProvider
     ]
 );
 

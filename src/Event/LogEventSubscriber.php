@@ -32,7 +32,7 @@ class LogEventSubscriber implements EventSubscriberInterface
      */
     public function onEvent(array $data)
     {
-
+        // @todo implement monoglog
     }
 
     /**
@@ -40,6 +40,6 @@ class LogEventSubscriber implements EventSubscriberInterface
      */
     public function onError(array $data)
     {
-
+        // @todo implement monoglog
     }
 }

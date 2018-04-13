@@ -18,7 +18,7 @@ class Server
     private $maxPacketLength = 512;
 
     /**
-     * @var AbstractStorageProvider
+     * @var ResolverInterface
      */
     private $resolver;
 
@@ -27,18 +27,18 @@ class Server
     /**
      * Server constructor.
      *
-     * @param AbstractStorageProvider $resolver
+     * @param ResolverInterface $resolver
      * @param array $config
      */
-    public function __construct(
-        $resolver,
-        array $config = []
-    ) {
+    public function __construct($resolver, array $config = [])
+    {
+        // @todo validate configuration validate ip, port, max packet and ttl as positive integers
+
         if (isset($config['server']) && $server = $config['server']) {
             $this->ip = isset($server['bind']) ? $server['bind'] : $this->ip;
             $this->port = isset($server['port']) ? $server['port'] : $this->port;
             $this->ttl = isset($server['ttl']) ? $server['ttl'] : $this->ttl;
-            $this->maxPacketLength = isset($server['max_packet_length']) ? $server['max_packet_length'] : $this->ttl;
+            $this->maxPacketLength = isset($server['max_packet_length']) ? $server['max_packet_length'] : $this->maxPacketLength;
         }
 
         $this->resolver = $resolver;
@@ -46,7 +46,7 @@ class Server
         ini_set('display_errors', true);
         ini_set('error_reporting', E_ALL);
 
-        set_error_handler(array($this, 'ds_error'), E_ALL);
+        set_error_handler([$this, 'ds_error'], E_ALL);
         set_time_limit(0);
 
         if (!extension_loaded('sockets') || !function_exists('socket_create')) {
@@ -117,10 +117,10 @@ class Server
         $question = $this->ds_decode_question_rr($buffer, $offset, $data['qdcount']);
         $authority = $this->ds_decode_rr($buffer, $offset, $data['nscount']);
         $additional = $this->ds_decode_rr($buffer, $offset, $data['arcount']);
-        $answer = $this->resolver->get_answer($question);
+        $answer = $this->resolver->getAnswer($question);
         $flags['qr'] = 1;
-        $flags['ra'] = $this->resolver->allows_recursion() ? 1 : 0;
-        $flags['aa'] = $this->resolver->is_authority($question[0]['qname']) ? 1 : 0;
+        $flags['ra'] = $this->resolver->allowsRecursion() ? 1 : 0;
+        $flags['aa'] = $this->resolver->isAuthority($question[0]['qname']) ? 1 : 0;
 
         $qdcount = count($question);
         $ancount = count($answer);
@@ -141,10 +141,13 @@ class Server
         $response .= $this->ds_encode_rr($authority, strlen($response));
         $response .= $this->ds_encode_rr($additional, strlen($response));
 
-        $this->notifyEventSubscriber('onEvent', [
-            'query' => $question,
-            'answer' => $answer,
-        ]);
+        $this->notifyEventSubscriber(
+            'onEvent',
+            [
+                'query' => $question,
+                'answer' => $answer,
+            ]
+        );
 
         return $response;
     }
@@ -324,7 +327,7 @@ class Server
         return $val;
     }
 
-    private function ds_encode_label($str, $offset = null)
+    private function encodeLabel($str, $offset = null)
     {
         if ('.' === $str) {
             return "\0";
@@ -347,7 +350,7 @@ class Server
         $res = '';
 
         foreach ($list as $rr) {
-            $lbl = $this->ds_encode_label($rr['qname'], $offset);
+            $lbl = $this->encodeLabel($rr['qname'], $offset);
             $offset += strlen($lbl) + 4;
             $res .= $lbl;
             $res .= pack('nn', $rr['qtype'], $rr['qclass']);
@@ -361,7 +364,7 @@ class Server
         $res = '';
 
         foreach ($list as $rr) {
-            $lbl = $this->ds_encode_label($rr['name'], $offset);
+            $lbl = $this->encodeLabel($rr['name'], $offset);
             $res .= $lbl;
             $offset += strlen($lbl);
 
@@ -414,13 +417,13 @@ class Server
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
                 $val = rtrim($val, '.').'.';
-                $enc = $this->ds_encode_label($val, $offset);
+                $enc = $this->encodeLabel($val, $offset);
                 break;
             case RecordTypeEnum::TYPE_SOA:
                 $val['mname'] = rtrim($val['mname'], '.').'.';
                 $val['rname'] = rtrim($val['rname'], '.').'.';
-                $enc .= $this->ds_encode_label($val['mname'], $offset);
-                $enc .= $this->ds_encode_label($val['rname'], $offset + strlen($enc));
+                $enc .= $this->encodeLabel($val['mname'], $offset);
+                $enc .= $this->encodeLabel($val['rname'], $offset + strlen($enc));
                 $enc .= pack(
                     'NNNNN',
                     $val['serial'],
@@ -439,7 +442,7 @@ class Server
                 }
 
                 $enc = pack('n', (int)$val['priority']);
-                $enc .= $this->ds_encode_label(rtrim($val['target'], '.').'.', $offset + 2);
+                $enc .= $this->encodeLabel(rtrim($val['target'], '.').'.', $offset + 2);
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 if (strlen($val) > 255) {
@@ -504,11 +507,14 @@ class Server
 
         $message = sprintf('DNS Server error: [%s] "%s" in file "%s" on line "%d".', $type, $error, $file, $line);
 
-        $this->notifyEventSubscriber('onError', [
-            'code' => $code,
-            'error' => $error,
-            'file' => $file,
-            'line' => $line
-        ]);
+        $this->notifyEventSubscriber(
+            'onError',
+            [
+                'code' => $code,
+                'error' => $error,
+                'file' => $file,
+                'line' => $line,
+            ]
+        );
     }
 }

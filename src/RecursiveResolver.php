@@ -7,10 +7,10 @@ namespace yswery\DNS;
 
 use \Exception;
 
-class RecursiveProvider extends AbstractStorageProvider
+class RecursiveResolver implements ResolverInterface
 {
 
-    private $recursion_available = true;
+    private $allowsRecursion = true;
 
     private $dns_answer_names = array(
         'DNS_A' => 'ip',
@@ -23,20 +23,52 @@ class RecursiveProvider extends AbstractStorageProvider
         'DNS_PTR' => 'target',
     );
 
-    public function get_answer($question)
+    /**
+     * @param array $query
+     * @return array
+     *
+     * @throws Exception
+     */
+    public function getAnswer($query)
     {
         $answer = [];
 
-        $domain = $question[0]['qname'];
+        $domain = $query[0]['qname'];
 
-        $type = RecordTypeEnum::get_name($question[0]['qtype']);
+        $type = RecordTypeEnum::get_name($query[0]['qtype']);
 
         $records = $this->get_records_recursivly($domain, $type);
         foreach ($records as $record) {
-            $answer[] = array('name' => $question[0]['qname'], 'class' => $question[0]['qclass'], 'ttl' => $record['ttl'], 'data' => array('type' => $question[0]['qtype'], 'value' => $record['answer']));
+            $answer[] = [
+                'name' => $query[0]['qname'],
+                'class' => $query[0]['qclass'],
+                'ttl' => $record['ttl'],
+                'data' => ['type' => $query[0]['qtype'], 'value' => $record['answer']],
+            ];
         }
 
         return $answer;
+    }
+
+    /**
+     * Getter method for $recursion_available property
+     *
+     * @return boolean
+     */
+    public function allowsRecursion()
+    {
+        return $this->allowsRecursion;
+    }
+
+    /**
+     * Check if the resolver knows about a domain
+     *
+     * @param  string $domain the domain to check for
+     * @return boolean         true if the resolver holds info about $domain
+     */
+    public function isAuthority($domain)
+    {
+        return false;
     }
 
     private function get_records_recursivly($domain, $type)
@@ -45,7 +77,7 @@ class RecursiveProvider extends AbstractStorageProvider
         $dns_const_name = $this->get_dns_cost_name($type);
 
         if (!$dns_const_name) {
-            throw new Exception('Unsupported dns type to query.');
+            throw new \Exception('Unsupported dns type to query.');
         }
 
         $dns_answer_name = $this->dns_answer_names[$dns_const_name];
@@ -59,7 +91,7 @@ class RecursiveProvider extends AbstractStorageProvider
             } else {
                 $answer = $record[$dns_answer_name];
             }
-            $result[] = array('answer' => $answer, 'ttl' => $record['ttl']);
+            $result[] = ['answer' => $answer, 'ttl' => $record['ttl']];
         }
 
         return $result;
@@ -67,29 +99,10 @@ class RecursiveProvider extends AbstractStorageProvider
 
     private function get_dns_cost_name($type)
     {
-        $const_name = "DNS_" . strtoupper($type);
+        $const_name = "DNS_".strtoupper($type);
         $name = defined($const_name) ? $const_name : false;
 
         return $name;
     }
 
-
-    /**
-     * Getter method for $recursion_available property
-     *
-     * @return boolean
-     */
-    public function allows_recursion() {
-       return $this->recursion_available;
-    }
-      
-     /**
-     * Check if the resolver knows about a domain
-     *
-     * @param  string  $domain the domain to check for
-     * @return boolean         true if the resolver holds info about $domain
-     */
-    public function is_authority($domain) {
-        return false;
-    }
 }
