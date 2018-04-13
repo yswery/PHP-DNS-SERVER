@@ -30,6 +30,16 @@ PHP Requirements
 * `PHP 5.3+`
 * Needs either `sockets` or `socket_create` PHP extension loaded (which they are by default)
 
+Usage:
+======
+Run php dns server with command:
+
+```
+bin/phpdns
+```
+It will load configuration from `config/config.yml` and start server with recursive resolving serving dns records
+from `config/dns.example.json`
+
 Example:
 ========
 Here is an example of some DNS records
@@ -72,7 +82,7 @@ $ dig @127.0.0.1 test2.com A +short
 Unit tests using PHPUnit are provided. A simple script is located in the root.
 
 * run `composer install --dev` to install PHPUnit and dependencies
-* run `./phpunit` from the root to run the tests
+* run `./bin/phpunit` from the root to run the tests
 
 ## Forwarding requests to dns.google.com
 
