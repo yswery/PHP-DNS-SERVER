@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @package yswery\DNS
+ */
 namespace yswery\DNS\Command;
 
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -8,6 +10,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
+use yswery\DNS\Event\ConsoleEventSubscriber;
 use yswery\DNS\StackableResolver;
 use yswery\DNS\Server;
 use yswery\DNS\RecursiveProvider;
@@ -24,8 +27,8 @@ class ServerCommand extends Command
     protected function configure()
     {
         $this->setName('phpdns')
-            ->setDescription('')
-            ->setHelp('');
+            ->setDescription('PHP DNS server command script')
+            ->setHelp('Use this script to start and control phpdns.');
     }
 
     /**
@@ -49,6 +52,10 @@ class ServerCommand extends Command
 
         $config = Yaml::parseFile('config/config.yml');
 
-        (new Server($resolver, $config))->start();
+        $server = new Server($resolver, $config);
+
+        $server->registerEventSubscriber(new ConsoleEventSubscriber($output));
+
+        $server->start();
     }
 }

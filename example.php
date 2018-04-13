@@ -12,7 +12,7 @@ use yswery\DNS\JsonStorageProvider;
 $resolver = new StackableResolver(
     [
         new JsonStorageProvider('config/dns.example.json'), // JSON formatted DNS records file
-        new RecursiveProvider()                                       // Recursive provider acting as a fallback to the JsonStorageProvider
+        new RecursiveProvider(),                                       // Recursive provider acting as a fallback to the JsonStorageProvider
     ]
 );
 

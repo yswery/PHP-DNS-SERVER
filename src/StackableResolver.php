@@ -1,20 +1,35 @@
 <?php
+/**
+ * @package yswery\DNS
+ */
 
 namespace yswery\DNS;
 
+/**
+ * Class StackableResolver
+ */
 class StackableResolver
 {
-
     /**
      * @var array
      */
     protected $resolvers;
 
-    public function __construct(array $resolvers = array())
+    /**
+     * StackableResolver constructor.
+     *
+     * @param array $resolvers
+     */
+    public function __construct(array $resolvers = [])
     {
         $this->resolvers = $resolvers;
     }
 
+    /**
+     * @param $question
+     *
+     * @return array
+     */
     public function get_answer($question)
     {
         foreach ($this->resolvers as $resolver) {
@@ -24,7 +39,7 @@ class StackableResolver
             }
         }
 
-        return array();
+        return [];
     }
 
     /**
@@ -32,10 +47,11 @@ class StackableResolver
      *
      * @return boolean true if any resolver supports recursion
      */
-    public function allows_recursion() {
+    public function allows_recursion()
+    {
         foreach ($this->resolvers as $resolver) {
             if ($resolver->allows_recursion()) {
-              return true;
+                return true;
             }
         }
     }
@@ -46,12 +62,14 @@ class StackableResolver
      * @param  string  $domain the domain to check for
      * @return boolean         true if some resolver holds info about $domain
      */
-    public function is_authority($domain) {
+    public function is_authority($domain)
+    {
         foreach ($this->resolvers as $resolver) {
             if ($resolver->is_authority($domain)) {
                 return true;
             }
         }
+
         return false;
     }
 }

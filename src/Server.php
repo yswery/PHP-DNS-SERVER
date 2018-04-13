@@ -1,31 +1,47 @@
 <?php
+/**
+ * @package yswery\DNS
+ */
 
 namespace yswery\DNS;
 
+use yswery\DNS\Event\EventSubscriberInterface;
+
+/**
+ * Class Server
+ */
 class Server
 {
-    private $DS_IP = '0.0.0.0';
-    private $DS_PORT = 53;
-    private $DS_TTL = 300;
-    private $DS_MAX_LENGTH = 512;
+    private $ip = '0.0.0.0';
+    private $port = 53;
+    private $ttl = 300;
+    private $maxPacketLength = 512;
 
     /**
      * @var AbstractStorageProvider
      */
-    private $ds_storage;
+    private $resolver;
 
+    protected $eventSubscribes = [];
+
+    /**
+     * Server constructor.
+     *
+     * @param AbstractStorageProvider $resolver
+     * @param array $config
+     */
     public function __construct(
-        $ds_storage,
-        $config = []
+        $resolver,
+        array $config = []
     ) {
         if (isset($config['server']) && $server = $config['server']) {
-            $this->DS_IP = isset($server['bind']) ? $server['bind'] : $this->DS_IP;
-            $this->DS_PORT = isset($server['port']) ? $server['port'] : $this->DS_PORT;
-            $this->DS_TTL = isset($server['ttl']) ? $server['ttl'] : $this->DS_TTL;
-            $this->DS_MAX_LENGTH = isset($server['max_packet_length']) ? $server['max_packet_length'] : $this->DS_TTL;
+            $this->ip = isset($server['bind']) ? $server['bind'] : $this->ip;
+            $this->port = isset($server['port']) ? $server['port'] : $this->port;
+            $this->ttl = isset($server['ttl']) ? $server['ttl'] : $this->ttl;
+            $this->maxPacketLength = isset($server['max_packet_length']) ? $server['max_packet_length'] : $this->ttl;
         }
 
-        $this->ds_storage = $ds_storage;
+        $this->resolver = $resolver;
 
         ini_set('display_errors', true);
         ini_set('error_reporting', E_ALL);
@@ -38,24 +54,29 @@ class Server
         }
     }
 
+    public function registerEventSubscriber(EventSubscriberInterface $subscriber)
+    {
+        $this->eventSubscribes[] = $subscriber;
+    }
+
     public function start()
     {
-        $ds_socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 
-        if (!$ds_socket) {
+        if (!$socket) {
             $error = sprintf(
                 'Cannot create socket (socket error: %s).',
-                socket_strerror(socket_last_error($ds_socket))
+                socket_strerror(socket_last_error($socket))
             );
             $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
         }
 
-        if (!socket_bind($ds_socket, $this->DS_IP, $this->DS_PORT)) {
+        if (!socket_bind($socket, $this->ip, $this->port)) {
             $error = sprintf(
                 'Cannot bind socket to %s:%d (socket error: %s).',
-                $this->DS_IP,
-                $this->DS_PORT,
-                socket_strerror(socket_last_error($ds_socket))
+                $this->ip,
+                $this->port,
+                socket_strerror(socket_last_error($socket))
             );
             $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
         }
@@ -63,24 +84,25 @@ class Server
         while (true) {
             $buffer = $ip = $port = null;
 
-            if (!socket_recvfrom($ds_socket, $buffer, $this->DS_MAX_LENGTH, null, $ip, $port)) {
+            if (!socket_recvfrom($socket, $buffer, $this->maxPacketLength, null, $ip, $port)) {
                 $error = sprintf(
                     'Cannot read from socket ip: %s, port: %d (socket error: %s).',
                     $ip,
                     $port,
-                    socket_strerror(socket_last_error($ds_socket))
+                    socket_strerror(socket_last_error($socket))
                 );
                 $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
             } else {
                 $response = $this->ds_handle_query($buffer, $ip, $port);
 
-                if (!socket_sendto($ds_socket, $response, strlen($response), 0, $ip, $port)) {
+                if (!socket_sendto($socket, $response, strlen($response), 0, $ip, $port)) {
                     $error = sprintf(
                         'Cannot send reponse to socket ip: %s, port: %d (socket error: %s).',
                         $ip,
                         $port,
-                        socket_strerror(socket_last_error($ds_socket))
+                        socket_strerror(socket_last_error($socket))
                     );
+                    $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
                 }
             }
         }
@@ -95,10 +117,10 @@ class Server
         $question = $this->ds_decode_question_rr($buffer, $offset, $data['qdcount']);
         $authority = $this->ds_decode_rr($buffer, $offset, $data['nscount']);
         $additional = $this->ds_decode_rr($buffer, $offset, $data['arcount']);
-        $answer = $this->ds_storage->get_answer($question);
+        $answer = $this->resolver->get_answer($question);
         $flags['qr'] = 1;
-        $flags['ra'] = $this->ds_storage->allows_recursion() ? 1 : 0;
-        $flags['aa'] = $this->ds_storage->is_authority($question[0]['qname']) ? 1 : 0;
+        $flags['ra'] = $this->resolver->allows_recursion() ? 1 : 0;
+        $flags['aa'] = $this->resolver->is_authority($question[0]['qname']) ? 1 : 0;
 
         $qdcount = count($question);
         $ancount = count($answer);
@@ -119,12 +141,17 @@ class Server
         $response .= $this->ds_encode_rr($authority, strlen($response));
         $response .= $this->ds_encode_rr($additional, strlen($response));
 
+        $this->notifyEventSubscriber('onEvent', [
+            'query' => $question,
+            'answer' => $answer,
+        ]);
+
         return $response;
     }
 
     private function ds_decode_flags($flags)
     {
-        $res = array();
+        $res = [];
 
         $res['qr'] = $flags >> 15 & 0x1;
         $res['opcode'] = $flags >> 11 & 0xf;
@@ -140,7 +167,7 @@ class Server
 
     private function ds_decode_question_rr($pkt, &$offset, $count)
     {
-        $res = array();
+        $res = [];
 
         for ($i = 0; $i < $count; ++$i) {
             if ($offset > strlen($pkt)) {
@@ -202,7 +229,7 @@ class Server
 
     private function ds_decode_rr($pkt, &$offset, $count)
     {
-        $res = array();
+        $res = [];
 
         for ($i = 0; $i < $count; ++$i) {
             // read qname
@@ -221,7 +248,7 @@ class Server
 
     private function ds_decode_type($type, $val)
     {
-        $data = array();
+        $data = [];
 
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
@@ -235,7 +262,7 @@ class Server
                 $data['value'] = $this->ds_decode_label($val, $foo_offset);
                 break;
             case RecordTypeEnum::TYPE_SOA:
-                $data['value'] = array();
+                $data['value'] = [];
                 $offset = 0;
                 $data['value']['mname'] = $this->ds_decode_label($val, $offset);
                 $data['value']['rname'] = $this->ds_decode_label($val, $offset);
@@ -268,10 +295,10 @@ class Server
                 $data['type'] = RecordTypeEnum::TYPE_OPT;
                 $data['value'] = array(
                     'type' => RecordTypeEnum::TYPE_OPT,
-                    'ext_code' => $this->DS_TTL >> 24 & 0xff,
+                    'ext_code' => $this->ttl >> 24 & 0xff,
                     'udp_payload_size' => 4096,
-                    'version' => $this->DS_TTL >> 16 & 0xff,
-                    'flags' => $this->ds_decode_flags($this->DS_TTL & 0xffff),
+                    'version' => $this->ttl >> 16 & 0xff,
+                    'flags' => $this->ds_decode_flags($this->ttl & 0xffff),
                 );
                 break;
             default:
@@ -299,7 +326,7 @@ class Server
 
     private function ds_encode_label($str, $offset = null)
     {
-        if ($str === '.') {
+        if ('.' === $str) {
             return "\0";
         }
 
@@ -441,13 +468,21 @@ class Server
         return $enc;
     }
 
-    public function ds_error($code, $error, $file, $line)
+    private function notifyEventSubscriber($event, $message)
+    {
+        /** @var EventSubscriberInterface $subscriber */
+        foreach ($this->eventSubscribes as $subscriber) {
+            call_user_func_array([$subscriber, $event], [$message]);
+        }
+    }
+
+    private function ds_error($code, $error, $file, $line)
     {
         if (!(error_reporting() & $code)) {
             return;
         }
 
-        $codes = array(
+        $codes = [
             E_ERROR => 'Error',
             E_WARNING => 'Warning',
             E_PARSE => 'Parse Error',
@@ -463,10 +498,17 @@ class Server
             E_RECOVERABLE_ERROR => 'Recoverable Error',
             E_DEPRECATED => 'Deprecated Error',
             E_USER_DEPRECATED => 'User Deprecated Error',
-        );
+        ];
 
         $type = isset($codes[$code]) ? $codes[$code] : 'Unknown Error';
 
-        die(sprintf('DNS Server error: [%s] "%s" in file "%s" on line "%d".%s', $type, $error, $file, $line, PHP_EOL));
+        $message = sprintf('DNS Server error: [%s] "%s" in file "%s" on line "%d".', $type, $error, $file, $line);
+
+        $this->notifyEventSubscriber('onError', [
+            'code' => $code,
+            'error' => $error,
+            'file' => $file,
+            'line' => $line
+        ]);
     }
 }

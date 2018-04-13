@@ -1,4 +1,7 @@
 <?php
+/**
+ * @package yswery\DNS
+ */
 
 namespace yswery\DNS;
 

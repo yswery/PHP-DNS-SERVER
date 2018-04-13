@@ -1,4 +1,7 @@
 <?php
+/**
+ * @package yswery\DNS
+ */
 
 namespace yswery\DNS;
 
@@ -26,7 +29,7 @@ class GoogleDNSForwarder extends AbstractStorageProvider
 
         $response = json_decode($content, true);
 
-        $answer = array();
+        $answer = [];
         if (isset($response['Answer'])) {
 
             foreach($response['Answer'] as $item) {

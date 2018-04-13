@@ -1,4 +1,7 @@
 <?php
+/**
+ * @package yswery\DNS
+ */
 
 namespace yswery\DNS;
 
@@ -22,7 +25,7 @@ class RecursiveProvider extends AbstractStorageProvider
 
     public function get_answer($question)
     {
-        $answer = array();
+        $answer = [];
 
         $domain = $question[0]['qname'];
 
@@ -38,7 +41,7 @@ class RecursiveProvider extends AbstractStorageProvider
 
     private function get_records_recursivly($domain, $type)
     {
-        $result = array();
+        $result = [];
         $dns_const_name = $this->get_dns_cost_name($type);
 
         if (!$dns_const_name) {
