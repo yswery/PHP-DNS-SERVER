@@ -15,6 +15,10 @@
         {
             "name": "Gary Saunders",
             "email": "gary@codenamegary.com"
+        },
+        {
+            "name": "Ivan Stanojevic",
+            "email": "ivanstan@gmail.com"
         }
     ],
     "require": {},
