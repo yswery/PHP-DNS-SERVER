@@ -3,10 +3,10 @@
 require "vendor/autoload.php";
 
 use Symfony\Component\Yaml\Yaml;
-use yswery\DNS\StackableResolver;
+use yswery\DNS\Resolver\JsonResolver;
+use yswery\DNS\Resolver\RecursiveResolver;
+use yswery\DNS\Resolver\StackableResolver;
 use yswery\DNS\Server;
-use yswery\DNS\RecursiveResolver;
-use yswery\DNS\JsonResolver;
 
 // instantiate resolver
 $resolver = new StackableResolver(
