@@ -1,6 +1,6 @@
 <?php
 
-require "vendor/autoload.php";
+require "../vendor/autoload.php";
 
 use Symfony\Component\Yaml\Yaml;
 use yswery\DNS\Resolver\JsonResolver;
@@ -12,7 +12,7 @@ use yswery\DNS\Server;
 $resolver = new StackableResolver(
     [
         new JsonResolver('config/dns.example.json'), // JSON formatted DNS records file
-        new RecursiveResolver(),                                       // Recursive provider acting as a fallback to the JsonStorageProvider
+        new RecursiveResolver(),                         // Recursive provider acting as a fallback to the JsonStorageProvider
     ]
 );
 
