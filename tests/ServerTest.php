@@ -19,7 +19,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->server = new TestServerProxy;
+        $this->server = new TestServerProxy();
     }
 
     public function testDs_encode_label()

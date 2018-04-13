@@ -1,6 +1,8 @@
 <?php
 
-class RecordTypeEnumTest extends PHPUnit_Framework_TestCase {
+namespace yswery\DNS\Tests;
+
+class RecordTypeEnumTest extends \PHPUnit_Framework_TestCase {
 
     public function testGetsHostRecordIndex()
     {

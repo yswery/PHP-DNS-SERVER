@@ -1,8 +1,10 @@
 <?php
 
+namespace yswery\DNS\Tests;
+
 use yswery\DNS\JsonStorageProvider;
 
-class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
+class JsonStorageProviderTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var yswery\DNS\JsonStorageProvider
