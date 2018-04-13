@@ -11,8 +11,11 @@
 namespace yswery\DNS\Tests;
 
 use yswery\DNS\Server;
-use yswery\DNS\JsonStorageProvider;
+use yswery\DNS\Resolver\JsonResolver;
 
+/**
+ * Class TestServerProxy
+ */
 class TestServerProxy
 {
     private static $name = 'yswery\DNS\Server';
@@ -22,15 +25,23 @@ class TestServerProxy
      */
     protected $server;
 
+    /**
+     * TestServerProxy constructor.
+     */
     public function __construct()
     {
-        $storage = new JsonStorageProvider(__DIR__ . '/test_records.json');
+        $storage = new JsonResolver(__DIR__ . '/data/dns.records.json');
         $this->server = new Server($storage);
     }
 
-    public function ds_encode_label($str, $offset = null)
+    /**
+     * @param $str
+     * @param null $offset
+     * @return mixed
+     */
+    public function encodeLabel($str, $offset = null)
     {
-        $method = new \ReflectionMethod(self::$name, 'ds_encode_label');
+        $method = new \ReflectionMethod(self::$name, 'encodeLabel');
         $method->setAccessible(true);
 
         return $method->invoke($this->server, $str, $offset);

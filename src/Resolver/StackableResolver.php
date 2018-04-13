@@ -1,30 +1,45 @@
 <?php
+/**
+ * @package yswery\DNS
+ */
 
-namespace yswery\DNS;
+namespace yswery\DNS\Resolver;
 
-class StackableResolver
+/**
+ * Class StackableResolver
+ */
+class StackableResolver implements ResolverInterface
 {
-
     /**
      * @var array
      */
     protected $resolvers;
 
-    public function __construct(array $resolvers = array())
+    /**
+     * StackableResolver constructor.
+     *
+     * @param array $resolvers
+     */
+    public function __construct(array $resolvers = [])
     {
         $this->resolvers = $resolvers;
     }
 
-    public function get_answer($question)
+    /**
+     * @param $query
+     *
+     * @return array
+     */
+    public function getAnswer($query)
     {
         foreach ($this->resolvers as $resolver) {
-            $answer = $resolver->get_answer($question);
+            $answer = $resolver->getAnswer($query);
             if ($answer) {
                 return $answer;
             }
         }
 
-        return array();
+        return [];
     }
 
     /**
@@ -32,10 +47,11 @@ class StackableResolver
      *
      * @return boolean true if any resolver supports recursion
      */
-    public function allows_recursion() {
+    public function allowsRecursion()
+    {
         foreach ($this->resolvers as $resolver) {
-            if ($resolver->allows_recursion()) {
-              return true;
+            if ($resolver->allowsRecursion()) {
+                return true;
             }
         }
     }
@@ -46,12 +62,14 @@ class StackableResolver
      * @param  string  $domain the domain to check for
      * @return boolean         true if some resolver holds info about $domain
      */
-    public function is_authority($domain) {
+    public function isAuthority($domain)
+    {
         foreach ($this->resolvers as $resolver) {
-            if ($resolver->is_authority($domain)) {
+            if ($resolver->isAuthority($domain)) {
                 return true;
             }
         }
+
         return false;
     }
 }

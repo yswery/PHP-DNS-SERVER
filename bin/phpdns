@@ -1,0 +1,15 @@
+#!/usr/bin/env php
+<?php
+
+require __DIR__.'/../vendor/autoload.php';
+
+use Symfony\Component\Console\Application;
+use yswery\DNS\Command\ServerCommand;
+
+$application = new Application('phpdns', '1.0.0');
+$command = new ServerCommand();
+
+$application->add($command);
+
+$application->setDefaultCommand($command->getName(), true);
+$application->run();
