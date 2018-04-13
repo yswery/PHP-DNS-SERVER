@@ -4,18 +4,27 @@ namespace yswery\DNS;
 
 class Server
 {
+    private $DS_IP = '0.0.0.0';
+    private $DS_PORT = 53;
+    private $DS_TTL = 300;
+    private $DS_MAX_LENGTH = 512;
 
     /**
      * @var AbstractStorageProvider
      */
     private $ds_storage;
 
-    public function __construct($ds_storage, $bind_ip = '0.0.0.0', $bind_port = 53, $default_ttl = 300, $max_packet_len = 512)
-    {
-        $this->DS_PORT = $bind_port;
-        $this->DS_IP = $bind_ip;
-        $this->DS_TTL = $default_ttl;
-        $this->DS_MAX_LENGTH = $max_packet_len;
+    public function __construct(
+        $ds_storage,
+        $config = []
+    ) {
+        if (isset($config['server']) && $server = $config['server']) {
+            $this->DS_IP = isset($server['bind']) ? $server['bind'] : $this->DS_IP;
+            $this->DS_PORT = isset($server['port']) ? $server['port'] : $this->DS_PORT;
+            $this->DS_TTL = isset($server['ttl']) ? $server['ttl'] : $this->DS_TTL;
+            $this->DS_MAX_LENGTH = isset($server['max_packet_length']) ? $server['max_packet_length'] : $this->DS_TTL;
+        }
+
         $this->ds_storage = $ds_storage;
 
         ini_set('display_errors', true);
@@ -34,12 +43,20 @@ class Server
         $ds_socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 
         if (!$ds_socket) {
-            $error = sprintf('Cannot create socket (socket error: %s).', socket_strerror(socket_last_error($ds_socket)));
+            $error = sprintf(
+                'Cannot create socket (socket error: %s).',
+                socket_strerror(socket_last_error($ds_socket))
+            );
             $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
         }
 
         if (!socket_bind($ds_socket, $this->DS_IP, $this->DS_PORT)) {
-            $error = sprintf('Cannot bind socket to %s:%d (socket error: %s).', $this->DS_IP, $this->DS_PORT, socket_strerror(socket_last_error($ds_socket)));
+            $error = sprintf(
+                'Cannot bind socket to %s:%d (socket error: %s).',
+                $this->DS_IP,
+                $this->DS_PORT,
+                socket_strerror(socket_last_error($ds_socket))
+            );
             $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
         }
 
@@ -47,13 +64,23 @@ class Server
             $buffer = $ip = $port = null;
 
             if (!socket_recvfrom($ds_socket, $buffer, $this->DS_MAX_LENGTH, null, $ip, $port)) {
-                $error = sprintf('Cannot read from socket ip: %s, port: %d (socket error: %s).', $ip, $port, socket_strerror(socket_last_error($ds_socket)));
+                $error = sprintf(
+                    'Cannot read from socket ip: %s, port: %d (socket error: %s).',
+                    $ip,
+                    $port,
+                    socket_strerror(socket_last_error($ds_socket))
+                );
                 $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
             } else {
                 $response = $this->ds_handle_query($buffer, $ip, $port);
 
                 if (!socket_sendto($ds_socket, $response, strlen($response), 0, $ip, $port)) {
-                    $error = sprintf('Cannot send reponse to socket ip: %s, port: %d (socket error: %s).', $ip, $port, socket_strerror(socket_last_error($ds_socket)));
+                    $error = sprintf(
+                        'Cannot send reponse to socket ip: %s, port: %d (socket error: %s).',
+                        $ip,
+                        $port,
+                        socket_strerror(socket_last_error($ds_socket))
+                    );
                 }
             }
         }
@@ -78,7 +105,15 @@ class Server
         $nscount = count($authority);
         $arcount = count($additional);
 
-        $response = pack('nnnnnn', $data['packet_id'], $this->ds_encode_flags($flags), $qdcount, $ancount, $nscount, $arcount);
+        $response = pack(
+            'nnnnnn',
+            $data['packet_id'],
+            $this->ds_encode_flags($flags),
+            $qdcount,
+            $ancount,
+            $nscount,
+            $arcount
+        );
         $response .= ($p = $this->ds_encode_question_rr($question, strlen($response)));
         $response .= ($p = $this->ds_encode_rr($answer, strlen($response)));
         $response .= $this->ds_encode_rr($authority, strlen($response));
@@ -117,6 +152,7 @@ class Server
             $tmp['qname'] = $qname;
             $res[] = $tmp;
         }
+
         return $res;
     }
 
@@ -153,7 +189,7 @@ class Server
                 ++$offset;
                 break;
             }
-            $qname .= substr($pkt, $offset + 1, $len) . '.';
+            $qname .= substr($pkt, $offset + 1, $len).'.';
             $offset += $len + 1;
         }
 
@@ -230,7 +266,13 @@ class Server
                 break;
             case RecordTypeEnum::TYPE_OPT:
                 $data['type'] = RecordTypeEnum::TYPE_OPT;
-                $data['value'] = array('type' => RecordTypeEnum::TYPE_OPT, 'ext_code' => $this->DS_TTL >> 24 & 0xff, 'udp_payload_size' => 4096, 'version' => $this->DS_TTL >> 16 & 0xff, 'flags' => $this->ds_decode_flags($this->DS_TTL & 0xffff));
+                $data['value'] = array(
+                    'type' => RecordTypeEnum::TYPE_OPT,
+                    'ext_code' => $this->DS_TTL >> 24 & 0xff,
+                    'udp_payload_size' => 4096,
+                    'version' => $this->DS_TTL >> 16 & 0xff,
+                    'flags' => $this->ds_decode_flags($this->DS_TTL & 0xffff),
+                );
                 break;
             default:
                 $data = false;
@@ -265,12 +307,12 @@ class Server
         $in_offset = 0;
 
         while (false !== $pos = strpos($str, '.', $in_offset)) {
-            $res .= chr($pos - $in_offset) . substr($str, $in_offset, $pos - $in_offset);
+            $res .= chr($pos - $in_offset).substr($str, $in_offset, $pos - $in_offset);
             $offset += ($pos - $in_offset) + 1;
             $in_offset = $pos + 1;
         }
 
-        return $res . "\0";
+        return $res."\0";
     }
 
     private function ds_encode_question_rr($list, $offset)
@@ -318,10 +360,10 @@ class Server
                     $data['ttl'] = $rr['ttl'];
                 }
                 $offset += strlen($data['data']);
-                $res .= pack('nnNn', $data['type'], $data['class'], $data['ttl'], strlen($data['data'])) . $data['data'];
+                $res .= pack('nnNn', $data['type'], $data['class'], $data['ttl'], strlen($data['data'])).$data['data'];
             } else {
                 $offset += strlen($data);
-                $res .= pack('nnNn', $rr['data']['type'], $rr['class'], $rr['ttl'], strlen($data)) . $data;
+                $res .= pack('nnNn', $rr['data']['type'], $rr['class'], $rr['ttl'], strlen($data)).$data;
             }
         }
 
@@ -344,15 +386,22 @@ class Server
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
-                $val = rtrim($val, '.') . '.';
+                $val = rtrim($val, '.').'.';
                 $enc = $this->ds_encode_label($val, $offset);
                 break;
             case RecordTypeEnum::TYPE_SOA:
-                $val['mname'] = rtrim($val['mname'], '.') . '.';
-                $val['rname'] = rtrim($val['rname'], '.') . '.';
+                $val['mname'] = rtrim($val['mname'], '.').'.';
+                $val['rname'] = rtrim($val['rname'], '.').'.';
                 $enc .= $this->ds_encode_label($val['mname'], $offset);
                 $enc .= $this->ds_encode_label($val['rname'], $offset + strlen($enc));
-                $enc .= pack('NNNNN', $val['serial'], $val['refresh'], $val['retry'], $val['expire'], $val['minimum-ttl']);
+                $enc .= pack(
+                    'NNNNN',
+                    $val['serial'],
+                    $val['refresh'],
+                    $val['retry'],
+                    $val['expire'],
+                    $val['minimum-ttl']
+                );
                 break;
             case RecordTypeEnum::TYPE_MX:
                 if (!is_array($val)) {
@@ -362,15 +411,15 @@ class Server
                     );
                 }
 
-                $enc = pack('n', (int) $val['priority']);
-                $enc .= $this->ds_encode_label(rtrim($val['target'], '.') . '.', $offset + 2);
+                $enc = pack('n', (int)$val['priority']);
+                $enc .= $this->ds_encode_label(rtrim($val['target'], '.').'.', $offset + 2);
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 if (strlen($val) > 255) {
                     $val = substr($val, 0, 255);
                 }
 
-                $enc = chr(strlen($val)) . $val;
+                $enc = chr(strlen($val)).$val;
                 break;
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:
@@ -378,11 +427,11 @@ class Server
                 break;
             case RecordTypeEnum::TYPE_OPT:
                 $enc = array(
-                    'class' =>  $val['udp_payload_size'],
-                    'ttl' =>    (($val['ext_code'] & 0xff) << 24) |
-                                (($val['version'] & 0xff) << 16) |
-                                ($this->ds_encode_flags($val['flags']) & 0xffff),
-                    'data' =>   '', // TODO: encode data
+                    'class' => $val['udp_payload_size'],
+                    'ttl' => (($val['ext_code'] & 0xff) << 24) |
+                        (($val['version'] & 0xff) << 16) |
+                        ($this->ds_encode_flags($val['flags']) & 0xffff),
+                    'data' => '', // TODO: encode data
                 );
                 break;
             default:
@@ -398,7 +447,23 @@ class Server
             return;
         }
 
-        $codes = array(E_ERROR => 'Error', E_WARNING => 'Warning', E_PARSE => 'Parse Error', E_NOTICE => 'Notice', E_CORE_ERROR => 'Core Error', E_CORE_WARNING => 'Core Warning', E_COMPILE_ERROR => 'Compile Error', E_COMPILE_WARNING => 'Compile Warning', E_USER_ERROR => 'User Error', E_USER_WARNING => 'User Warning', E_USER_NOTICE => 'User Notice', E_STRICT => 'Strict Notice', E_RECOVERABLE_ERROR => 'Recoverable Error', E_DEPRECATED => 'Deprecated Error', E_USER_DEPRECATED => 'User Deprecated Error');
+        $codes = array(
+            E_ERROR => 'Error',
+            E_WARNING => 'Warning',
+            E_PARSE => 'Parse Error',
+            E_NOTICE => 'Notice',
+            E_CORE_ERROR => 'Core Error',
+            E_CORE_WARNING => 'Core Warning',
+            E_COMPILE_ERROR => 'Compile Error',
+            E_COMPILE_WARNING => 'Compile Warning',
+            E_USER_ERROR => 'User Error',
+            E_USER_WARNING => 'User Warning',
+            E_USER_NOTICE => 'User Notice',
+            E_STRICT => 'Strict Notice',
+            E_RECOVERABLE_ERROR => 'Recoverable Error',
+            E_DEPRECATED => 'Deprecated Error',
+            E_USER_DEPRECATED => 'User Deprecated Error',
+        );
 
         $type = isset($codes[$code]) ? $codes[$code] : 'Unknown Error';
 

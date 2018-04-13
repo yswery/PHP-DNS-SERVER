@@ -2,17 +2,23 @@
 
 require "vendor/autoload.php";
 
-// JSON formatted DNS records file
-$record_file = 'dns_record.json';
-$jsonStorageProvider = new yswery\DNS\JsonStorageProvider($record_file);
+use Symfony\Component\Yaml\Yaml;
+use yswery\DNS\StackableResolver;
+use yswery\DNS\Server;
+use yswery\DNS\RecursiveProvider;
+use yswery\DNS\JsonStorageProvider;
 
-// Recursive provider acting as a fallback to the JsonStorageProvider
-$recursiveProvider = new yswery\DNS\RecursiveProvider;
+// instantiate resolver
+$resolver = new StackableResolver(
+    [
+        new JsonStorageProvider('config/dns.example.json'), // JSON formatted DNS records file
+        new RecursiveProvider()                                       // Recursive provider acting as a fallback to the JsonStorageProvider
+    ]
+);
 
-$stackableResolver = new yswery\DNS\StackableResolver(array($jsonStorageProvider, $recursiveProvider));
+// load configuration
+$config = Yaml::parseFile('config/config.yml');
 
-// Creating a new instance of our class
-$dns = new yswery\DNS\Server($stackableResolver);
+// Creating a new instance of server and start it
+(new Server($resolver, $config))->start();
 
-// Starting our DNS server
-$dns->start();
