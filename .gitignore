@@ -3,5 +3,5 @@ composer.lock
 /vendor/
 .README.md.html
 /.idea
-/tests/clover.xml
+/Tests/clover.xml
 /nbproject

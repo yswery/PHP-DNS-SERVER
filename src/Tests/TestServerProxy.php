@@ -24,7 +24,7 @@ class TestServerProxy
 
     public function __construct()
     {
-        $storage = new JsonStorageProvider(__DIR__ . '/test_records.json');
+        $storage = new JsonStorageProvider(__DIR__ . '/data/dns.records.json');
         $this->server = new Server($storage);
     }
 
