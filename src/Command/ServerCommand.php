@@ -11,10 +11,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 use yswery\DNS\Event\ConsoleEventSubscriber;
-use yswery\DNS\StackableResolver;
+use yswery\DNS\Resolver\JsonResolver;
+use yswery\DNS\Resolver\RecursiveResolver;
+use yswery\DNS\Resolver\StackableResolver;
 use yswery\DNS\Server;
-use yswery\DNS\RecursiveResolver;
-use yswery\DNS\JsonResolver;
 
 /**
  * Class ServerCommand
@@ -34,7 +34,7 @@ class ServerCommand extends Command
     /**
      * @inheritdoc
      *
-     * @param InputInterface $input
+     * @param InputInterface  $input
      * @param OutputInterface $output
      *
      * @return void
@@ -45,7 +45,7 @@ class ServerCommand extends Command
             [
                 new JsonResolver('config/dns.example.json'),
                 // JSON formatted DNS records file
-                new RecursiveResolver()
+                new RecursiveResolver(),
                 // Recursive provider acting as a fallback to the JsonStorageProvider
             ]
         );

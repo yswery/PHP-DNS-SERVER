@@ -3,9 +3,10 @@
  * @package yswery\DNS
  */
 
-namespace yswery\DNS;
+namespace yswery\DNS\Resolver;
 
 use \Exception;
+use yswery\DNS\RecordTypeEnum;
 
 class RecursiveResolver implements ResolverInterface
 {

@@ -3,10 +3,11 @@
  * @package yswery\DNS
  */
 
-namespace yswery\DNS;
+namespace yswery\DNS\Resolver;
 
 use \Exception;
 use \InvalidArgumentException;
+use yswery\DNS\RecordTypeEnum;
 
 /**
  * Class JsonStorageProvider

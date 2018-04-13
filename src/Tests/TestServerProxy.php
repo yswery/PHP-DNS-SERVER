@@ -11,7 +11,7 @@
 namespace yswery\DNS\Tests;
 
 use yswery\DNS\Server;
-use yswery\DNS\JsonResolver;
+use yswery\DNS\Resolver\JsonResolver;
 
 /**
  * Class TestServerProxy

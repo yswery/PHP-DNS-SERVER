@@ -6,6 +6,7 @@
 namespace yswery\DNS;
 
 use yswery\DNS\Event\EventSubscriberInterface;
+use yswery\DNS\Resolver\ResolverInterface;
 
 /**
  * Class Server
@@ -30,7 +31,7 @@ class Server
      * @param ResolverInterface $resolver
      * @param array $config
      */
-    public function __construct($resolver, array $config = [])
+    public function __construct(ResolverInterface $resolver, array $config = [])
     {
         // @todo validate configuration validate ip, port, max packet and ttl as positive integers
 

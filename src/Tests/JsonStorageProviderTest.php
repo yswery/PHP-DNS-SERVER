@@ -10,8 +10,8 @@
 
 namespace yswery\DNS\Tests;
 
-use yswery\DNS\JsonResolver;
 use yswery\DNS\RecordTypeEnum;
+use yswery\DNS\Resolver\JsonResolver;
 
 /**
  * Class JsonStorageProviderTest
@@ -89,7 +89,7 @@ class JsonStorageProviderTest extends \PHPUnit_Framework_TestCase
         $question = [
             [
                 'qname' => 'testestestes.com',
-                'qtype' => RecordTypeEnum::TYPE_A,
+                'qtype' => \yswery\DNS\RecordTypeEnum::TYPE_A,
                 'qclass' => 1,
             ],
         ];
@@ -102,7 +102,7 @@ class JsonStorageProviderTest extends \PHPUnit_Framework_TestCase
         $question = [
             [
                 'qname' => 'test2.com',
-                'qtype' => RecordTypeEnum::TYPE_A,
+                'qtype' => \yswery\DNS\RecordTypeEnum::TYPE_A,
                 'qclass' => 1,
             ],
         ];

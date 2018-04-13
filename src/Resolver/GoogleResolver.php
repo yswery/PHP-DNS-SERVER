@@ -3,7 +3,7 @@
  * @package yswery\DNS
  */
 
-namespace yswery\DNS;
+namespace yswery\DNS\Resolver;
 
 /**
  * Class GoogleDNSForwarder
