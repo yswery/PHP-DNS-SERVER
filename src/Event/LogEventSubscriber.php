@@ -32,11 +32,15 @@ class LogEventSubscriber implements EventSubscriberInterface
      */
     public function onEvent(array $data)
     {
-        // @todo implement monoglog
+        $query = $data['query'][0]['qname'];
+
+        $this->logger->info("Requested to resolve $query");
     }
 
     /**
      * @param array $data
+     *
+     * @deprecated
      */
     public function onError(array $data)
     {

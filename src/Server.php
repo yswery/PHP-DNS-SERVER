@@ -36,13 +36,10 @@ class Server
     public function __construct(ResolverInterface $resolver, array $config = [])
     {
         // @todo validate configuration validate ip, port, max packet and ttl as positive integers
-
-        if (isset($config['server']) && $server = $config['server']) {
-            $this->ip = isset($server['bind']) ? $server['bind'] : $this->ip;
-            $this->port = isset($server['port']) ? $server['port'] : $this->port;
-            $this->ttl = isset($server['ttl']) ? $server['ttl'] : $this->ttl;
-            $this->maxPacketLength = isset($server['max_packet_length']) ? $server['max_packet_length'] : $this->maxPacketLength;
-        }
+        $this->ip = isset($config['bind']) ? $config['bind'] : $this->ip;
+        $this->port = isset($config['port']) ? $config['port'] : $this->port;
+        $this->ttl = isset($config['ttl']) ? $config['ttl'] : $this->ttl;
+        $this->maxPacketLength = isset($config['max_packet_length']) ? $config['max_packet_length'] : $this->maxPacketLength;
 
         $this->resolver = $resolver;
 

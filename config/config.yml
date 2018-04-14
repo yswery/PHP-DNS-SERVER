@@ -3,3 +3,6 @@ server:
   port: 53
   ttl: 300
   max_packet_length: 512
+log:
+  enabled: true
+  path: 'log/production.log'

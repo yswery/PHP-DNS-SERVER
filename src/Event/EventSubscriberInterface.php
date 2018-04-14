@@ -21,6 +21,8 @@ interface EventSubscriberInterface
      * @param array $data
      *
      * @return void
+     *
+     * @deprecated
      */
     public function onError(array $data);
 }

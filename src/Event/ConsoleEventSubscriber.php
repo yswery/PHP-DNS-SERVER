@@ -41,6 +41,8 @@ class ConsoleEventSubscriber implements EventSubscriberInterface
 
     /**
      * @param array $data
+     *
+     * @deprecated
      */
     public function onError(array $data)
     {
