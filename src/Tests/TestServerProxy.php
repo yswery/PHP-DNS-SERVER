@@ -30,7 +30,7 @@ class TestServerProxy
      */
     public function __construct()
     {
-        $storage = new JsonResolver(__DIR__ . '/data/dns.records.json');
+        $storage = new JsonResolver(__DIR__.'/data/dns.records.json');
         $this->server = new Server($storage);
     }
 
