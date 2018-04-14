@@ -29,7 +29,7 @@ class Server
      * Server constructor.
      *
      * @param ResolverInterface $resolver
-     * @param array $config
+     * @param array             $config
      */
     public function __construct(ResolverInterface $resolver, array $config = [])
     {
@@ -55,11 +55,19 @@ class Server
         }
     }
 
+    /**
+     * Register event subscriber to class.
+     *
+     * @param EventSubscriberInterface $subscriber
+     */
     public function registerEventSubscriber(EventSubscriberInterface $subscriber)
     {
         $this->eventSubscribes[] = $subscriber;
     }
 
+    /**
+     * Starts DNS server.
+     */
     public function run()
     {
         $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
@@ -109,6 +117,12 @@ class Server
         }
     }
 
+    /**
+     * Handles DNS queries.
+     *
+     * @param $buffer
+     * @return string
+     */
     private function handleQuery($buffer)
     {
         $data = unpack('npacket_id/nflags/nqdcount/nancount/nnscount/narcount', $buffer);
