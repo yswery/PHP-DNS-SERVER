@@ -27,7 +27,7 @@ Supported Record Types
 PHP Requirements
 ================
 
-* `PHP 5.3+`
+* `PHP 5.4+`
 * Needs either `sockets` or `socket_create` PHP extension loaded (which they are by default)
 
 Usage:

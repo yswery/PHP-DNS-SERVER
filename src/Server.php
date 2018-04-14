@@ -507,7 +507,7 @@ class Server
     private function errorHandler($code, $error, $file, $line)
     {
 
-//        error_get_last();
+        // @todo use trigger error instead call to this function, get error data using error_get_last();
 
         if (!(error_reporting() & $code)) {
             return;
