@@ -5,8 +5,6 @@
 
 namespace yswery\DNS\Resolver;
 
-use \Exception;
-use \InvalidArgumentException;
 use yswery\DNS\RecordTypeEnum;
 
 /**
@@ -17,36 +15,36 @@ class JsonResolver implements ResolverInterface
     /**
      * @var array
      */
-    private $records;
+    protected $records;
 
     /**
      * @var int
      */
-    private $ttl = 300;
+    protected $ttl = 300;
 
     /**
      * JsonStorageProvider constructor.
      *
      * @param string $file The file path of the JSON-formatted DNS Zone file.
      *
-     * @throws Exception | InvalidArgumentException
+     * @throws \Exception | \InvalidArgumentException
      */
     public function __construct($file)
     {
         if (!file_exists($file)) {
-            throw new Exception(sprintf('The file "%s" does not exist.', $file));
+            throw new \Exception(sprintf('The file "%s" does not exist.', $file));
         }
 
         if (false === $json = file_get_contents($file)) {
-            throw new Exception(sprintf('Unable to open JSON file: "%s".', $file));
+            throw new \Exception(sprintf('Unable to open JSON file: "%s".', $file));
         }
 
         if (null === $records = json_decode($json, true)) {
-            throw new Exception(sprintf('Unable to parse JSON file: "%s".', $file));
+            throw new \Exception(sprintf('Unable to parse JSON file: "%s".', $file));
         }
 
         if (!is_int($this->ttl)) {
-            throw new InvalidArgumentException('Default TTL must be an integer.');
+            throw new \InvalidArgumentException('Default TTL must be an integer.');
         }
 
         $this->records = $records;

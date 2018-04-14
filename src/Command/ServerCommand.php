@@ -14,6 +14,7 @@ use yswery\DNS\Event\ConsoleEventSubscriber;
 use yswery\DNS\Resolver\JsonResolver;
 use yswery\DNS\Resolver\RecursiveResolver;
 use yswery\DNS\Resolver\StackableResolver;
+use yswery\DNS\Resolver\YamlResolver;
 use yswery\DNS\Server;
 
 /**
@@ -43,10 +44,12 @@ class ServerCommand extends Command
     {
         $resolver = new StackableResolver(
             [
-                new JsonResolver('config/dns.example.json'),
+                // Yaml formatted DNS records file
+                new YamlResolver('config/dns.example.yml'),
                 // JSON formatted DNS records file
+                new JsonResolver('config/dns.example.json'),
+                // Recursive provider acting as a fallback to the YamlResolver and JsonResolver
                 new RecursiveResolver(),
-                // Recursive provider acting as a fallback to the JsonStorageProvider
             ]
         );
 
