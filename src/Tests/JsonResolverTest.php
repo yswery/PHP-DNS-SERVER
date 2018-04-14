@@ -16,7 +16,7 @@ use yswery\DNS\Resolver\JsonResolver;
 /**
  * Class JsonStorageProviderTest
  */
-class JsonStorageProviderTest extends \PHPUnit_Framework_TestCase
+class JsonResolverTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var JsonResolver

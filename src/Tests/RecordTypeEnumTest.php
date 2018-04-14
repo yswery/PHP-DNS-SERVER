@@ -10,29 +10,34 @@
 
 namespace yswery\DNS\Tests;
 
+use yswery\DNS\RecordTypeEnum;
+
+/**
+ * Class RecordTypeEnumTest
+ */
 class RecordTypeEnumTest extends \PHPUnit_Framework_TestCase {
 
     public function testGetsHostRecordIndex()
     {
-        $hostIndex = \yswery\DNS\RecordTypeEnum::get_type_index('A');
-        $this->assertTrue($hostIndex === \yswery\DNS\RecordTypeEnum::TYPE_A);
+        $hostIndex = RecordTypeEnum::get_type_index('A');
+        $this->assertTrue($hostIndex === RecordTypeEnum::TYPE_A);
     }
 
     public function testDoesNotGetInvalidRecordTypeIndex()
     {
-        $hostIndex = \yswery\DNS\RecordTypeEnum::get_type_index('BLAH');
+        $hostIndex = RecordTypeEnum::get_type_index('BLAH');
         $this->assertTrue($hostIndex === false);
     }
 
     public function testGetsNameFromType()
     {
-        $typeName = \yswery\DNS\RecordTypeEnum::get_name(\yswery\DNS\RecordTypeEnum::TYPE_A);
+        $typeName = RecordTypeEnum::get_name(RecordTypeEnum::TYPE_A);
         $this->assertTrue('A' === $typeName);
     }
 
     public function testDoesNotGetInvalidNameFromType()
     {
-        $typeName = \yswery\DNS\RecordTypeEnum::get_name(932);
+        $typeName = RecordTypeEnum::get_name(932);
         $this->assertTrue(false === $typeName);
     }
 
@@ -81,6 +86,6 @@ class RecordTypeEnumTest extends \PHPUnit_Framework_TestCase {
             'DNAME' => 39,
         ];
 
-        $this->assertTrue(\yswery\DNS\RecordTypeEnum::get_types() === $expected);
+        $this->assertTrue(RecordTypeEnum::get_types() === $expected);
     }
 }
