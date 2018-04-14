@@ -39,7 +39,7 @@ class RecursiveResolver implements ResolverInterface
 
         $domain = $query[0]['qname'];
 
-        $type = RecordTypeEnum::get_name($query[0]['qtype']);
+        $type = RecordTypeEnum::getName($query[0]['qtype']);
 
         $records = $this->getRecordsRecursivly($domain, $type);
         foreach ($records as $record) {

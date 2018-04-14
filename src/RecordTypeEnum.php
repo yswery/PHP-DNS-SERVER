@@ -102,7 +102,7 @@ class RecordTypeEnum
      *
      * @return string|false
      */
-    public static function get_name($typeIndex)
+    public static function getName($typeIndex)
     {
         return array_search($typeIndex, self::$types);
     }
@@ -112,7 +112,7 @@ class RecordTypeEnum
      *
      * @return int|false
      */
-    public static function get_type_index($name)
+    public static function getTypeIndex($name)
     {
         $key = trim(strtoupper($name));
         if (!array_key_exists($key, self::$types)) {
@@ -125,7 +125,7 @@ class RecordTypeEnum
     /**
      * @return array
      */
-    public static function get_types()
+    public static function getTypes()
     {
         return self::$types;
     }
