@@ -56,6 +56,6 @@ class ServerCommand extends Command
 
         $server->registerEventSubscriber(new ConsoleEventSubscriber($output));
 
-        $server->start();
+        $server->run();
     }
 }

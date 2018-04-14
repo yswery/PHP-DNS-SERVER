@@ -47,11 +47,11 @@ class Server
         ini_set('display_errors', true);
         ini_set('error_reporting', E_ALL);
 
-        set_error_handler([$this, 'ds_error'], E_ALL);
+        set_error_handler([$this, 'errorHandler'], E_ALL);
         set_time_limit(0);
 
         if (!extension_loaded('sockets') || !function_exists('socket_create')) {
-            $this->ds_error(E_USER_ERROR, 'Socket extension or function not found.', __FILE__, __LINE__);
+            $this->errorHandler(E_USER_ERROR, 'Socket extension or function not found.', __FILE__, __LINE__);
         }
     }
 
@@ -60,7 +60,7 @@ class Server
         $this->eventSubscribes[] = $subscriber;
     }
 
-    public function start()
+    public function run()
     {
         $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 
@@ -69,7 +69,7 @@ class Server
                 'Cannot create socket (socket error: %s).',
                 socket_strerror(socket_last_error($socket))
             );
-            $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
+            $this->errorHandler(E_USER_ERROR, $error, __FILE__, __LINE__);
         }
 
         if (!socket_bind($socket, $this->ip, $this->port)) {
@@ -79,7 +79,7 @@ class Server
                 $this->port,
                 socket_strerror(socket_last_error($socket))
             );
-            $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
+            $this->errorHandler(E_USER_ERROR, $error, __FILE__, __LINE__);
         }
 
         while (true) {
@@ -92,9 +92,9 @@ class Server
                     $port,
                     socket_strerror(socket_last_error($socket))
                 );
-                $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
+                $this->errorHandler(E_USER_ERROR, $error, __FILE__, __LINE__);
             } else {
-                $response = $this->ds_handle_query($buffer, $ip, $port);
+                $response = $this->handleQuery($buffer);
 
                 if (!socket_sendto($socket, $response, strlen($response), 0, $ip, $port)) {
                     $error = sprintf(
@@ -103,21 +103,21 @@ class Server
                         $port,
                         socket_strerror(socket_last_error($socket))
                     );
-                    $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
+                    $this->errorHandler(E_USER_ERROR, $error, __FILE__, __LINE__);
                 }
             }
         }
     }
 
-    private function ds_handle_query($buffer, $ip, $port)
+    private function handleQuery($buffer)
     {
         $data = unpack('npacket_id/nflags/nqdcount/nancount/nnscount/narcount', $buffer);
-        $flags = $this->ds_decode_flags($data['flags']);
+        $flags = $this->decodeFlags($data['flags']);
         $offset = 12;
 
-        $question = $this->ds_decode_question_rr($buffer, $offset, $data['qdcount']);
-        $authority = $this->ds_decode_rr($buffer, $offset, $data['nscount']);
-        $additional = $this->ds_decode_rr($buffer, $offset, $data['arcount']);
+        $question = $this->decodeQuestionRR($buffer, $offset, $data['qdcount']);
+        $authority = $this->decodeRR($buffer, $offset, $data['nscount']);
+        $additional = $this->decodeRR($buffer, $offset, $data['arcount']);
         $answer = $this->resolver->getAnswer($question);
         $flags['qr'] = 1;
         $flags['ra'] = $this->resolver->allowsRecursion() ? 1 : 0;
@@ -131,16 +131,16 @@ class Server
         $response = pack(
             'nnnnnn',
             $data['packet_id'],
-            $this->ds_encode_flags($flags),
+            $this->encodeFlags($flags),
             $qdcount,
             $ancount,
             $nscount,
             $arcount
         );
-        $response .= ($p = $this->ds_encode_question_rr($question, strlen($response)));
-        $response .= ($p = $this->ds_encode_rr($answer, strlen($response)));
-        $response .= $this->ds_encode_rr($authority, strlen($response));
-        $response .= $this->ds_encode_rr($additional, strlen($response));
+        $response .= ($p = $this->encodeQuestionRR($question, strlen($response)));
+        $response .= ($p = $this->encodeRR($answer, strlen($response)));
+        $response .= $this->encodeRR($authority, strlen($response));
+        $response .= $this->encodeRR($additional, strlen($response));
 
         $this->notifyEventSubscriber(
             'onEvent',
@@ -153,7 +153,7 @@ class Server
         return $response;
     }
 
-    private function ds_decode_flags($flags)
+    private function decodeFlags($flags)
     {
         $res = [];
 
@@ -169,7 +169,7 @@ class Server
         return $res;
     }
 
-    private function ds_decode_question_rr($pkt, &$offset, $count)
+    private function decodeQuestionRR($pkt, &$offset, $count)
     {
         $res = [];
 
@@ -177,7 +177,7 @@ class Server
             if ($offset > strlen($pkt)) {
                 return false;
             }
-            $qname = $this->ds_decode_label($pkt, $offset);
+            $qname = $this->decodeLabel($pkt, $offset);
             $tmp = unpack('nqtype/nqclass', substr($pkt, $offset, 4));
             $offset += 4;
             $tmp['qname'] = $qname;
@@ -187,7 +187,7 @@ class Server
         return $res;
     }
 
-    private function ds_decode_label($pkt, &$offset)
+    private function decodeLabel($pkt, &$offset)
     {
         $end_offset = null;
         $qname = '';
@@ -231,18 +231,18 @@ class Server
         return $qname;
     }
 
-    private function ds_decode_rr($pkt, &$offset, $count)
+    private function decodeRR($pkt, &$offset, $count)
     {
         $res = [];
 
         for ($i = 0; $i < $count; ++$i) {
             // read qname
-            $qname = $this->ds_decode_label($pkt, $offset);
+            $qname = $this->decodeLabel($pkt, $offset);
             // read qtype & qclass
             $tmp = unpack('ntype/nclass/Nttl/ndlength', substr($pkt, $offset, 10));
             $tmp['name'] = $qname;
             $offset += 10;
-            $tmp['data'] = $this->ds_decode_type($tmp['type'], substr($pkt, $offset, $tmp['dlength']));
+            $tmp['data'] = $this->decodeType($tmp['type'], substr($pkt, $offset, $tmp['dlength']));
             $offset += $tmp['dlength'];
             $res[] = $tmp;
         }
@@ -250,7 +250,7 @@ class Server
         return $res;
     }
 
-    private function ds_decode_type($type, $val)
+    private function decodeType($type, $val)
     {
         $data = [];
 
@@ -263,13 +263,13 @@ class Server
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
                 $foo_offset = 0;
-                $data['value'] = $this->ds_decode_label($val, $foo_offset);
+                $data['value'] = $this->decodeLabel($val, $foo_offset);
                 break;
             case RecordTypeEnum::TYPE_SOA:
                 $data['value'] = [];
                 $offset = 0;
-                $data['value']['mname'] = $this->ds_decode_label($val, $offset);
-                $data['value']['rname'] = $this->ds_decode_label($val, $offset);
+                $data['value']['mname'] = $this->decodeLabel($val, $offset);
+                $data['value']['rname'] = $this->decodeLabel($val, $offset);
                 $next_values = unpack('Nserial/Nrefresh/Nretry/Nexpire/Nminimum', substr($val, $offset));
 
                 foreach ($next_values as $var => $val) {
@@ -302,7 +302,7 @@ class Server
                     'ext_code' => $this->ttl >> 24 & 0xff,
                     'udp_payload_size' => 4096,
                     'version' => $this->ttl >> 16 & 0xff,
-                    'flags' => $this->ds_decode_flags($this->ttl & 0xffff),
+                    'flags' => $this->decodeFlags($this->ttl & 0xffff),
                 ];
                 break;
             default:
@@ -312,7 +312,7 @@ class Server
         return $data;
     }
 
-    private function ds_encode_flags($flags)
+    private function encodeFlags($flags)
     {
         $val = 0;
 
@@ -346,7 +346,7 @@ class Server
         return $res."\0";
     }
 
-    private function ds_encode_question_rr($list, $offset)
+    private function encodeQuestionRR($list, $offset)
     {
         $res = '';
 
@@ -360,7 +360,7 @@ class Server
         return $res;
     }
 
-    private function ds_encode_rr($list, $offset)
+    private function encodeRR($list, $offset)
     {
         $res = '';
 
@@ -374,7 +374,7 @@ class Server
             }
 
             $offset += 10;
-            $data = $this->ds_encode_type($rr['data']['type'], $rr['data']['value'], $offset);
+            $data = $this->encodeType($rr['data']['type'], $rr['data']['value'], $offset);
 
             if (is_array($data)) {
                 // overloading written data
@@ -401,7 +401,7 @@ class Server
         return $res;
     }
 
-    private function ds_encode_type($type, $val = null, $offset = null)
+    private function encodeType($type, $val = null, $offset = null)
     {
         $enc = '';
         switch ($type) {
@@ -461,7 +461,7 @@ class Server
                     'class' => $val['udp_payload_size'],
                     'ttl' => (($val['ext_code'] & 0xff) << 24) |
                         (($val['version'] & 0xff) << 16) |
-                        ($this->ds_encode_flags($val['flags']) & 0xffff),
+                        ($this->encodeFlags($val['flags']) & 0xffff),
                     'data' => '', // TODO: encode data
                 ];
                 break;
@@ -472,16 +472,29 @@ class Server
         return $enc;
     }
 
-    private function notifyEventSubscriber($event, $message)
+    /**
+     * @param string $event
+     * @param array  $data
+     */
+    private function notifyEventSubscriber($event, array $data)
     {
         /** @var EventSubscriberInterface $subscriber */
         foreach ($this->eventSubscribes as $subscriber) {
-            call_user_func_array([$subscriber, $event], [$message]);
+            call_user_func_array([$subscriber, $event], [$data]);
         }
     }
 
-    private function ds_error($code, $error, $file, $line)
+    /**
+     * @param $code
+     * @param $error
+     * @param $file
+     * @param $line
+     */
+    private function errorHandler($code, $error, $file, $line)
     {
+
+//        error_get_last();
+
         if (!(error_reporting() & $code)) {
             return;
         }

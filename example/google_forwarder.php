@@ -9,4 +9,4 @@ use yswery\DNS\Resolver\GoogleResolver;
 $dns = new Server((new GoogleResolver()));
 
 // Starting our DNS server
-$dns->start();
+$dns->run();
