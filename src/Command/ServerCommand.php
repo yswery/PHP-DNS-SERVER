@@ -50,15 +50,15 @@ class ServerCommand extends Command
         $resolver = new StackableResolver(
             [
                 // Yaml formatted DNS records file
-                new YamlResolver('config/dns.example.yml'),
+                new YamlResolver('etc/dns.example.yml'),
                 // JSON formatted DNS records file
-                new JsonResolver('config/dns.example.json'),
+                new JsonResolver('etc/dns.example.json'),
                 // Recursive provider acting as a fallback to the YamlResolver and JsonResolver
                 new RecursiveResolver(),
             ]
         );
 
-        $config = Yaml::parseFile('config/config.yml');
+        $config = Yaml::parseFile('etc/config.yml');
 
         $server = new Server($resolver, isset($config['server']) ? $config['server'] : []);
 
