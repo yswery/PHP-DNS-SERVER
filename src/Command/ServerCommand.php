@@ -8,6 +8,7 @@ namespace yswery\DNS\Command;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Registry;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -69,6 +70,7 @@ class ServerCommand extends Command
         }
 
         try {
+            $this->showInfo($output, $config['server']);
             $server->run();
         } catch (\Exception $e) {
             $message = $e->getMessage();
@@ -94,5 +96,24 @@ class ServerCommand extends Command
         Registry::addLogger($logger);
 
         return $logger;
+    }
+
+    /**
+     * @param OutputInterface $output
+     * @param $config
+     */
+    protected function showInfo(OutputInterface $output, $config) {
+        $rows = [];
+        foreach ($config as $key => $value) {
+            $rows[] = [$key, $value];
+        }
+
+        $output->writeln("<info>Running DNS server with following options:</info>");
+
+        $table = new Table($output);
+        $table
+            ->setHeaders(['Option', 'Value'])
+            ->setRows($rows);
+        $table->render();
     }
 }
