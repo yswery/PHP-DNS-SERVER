@@ -6,6 +6,7 @@
 namespace yswery\DNS\Event;
 
 use Symfony\Component\Console\Output\OutputInterface;
+use yswery\DNS\RecordTypeEnum;
 
 /**
  * Class ConsoleEventSubscriber
@@ -33,9 +34,17 @@ class ConsoleEventSubscriber implements EventSubscriberInterface
     public function onEvent(array $data)
     {
         if ($this->output->isVerbose()) {
-            $query = $data['query'][0]['qname'];
+            $type = RecordTypeEnum::getName($data['query'][0]['qtype']);
+            $domain = $data['query'][0]['qname'];
+            $time = (new \DateTime())->format('Y-m-d H:i:s');
 
-            $this->output->writeln("<info>Requested to resolve $query</info>");
+            $message = "[$time] Requested to resolve $type query for domain $domain";
+
+            if (isset($data['answer'])) {
+                $message .= ' Result: '.$data['answer'][0]['data']['value'];
+            }
+
+            $this->output->writeln("<info>$message</info>");
         }
     }
 
