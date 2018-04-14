@@ -1,14 +1,19 @@
 <?php
+/**
+ * @package yswery\DNS
+ */
 
 namespace yswery\DNS;
 
+/**
+ * Class RecordTypeEnum
+ */
 class RecordTypeEnum
 {
-
     /**
      * @var array
      */
-    private static $types = array(
+    private static $types = [
         'A' => 1,
         'NS' => 2,
         'CNAME' => 5,
@@ -49,7 +54,7 @@ class RecordTypeEnum
         'TSIG' => 250,
         'URI' => 256,
         'DNAME' => 39,
-    );
+    ];
 
     const TYPE_A = 1;
     const TYPE_NS = 2;
@@ -94,30 +99,33 @@ class RecordTypeEnum
 
     /**
      * @param int $typeIndex The index of the type contained in the question
+     *
      * @return string|false
      */
-    public static function get_name($typeIndex)
+    public static function getName($typeIndex)
     {
         return array_search($typeIndex, self::$types);
     }
 
     /**
      * @param string $name The name of the record type, e.g. = 'A' or 'MX' or 'SOA'
+     *
      * @return int|false
      */
-    public static function get_type_index($name)
+    public static function getTypeIndex($name)
     {
         $key = trim(strtoupper($name));
         if (!array_key_exists($key, self::$types)) {
             return false;
         }
+
         return self::$types[$key];
     }
 
     /**
      * @return array
      */
-    public static function get_types()
+    public static function getTypes()
     {
         return self::$types;
     }

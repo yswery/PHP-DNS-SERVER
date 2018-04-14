@@ -27,8 +27,18 @@ Supported Record Types
 PHP Requirements
 ================
 
-* `PHP 5.3+`
+* `PHP 5.5+`
 * Needs either `sockets` or `socket_create` PHP extension loaded (which they are by default)
+
+Usage:
+======
+Run php dns server with command:
+
+```
+bin/phpdns
+```
+It will load configuration from `config/config.yml` and start server with recursive resolving serving dns records
+from `config/dns.example.json`
 
 Example:
 ========
@@ -72,8 +82,18 @@ $ dig @127.0.0.1 test2.com A +short
 Unit tests using PHPUnit are provided. A simple script is located in the root.
 
 * run `composer install --dev` to install PHPUnit and dependencies
-* run `./phpunit` from the root to run the tests
+* run `./bin/phpunit` from the root to run the tests
 
+## Forwarding requests to dns.google.com
+
+This is a rather proof of concept than the actual way of resolving requests. 
+
+In order to resolve the name of server we will be sending queries to make sure your /etc/hosts file contains:
+```
+216.58.209.206 dns.google.com
+```
+Now you can start the server by running `example_google_forwarder.php`. Requests will be forwarded to dns.google.com
+via HTTPS, which is quite handy if you want to keep your internet provider away from your browsing history.
 
 ## License
 

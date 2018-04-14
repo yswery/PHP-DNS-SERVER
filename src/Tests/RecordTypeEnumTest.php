@@ -1,34 +1,49 @@
 <?php
+/*
+ * This file is part of PHP DNS Server.
+ *
+ * (c) Yif Swery <yiftachswr@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-class RecordTypeEnumTest extends PHPUnit_Framework_TestCase {
+namespace yswery\DNS\Tests;
+
+use yswery\DNS\RecordTypeEnum;
+
+/**
+ * Class RecordTypeEnumTest
+ */
+class RecordTypeEnumTest extends \PHPUnit_Framework_TestCase {
 
     public function testGetsHostRecordIndex()
     {
-        $hostIndex = \yswery\DNS\RecordTypeEnum::get_type_index('A');
-        $this->assertTrue($hostIndex === \yswery\DNS\RecordTypeEnum::TYPE_A);
+        $hostIndex = RecordTypeEnum::getTypeIndex('A');
+        $this->assertTrue($hostIndex === RecordTypeEnum::TYPE_A);
     }
 
     public function testDoesNotGetInvalidRecordTypeIndex()
     {
-        $hostIndex = \yswery\DNS\RecordTypeEnum::get_type_index('BLAH');
+        $hostIndex = RecordTypeEnum::getTypeIndex('BLAH');
         $this->assertTrue($hostIndex === false);
     }
 
     public function testGetsNameFromType()
     {
-        $typeName = \yswery\DNS\RecordTypeEnum::get_name(\yswery\DNS\RecordTypeEnum::TYPE_A);
+        $typeName = RecordTypeEnum::getName(RecordTypeEnum::TYPE_A);
         $this->assertTrue('A' === $typeName);
     }
 
     public function testDoesNotGetInvalidNameFromType()
     {
-        $typeName = \yswery\DNS\RecordTypeEnum::get_name(932);
+        $typeName = RecordTypeEnum::getName(932);
         $this->assertTrue(false === $typeName);
     }
 
     public function testGetTypes()
     {
-        $expected = array(
+        $expected = [
             'A' => 1,
             'NS' => 2,
             'CNAME' => 5,
@@ -69,8 +84,8 @@ class RecordTypeEnumTest extends PHPUnit_Framework_TestCase {
             'TSIG' => 250,
             'URI' => 256,
             'DNAME' => 39,
-        );
+        ];
 
-        $this->assertTrue(\yswery\DNS\RecordTypeEnum::get_types() === $expected);
+        $this->assertTrue(RecordTypeEnum::getTypes() === $expected);
     }
 }
