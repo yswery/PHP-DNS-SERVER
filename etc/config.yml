@@ -5,4 +5,4 @@ server:
   max_packet_length: 512
 log:
   enabled: true
-  path: 'log/production.log'
+  path: 'var/log/production.log'

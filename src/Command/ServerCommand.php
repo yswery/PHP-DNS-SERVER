@@ -88,7 +88,7 @@ class ServerCommand extends Command
      */
     protected function getLogger($config = [])
     {
-        $logger = new Logger('application');
+        $logger = new Logger('dns');
         $logger->pushHandler(new StreamHandler($config['path'], Logger::DEBUG));
 
         Registry::addLogger($logger);

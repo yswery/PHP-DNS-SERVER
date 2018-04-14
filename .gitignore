@@ -5,4 +5,5 @@ composer.lock
 /.idea
 /Tests/clover.xml
 /nbproject
-log/*
+var/log/*
+var/cache/*
