@@ -30,7 +30,7 @@ class RecursiveResolver implements ResolverInterface
      *
      * @throws Exception
      */
-    public function getAnswer($query)
+    public function getAnswer(array $query)
     {
         $answer = [];
 
@@ -38,7 +38,7 @@ class RecursiveResolver implements ResolverInterface
 
         $type = RecordTypeEnum::get_name($query[0]['qtype']);
 
-        $records = $this->get_records_recursivly($domain, $type);
+        $records = $this->getRecordsRecursivly($domain, $type);
         foreach ($records as $record) {
             $answer[] = [
                 'name' => $query[0]['qname'],
@@ -72,10 +72,18 @@ class RecursiveResolver implements ResolverInterface
         return false;
     }
 
-    private function get_records_recursivly($domain, $type)
+    /**
+     * @param $domain
+     * @param $type
+     *
+     * @return array
+     *
+     * @throws Exception
+     */
+    private function getRecordsRecursivly($domain, $type)
     {
         $result = [];
-        $dns_const_name = $this->get_dns_cost_name($type);
+        $dns_const_name = $this->getDnsCostName($type);
 
         if (!$dns_const_name) {
             throw new \Exception('Unsupported dns type to query.');
@@ -98,12 +106,16 @@ class RecursiveResolver implements ResolverInterface
         return $result;
     }
 
-    private function get_dns_cost_name($type)
+    /**
+     * @param $type
+     *
+     * @return bool|string
+     */
+    private function getDnsCostName($type)
     {
-        $const_name = "DNS_".strtoupper($type);
-        $name = defined($const_name) ? $const_name : false;
+        $constName = "DNS_".strtoupper($type);
+        $name = defined($constName) ? $constName : false;
 
         return $name;
     }
-
 }

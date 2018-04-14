@@ -26,11 +26,11 @@ class StackableResolver implements ResolverInterface
     }
 
     /**
-     * @param $query
+     * @param array $query
      *
      * @return array
      */
-    public function getAnswer($query)
+    public function getAnswer(array $query)
     {
         foreach ($this->resolvers as $resolver) {
             $answer = $resolver->getAnswer($query);
@@ -43,9 +43,9 @@ class StackableResolver implements ResolverInterface
     }
 
     /**
-     * Check if any of the resoolvers supports recursion
+     * @inheritdoc
      *
-     * @return boolean true if any resolver supports recursion
+     * @return bool
      */
     public function allowsRecursion()
     {
@@ -54,13 +54,16 @@ class StackableResolver implements ResolverInterface
                 return true;
             }
         }
+
+        return false;
     }
 
-    /*
-     * Check if any resolver knows about a domain
+    /**
+     * @inheritdoc
      *
-     * @param  string  $domain the domain to check for
-     * @return boolean         true if some resolver holds info about $domain
+     * @param string $domain
+     *
+     * @return bool
      */
     public function isAuthority($domain)
     {

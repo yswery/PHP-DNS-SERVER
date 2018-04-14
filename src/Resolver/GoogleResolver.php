@@ -15,7 +15,7 @@ class GoogleResolver implements ResolverInterface
      *
      * @return array
      */
-    public function getAnswer($query)
+    public function getAnswer(array $query)
     {
         $curl = curl_init();
 

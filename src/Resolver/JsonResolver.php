@@ -62,7 +62,7 @@ class JsonResolver implements ResolverInterface
      * @param $query
      * @return array
      */
-    public function getAnswer($query)
+    public function getAnswer(array $query)
     {
         $q_name = $query[0]['qname'];
         $q_type = $query[0]['qtype'];
