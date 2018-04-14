@@ -19,5 +19,9 @@ $resolver = new StackableResolver(
 // load configuration
 $config = Yaml::parseFile('../config/config.yml');
 
-// Creating a new instance of server and start it
-(new Server($resolver, $config))->run();
+try {
+    // Creating a new instance of server and start it
+    (new Server($resolver, $config))->run();
+} catch (\Exception $e) {
+    echo $e->getMessage();
+}

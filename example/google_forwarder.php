@@ -8,5 +8,9 @@ use yswery\DNS\Resolver\GoogleResolver;
 // Creating a new instance of our class
 $dns = new Server((new GoogleResolver()));
 
-// Starting our DNS server
-$dns->run();
+try {
+    // Starting our DNS server
+    $dns->run();
+} catch (\Exception $e) {
+    echo $e->getMessage();
+}

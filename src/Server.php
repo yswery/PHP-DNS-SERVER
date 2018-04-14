@@ -29,7 +29,9 @@ class Server
      * Server constructor.
      *
      * @param ResolverInterface $resolver
-     * @param array             $config
+     * @param array $config
+     *
+     * @throws \Exception
      */
     public function __construct(ResolverInterface $resolver, array $config = [])
     {
@@ -44,14 +46,10 @@ class Server
 
         $this->resolver = $resolver;
 
-        ini_set('display_errors', true);
-        ini_set('error_reporting', E_ALL);
-
-        set_error_handler([$this, 'errorHandler'], E_ALL);
         set_time_limit(0);
 
         if (!extension_loaded('sockets') || !function_exists('socket_create')) {
-            $this->errorHandler(E_USER_ERROR, 'Socket extension or function not found.', __FILE__, __LINE__);
+            throw new \Exception('Socket extension or function not found.');
         }
     }
 
@@ -67,6 +65,8 @@ class Server
 
     /**
      * Starts DNS server.
+     *
+     * @throws \Exception
      */
     public function run()
     {
@@ -77,7 +77,8 @@ class Server
                 'Cannot create socket (socket error: %s).',
                 socket_strerror(socket_last_error($socket))
             );
-            $this->errorHandler(E_USER_ERROR, $error, __FILE__, __LINE__);
+
+            throw new \Exception($error);
         }
 
         if (!socket_bind($socket, $this->ip, $this->port)) {
@@ -87,7 +88,8 @@ class Server
                 $this->port,
                 socket_strerror(socket_last_error($socket))
             );
-            $this->errorHandler(E_USER_ERROR, $error, __FILE__, __LINE__);
+
+            throw new \Exception($error);
         }
 
         while (true) {
@@ -100,19 +102,19 @@ class Server
                     $port,
                     socket_strerror(socket_last_error($socket))
                 );
-                $this->errorHandler(E_USER_ERROR, $error, __FILE__, __LINE__);
-            } else {
-                $response = $this->handleQuery($buffer);
+                throw new \Exception($error);
+            }
 
-                if (!socket_sendto($socket, $response, strlen($response), 0, $ip, $port)) {
-                    $error = sprintf(
-                        'Cannot send reponse to socket ip: %s, port: %d (socket error: %s).',
-                        $ip,
-                        $port,
-                        socket_strerror(socket_last_error($socket))
-                    );
-                    $this->errorHandler(E_USER_ERROR, $error, __FILE__, __LINE__);
-                }
+            $response = $this->handleQuery($buffer);
+
+            if (!socket_sendto($socket, $response, strlen($response), 0, $ip, $port)) {
+                $error = sprintf(
+                    'Cannot send reponse to socket ip: %s, port: %d (socket error: %s).',
+                    $ip,
+                    $port,
+                    socket_strerror(socket_last_error($socket))
+                );
+                throw new \Exception($error);
             }
         }
     }
@@ -496,53 +498,5 @@ class Server
         foreach ($this->eventSubscribes as $subscriber) {
             call_user_func_array([$subscriber, $event], [$data]);
         }
-    }
-
-    /**
-     * @param $code
-     * @param $error
-     * @param $file
-     * @param $line
-     */
-    private function errorHandler($code, $error, $file, $line)
-    {
-
-        // @todo use trigger error instead call to this function, get error data using error_get_last();
-
-        if (!(error_reporting() & $code)) {
-            return;
-        }
-
-        $codes = [
-            E_ERROR => 'Error',
-            E_WARNING => 'Warning',
-            E_PARSE => 'Parse Error',
-            E_NOTICE => 'Notice',
-            E_CORE_ERROR => 'Core Error',
-            E_CORE_WARNING => 'Core Warning',
-            E_COMPILE_ERROR => 'Compile Error',
-            E_COMPILE_WARNING => 'Compile Warning',
-            E_USER_ERROR => 'User Error',
-            E_USER_WARNING => 'User Warning',
-            E_USER_NOTICE => 'User Notice',
-            E_STRICT => 'Strict Notice',
-            E_RECOVERABLE_ERROR => 'Recoverable Error',
-            E_DEPRECATED => 'Deprecated Error',
-            E_USER_DEPRECATED => 'User Deprecated Error',
-        ];
-
-        $type = isset($codes[$code]) ? $codes[$code] : 'Unknown Error';
-
-        $message = sprintf('DNS Server error: [%s] "%s" in file "%s" on line "%d".', $type, $error, $file, $line);
-
-        $this->notifyEventSubscriber(
-            'onError',
-            [
-                'code' => $code,
-                'error' => $error,
-                'file' => $file,
-                'line' => $line,
-            ]
-        );
     }
 }

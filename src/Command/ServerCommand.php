@@ -56,6 +56,16 @@ class ServerCommand extends Command
 
         $server->registerEventSubscriber(new ConsoleEventSubscriber($output));
 
-        $server->run();
+        try {
+            $server->run();
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+
+            if ($output->isVeryVerbose()) {
+                $message .= "\n".$e->getFile().':'.$e->getLine();
+            }
+
+            $output->writeln("<error>$message</error>");
+        }
     }
 }
