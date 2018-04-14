@@ -8,12 +8,12 @@ namespace yswery\DNS\Resolver;
 use \Exception;
 use yswery\DNS\RecordTypeEnum;
 
+/**
+ * Class RecursiveResolver
+ */
 class RecursiveResolver implements ResolverInterface
 {
-
-    private $allowsRecursion = true;
-
-    private $dns_answer_names = [
+    private $dnsAnswerNames = [
         'DNS_A' => 'ip',
         'DNS_AAAA' => 'ipv6',
         'DNS_CNAME' => 'target',
@@ -25,7 +25,10 @@ class RecursiveResolver implements ResolverInterface
     ];
 
     /**
+     * @inheritdoc
+     *
      * @param array $query
+     *
      * @return array
      *
      * @throws Exception
@@ -52,20 +55,21 @@ class RecursiveResolver implements ResolverInterface
     }
 
     /**
-     * Getter method for $recursion_available property
+     * @inheritdoc
      *
-     * @return boolean
+     * @return bool
      */
     public function allowsRecursion()
     {
-        return $this->allowsRecursion;
+        return true;
     }
 
     /**
-     * Check if the resolver knows about a domain
+     * @inheritdoc
      *
-     * @param  string $domain the domain to check for
-     * @return boolean         true if the resolver holds info about $domain
+     * @param string $domain
+     *
+     * @return bool
      */
     public function isAuthority($domain)
     {
@@ -83,22 +87,22 @@ class RecursiveResolver implements ResolverInterface
     private function getRecordsRecursivly($domain, $type)
     {
         $result = [];
-        $dns_const_name = $this->getDnsCostName($type);
+        $dnsConstName = $this->getDnsCostName($type);
 
-        if (!$dns_const_name) {
+        if (!$dnsConstName) {
             throw new \Exception('Unsupported dns type to query.');
         }
 
-        $dns_answer_name = $this->dns_answer_names[$dns_const_name];
-        $records = dns_get_record($domain, constant($dns_const_name));
+        $dnsAnswerName = $this->dnsAnswerNames[$dnsConstName];
+        $records = dns_get_record($domain, constant($dnsConstName));
 
         foreach ($records as $record) {
-            if (is_array($dns_answer_name)) {
-                foreach ($dns_answer_name as $name) {
+            if (is_array($dnsAnswerName)) {
+                foreach ($dnsAnswerName as $name) {
                     $answer[$name] = $record[$name];
                 }
             } else {
-                $answer = $record[$dns_answer_name];
+                $answer = $record[$dnsAnswerName];
             }
             $result[] = ['answer' => $answer, 'ttl' => $record['ttl']];
         }
@@ -109,12 +113,12 @@ class RecursiveResolver implements ResolverInterface
     /**
      * @param $type
      *
-     * @return bool|string
+     * @return null|string
      */
     private function getDnsCostName($type)
     {
         $constName = "DNS_".strtoupper($type);
-        $name = defined($constName) ? $constName : false;
+        $name = defined($constName) ? $constName : null;
 
         return $name;
     }
