@@ -2,11 +2,13 @@
 
 namespace yswery\DNS;
 
+use yswery\DNS\ResolverInterface;
+
 class Server
 {
 
     /**
-     * @var AbstractStorageProvider
+     * @var ResolverInterface
      */
     private $ds_storage;
 
@@ -53,7 +55,7 @@ class Server
                 $response = $this->ds_handle_query($buffer, $ip, $port);
 
                 if (!socket_sendto($ds_socket, $response, strlen($response), 0, $ip, $port)) {
-                    $error = sprintf('Cannot send reponse to socket ip: %s, port: %d (socket error: %s).', $ip, $port, socket_strerror(socket_last_error($ds_socket)));
+                    $error = sprintf('Cannot send response to socket ip: %s, port: %d (socket error: %s).', $ip, $port, socket_strerror(socket_last_error($ds_socket)));
                 }
             }
         }
@@ -68,10 +70,10 @@ class Server
         $question = $this->ds_decode_question_rr($buffer, $offset, $data['qdcount']);
         $authority = $this->ds_decode_rr($buffer, $offset, $data['nscount']);
         $additional = $this->ds_decode_rr($buffer, $offset, $data['arcount']);
-        $answer = $this->ds_storage->get_answer($question);
+        $answer = $this->ds_storage->getAnswer($question);
         $flags['qr'] = 1;
-        $flags['ra'] = $this->ds_storage->allows_recursion() ? 1 : 0;
-        $flags['aa'] = $this->ds_storage->is_authority($question[0]['qname']) ? 1 : 0;
+        $flags['ra'] = $this->ds_storage->allowsRecursion() ? 1 : 0;
+        $flags['aa'] = $this->ds_storage->isAuthority($question[0]['qname']) ? 1 : 0;
 
         $qdcount = count($question);
         $ancount = count($answer);

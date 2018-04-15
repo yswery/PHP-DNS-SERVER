@@ -10,8 +10,8 @@
 
 namespace yswery\DNS\Tests;
 
+use yswery\DNS\JsonResolver;
 use yswery\DNS\Server;
-use yswery\DNS\JsonStorageProvider;
 
 class TestServerProxy
 {
@@ -24,7 +24,7 @@ class TestServerProxy
 
     public function __construct()
     {
-        $storage = new JsonStorageProvider(__DIR__ . '/test_records.json');
+        $storage = new JsonResolver(__DIR__ . '/test_records.json');
         $this->server = new Server($storage);
     }
 

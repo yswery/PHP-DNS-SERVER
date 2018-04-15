@@ -27,7 +27,7 @@ Supported Record Types
 PHP Requirements
 ================
 
-* `PHP 5.3+`
+* `PHP 5.5+`
 * Needs either `sockets` or `socket_create` PHP extension loaded (which they are by default)
 
 Example:
@@ -40,12 +40,12 @@ require "vendor/autoload.php";
 
 // JSON formatted DNS records file
 $record_file = 'dns_record.json';
-$jsonStorageProvider = new yswery\DNS\JsonStorageProvider($record_file);
+$jsonResolver = new yswery\DNS\JsonResolver($record_file);
 
-// Recursive provider acting as a fallback to the JsonStorageProvider
-$recursiveProvider = new yswery\DNS\RecursiveProvider($options);
+// Recursive resolver acting as a fallback to the JsonResolver
+$recursiveResolver = new yswery\DNS\RecursiveResolver($options);
 
-$stackableResolver = new yswery\DNS\StackableResolver(array($jsonStorageProvider, $recursiveProvider));
+$stackableResolver = new yswery\DNS\StackableResolver(array($jsonResolver, $recursiveResolver));
 
 // Creating a new instance of our class
 $dns = new yswery\DNS\Server($stackableResolver);

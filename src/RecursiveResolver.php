@@ -4,7 +4,7 @@ namespace yswery\DNS;
 
 use \Exception;
 
-class RecursiveProvider extends AbstractStorageProvider
+class RecursiveResolver implements ResolverInterface
 {
 
     private $recursion_available = true;
@@ -20,7 +20,7 @@ class RecursiveProvider extends AbstractStorageProvider
         'DNS_PTR' => 'target',
     );
 
-    public function get_answer($question)
+    public function getAnswer(array $question)
     {
         $answer = array();
 
@@ -76,7 +76,7 @@ class RecursiveProvider extends AbstractStorageProvider
      *
      * @return boolean
      */
-    public function allows_recursion() {
+    public function allowsRecursion() {
        return $this->recursion_available;
     }
       
@@ -86,7 +86,7 @@ class RecursiveProvider extends AbstractStorageProvider
      * @param  string  $domain the domain to check for
      * @return boolean         true if the resolver holds info about $domain
      */
-    public function is_authority($domain) {
+    public function isAuthority($domain) {
         return false;
     }
 }
