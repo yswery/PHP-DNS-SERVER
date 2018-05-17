@@ -4,7 +4,7 @@
     "require-dev": {
         "phpunit/phpunit": "~4.3",
         "phpunit/php-code-coverage": "~2.0",
-        "satooshi/php-coveralls": "dev-master"
+        "satooshi/php-coveralls": "v2.0.0"
     },
     "license": "MIT",
     "authors": [
@@ -15,9 +15,15 @@
         {
             "name": "Gary Saunders",
             "email": "gary@codenamegary.com"
+        },
+        {
+            "name": "Ivan Stanojevic",
+            "email": "ivanstan@gmail.com"
         }
     ],
-    "require": {},
+    "require": {
+        "php": ">=5.5"
+    },
     "autoload": {
         "psr-4": {
             "yswery\\DNS\\": "src/",
