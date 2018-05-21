@@ -2,11 +2,15 @@
 
 namespace yswery\DNS;
 
+use React\Datagram\Socket;
+
 class Server
 {
 
     /**
      * @var AbstractStorageProvider
+     *
+     * @throws \Exception
      */
     private $ds_storage;
 
@@ -24,6 +28,10 @@ class Server
         set_error_handler(array($this, 'ds_error'), E_ALL);
         set_time_limit(0);
 
+        if (posix_getuid() !== 0) {
+            throw new \Exception('Root privileges required.');
+        }
+
         if (!extension_loaded('sockets') || !function_exists('socket_create')) {
             $this->ds_error(E_USER_ERROR, 'Socket extension or function not found.', __FILE__, __LINE__);
         }
@@ -31,41 +39,16 @@ class Server
 
     public function start()
     {
-//        $ds_socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-//
-//        if (!$ds_socket) {
-//            $error = sprintf('Cannot create socket (socket error: %s).', socket_strerror(socket_last_error($ds_socket)));
-//            $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
-//        }
-//
-//        if (!socket_bind($ds_socket, $this->DS_IP, $this->DS_PORT)) {
-//            $error = sprintf('Cannot bind socket to %s:%d (socket error: %s).', $this->DS_IP, $this->DS_PORT, socket_strerror(socket_last_error($ds_socket)));
-//            $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
-//        }
-//
-//        while (true) {
-//            $buffer = $ip = $port = null;
-//
-//            if (!socket_recvfrom($ds_socket, $buffer, $this->DS_MAX_LENGTH, null, $ip, $port)) {
-//                $error = sprintf('Cannot read from socket ip: %s, port: %d (socket error: %s).', $ip, $port, socket_strerror(socket_last_error($ds_socket)));
-//                $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
-//            } else {
-//                $response = $this->ds_handle_query($buffer, $ip, $port);
-//
-//                if (!socket_sendto($ds_socket, $response, strlen($response), 0, $ip, $port)) {
-//                    $error = sprintf('Cannot send reponse to socket ip: %s, port: %d (socket error: %s).', $ip, $port, socket_strerror(socket_last_error($ds_socket)));
-//                }
-//            }
-//        }
-
         $loop = \React\EventLoop\Factory::create();
         $factory = new \React\Datagram\Factory($loop);
-        $factory->createServer($this->DS_IP.':'.$this->DS_PORT)->then(function (\React\Datagram\Socket $server) {
+
+        $factory->createServer($this->DS_IP.':'.$this->DS_PORT)->then(function (Socket $server) {
             $server->on('message', function($message, $address, $server) {
                 $response = $this->ds_handle_query($message);
                 $server->send($response, $address);
             });
         });
+
         $loop->run();
     }
 
