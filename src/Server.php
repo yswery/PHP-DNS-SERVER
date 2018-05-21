@@ -3,14 +3,16 @@
 namespace yswery\DNS;
 
 use React\Datagram\Socket;
+use yswery\DNS\ResolverInterface;
 
 class Server
 {
 
     /**
-     * @var AbstractStorageProvider
      *
      * @throws \Exception
+     *
+     * @var ResolverInterface $ds_storage
      */
     private $ds_storage;
 
@@ -57,10 +59,10 @@ class Server
         $question = $this->ds_decode_question_rr($buffer, $offset, $data['qdcount']);
         $authority = $this->ds_decode_rr($buffer, $offset, $data['nscount']);
         $additional = $this->ds_decode_rr($buffer, $offset, $data['arcount']);
-        $answer = $this->ds_storage->get_answer($question);
+        $answer = $this->ds_storage->getAnswer($question);
         $flags['qr'] = 1;
-        $flags['ra'] = $this->ds_storage->allows_recursion() ? 1 : 0;
-        $flags['aa'] = $this->ds_storage->is_authority($question[0]['qname']) ? 1 : 0;
+        $flags['ra'] = $this->ds_storage->allowsRecursion() ? 1 : 0;
+        $flags['aa'] = $this->ds_storage->isAuthority($question[0]['qname']) ? 1 : 0;
 
         $qdcount = count($question);
         $ancount = count($answer);

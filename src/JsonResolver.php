@@ -5,7 +5,7 @@ namespace yswery\DNS;
 use \Exception;
 use \InvalidArgumentException;
 
-class JsonStorageProvider extends AbstractStorageProvider
+class JsonResolver implements ResolverInterface
 {
     /**
      * @var array
@@ -23,7 +23,7 @@ class JsonStorageProvider extends AbstractStorageProvider
     private $recursion_available;
 
     /**
-     * JsonStorageProvider constructor.
+     * JsonResolver constructor.
      *
      * @param string $record_file The filepath of the JSON-formatted DNS Zone file.
      * @param int $default_ttl The TTL to be used for all Resource Records omitting a TTL.
@@ -53,10 +53,10 @@ class JsonStorageProvider extends AbstractStorageProvider
     }
 
     /**
-     * @param $question
+     * @param array $question
      * @return array
      */
-    public function get_answer($question)
+    public function getAnswer(array $question)
     {
         $q_name = $question[0]['qname'];
         $q_type = $question[0]['qtype'];
@@ -103,7 +103,7 @@ class JsonStorageProvider extends AbstractStorageProvider
      *
      * @return boolean
      */
-    public function allows_recursion() {
+    public function allowsRecursion() {
         return $this->recursion_available;
     }
   
@@ -113,7 +113,7 @@ class JsonStorageProvider extends AbstractStorageProvider
      * @param  string  $domain the domain to check for
      * @return boolean         true if the resolver holds info about $domain
      */
-    public function is_authority($domain) {
+    public function isAuthority($domain) {
         $domain = trim($domain, '.');
         return array_key_exists($domain, $this->dns_records);
     }

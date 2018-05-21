@@ -1,17 +1,17 @@
 <?php
 
-use yswery\DNS\JsonStorageProvider;
+use yswery\DNS\JsonResolver;
 
-class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
+class JsonResolverTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var yswery\DNS\JsonStorageProvider
+     * @var yswery\DNS\JsonResolver
      */
     protected $storage;
     
     public function setUp()
     {
-        $this->storage = new JsonStorageProvider(__DIR__ . '/test_records.json');
+        $this->storage = new JsonResolver(__DIR__ . '/test_records.json');
     }
 
     /**
@@ -59,7 +59,7 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
                 'value' => '111.111.111.111',
             ),
         ));
-        $answer = $this->storage->get_answer($question);
+        $answer = $this->storage->getAnswer($question);
         $this->assertTrue($answer === $expected);
     }
 
@@ -70,7 +70,7 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
             'qtype' => \yswery\DNS\RecordTypeEnum::TYPE_A,
             'qclass' => 1,
         ));
-        $answer = $this->storage->get_answer($question);
+        $answer = $this->storage->getAnswer($question);
         $this->assertTrue($answer === array());
     }
 
@@ -101,25 +101,25 @@ class JsonStorageProviderTest extends PHPUnit_Framework_TestCase
                 ),
             ),
         );
-        $answer = $this->storage->get_answer($question);
+        $answer = $this->storage->getAnswer($question);
         $this->assertTrue($answer === $expected);
     }
 
     public function testConstructorThrowsExceptions()
     {
         $this->setExpectedException('\Exception', 'The file "blah.json" does not exist.');
-        $jsonAdapter = new JsonStorageProvider('blah.json');
+        $jsonAdapter = new JsonResolver('blah.json');
 
         $this->setExpectedException('\Exception', 'Unable to parse JSON file: "invalid_dns_records.json".');
-        $jsonAdapter = new JsonStorageProvider('invalid_dns_records.json');
+        $jsonAdapter = new JsonResolver('invalid_dns_records.json');
         
         $this->setExpectedException('\InvalidArgumentException', 'Default TTL must be an integer.');
-        $jsonAdapter = new JsonStorageProvider(__DIR__ . 'test_records.json', '300');
+        $jsonAdapter = new JsonResolver(__DIR__ . 'test_records.json', '300');
     }
 
     public function testConstructorLoadsRecords()
     {
-        $this->storage = new JsonStorageProvider(__DIR__ . '/test_records.json');
+        $this->storage = new JsonResolver(__DIR__ . '/test_records.json');
         $this->assertTrue($this->storage !== false);
     }
     
