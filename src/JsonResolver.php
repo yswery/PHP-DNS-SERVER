@@ -15,7 +15,7 @@ class JsonResolver implements ResolverInterface
     private $ttl;
 
     /**
-     * @var boolean
+     * @var bool
      */
     private $recursionAvailable;
 
