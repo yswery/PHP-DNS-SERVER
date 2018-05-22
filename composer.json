@@ -22,6 +22,8 @@
         }
     ],
     "require": {
+        "react/socket": "^0.8.10",
+        "react/datagram": "^1.4",
         "php": ">=5.5"
     },
     "autoload": {

@@ -2,13 +2,17 @@
 
 namespace yswery\DNS;
 
+use React\Datagram\Socket;
 use yswery\DNS\ResolverInterface;
 
 class Server
 {
 
     /**
-     * @var ResolverInterface
+     *
+     * @throws \Exception
+     *
+     * @var ResolverInterface $ds_storage
      */
     private $ds_storage;
 
@@ -33,35 +37,20 @@ class Server
 
     public function start()
     {
-        $ds_socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        $loop = \React\EventLoop\Factory::create();
+        $factory = new \React\Datagram\Factory($loop);
 
-        if (!$ds_socket) {
-            $error = sprintf('Cannot create socket (socket error: %s).', socket_strerror(socket_last_error($ds_socket)));
-            $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
-        }
+        $factory->createServer($this->DS_IP.':'.$this->DS_PORT)->then(function (Socket $server) {
+            $server->on('message', function($message, $address, $server) {
+                $response = $this->ds_handle_query($message);
+                $server->send($response, $address);
+            });
+        });
 
-        if (!socket_bind($ds_socket, $this->DS_IP, $this->DS_PORT)) {
-            $error = sprintf('Cannot bind socket to %s:%d (socket error: %s).', $this->DS_IP, $this->DS_PORT, socket_strerror(socket_last_error($ds_socket)));
-            $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
-        }
-
-        while (true) {
-            $buffer = $ip = $port = null;
-
-            if (!socket_recvfrom($ds_socket, $buffer, $this->DS_MAX_LENGTH, null, $ip, $port)) {
-                $error = sprintf('Cannot read from socket ip: %s, port: %d (socket error: %s).', $ip, $port, socket_strerror(socket_last_error($ds_socket)));
-                $this->ds_error(E_USER_ERROR, $error, __FILE__, __LINE__);
-            } else {
-                $response = $this->ds_handle_query($buffer, $ip, $port);
-
-                if (!socket_sendto($ds_socket, $response, strlen($response), 0, $ip, $port)) {
-                    $error = sprintf('Cannot send response to socket ip: %s, port: %d (socket error: %s).', $ip, $port, socket_strerror(socket_last_error($ds_socket)));
-                }
-            }
-        }
+        $loop->run();
     }
 
-    private function ds_handle_query($buffer, $ip, $port)
+    private function ds_handle_query($buffer)
     {
         $data = unpack('npacket_id/nflags/nqdcount/nancount/nnscount/narcount', $buffer);
         $flags = $this->ds_decode_flags($data['flags']);
