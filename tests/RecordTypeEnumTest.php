@@ -4,31 +4,31 @@ class RecordTypeEnumTest extends PHPUnit_Framework_TestCase {
 
     public function testGetsHostRecordIndex()
     {
-        $hostIndex = \yswery\DNS\RecordTypeEnum::get_type_index('A');
+        $hostIndex = \yswery\DNS\RecordTypeEnum::getTypeIndex('A');
         $this->assertTrue($hostIndex === \yswery\DNS\RecordTypeEnum::TYPE_A);
     }
 
     public function testDoesNotGetInvalidRecordTypeIndex()
     {
-        $hostIndex = \yswery\DNS\RecordTypeEnum::get_type_index('BLAH');
+        $hostIndex = \yswery\DNS\RecordTypeEnum::getTypeIndex('BLAH');
         $this->assertTrue($hostIndex === false);
     }
 
     public function testGetsNameFromType()
     {
-        $typeName = \yswery\DNS\RecordTypeEnum::get_name(\yswery\DNS\RecordTypeEnum::TYPE_A);
+        $typeName = \yswery\DNS\RecordTypeEnum::getName(\yswery\DNS\RecordTypeEnum::TYPE_A);
         $this->assertTrue('A' === $typeName);
     }
 
     public function testDoesNotGetInvalidNameFromType()
     {
-        $typeName = \yswery\DNS\RecordTypeEnum::get_name(932);
+        $typeName = \yswery\DNS\RecordTypeEnum::getName(932);
         $this->assertTrue(false === $typeName);
     }
 
     public function testGetTypes()
     {
-        $expected = array(
+        $expected = [
             'A' => 1,
             'NS' => 2,
             'CNAME' => 5,
@@ -69,8 +69,8 @@ class RecordTypeEnumTest extends PHPUnit_Framework_TestCase {
             'TSIG' => 250,
             'URI' => 256,
             'DNAME' => 39,
-        );
+        ];
 
-        $this->assertTrue(\yswery\DNS\RecordTypeEnum::get_types() === $expected);
+        $this->assertTrue(\yswery\DNS\RecordTypeEnum::getTypes() === $expected);
     }
 }

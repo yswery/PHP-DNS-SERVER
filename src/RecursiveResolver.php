@@ -2,50 +2,55 @@
 
 namespace yswery\DNS;
 
-use \Exception;
-
 class RecursiveResolver implements ResolverInterface
 {
+    private $recursionAvailable = true;
 
-    private $recursion_available = true;
-
-    private $dns_answer_names = array(
+    private $dnsAnswerNames = [
         'DNS_A' => 'ip',
         'DNS_AAAA' => 'ipv6',
         'DNS_CNAME' => 'target',
         'DNS_TXT' => 'txt',
         'DNS_MX' => 'target',
         'DNS_NS' => 'target',
-        'DNS_SOA' => array('mname', 'rname', 'serial', 'retry', 'refresh', 'expire', 'minimum-ttl'),
+        'DNS_SOA' => ['mname', 'rname', 'serial', 'retry', 'refresh', 'expire', 'minimum-ttl'],
         'DNS_PTR' => 'target',
-    );
+    ];
 
+    /*
+     * {@inheritdoc}
+     */
     public function getAnswer(array $question)
     {
-        $answer = array();
+        $answer = [];
 
         $domain = $question[0]['qname'];
 
-        $type = RecordTypeEnum::get_name($question[0]['qtype']);
+        $type = RecordTypeEnum::getName($question[0]['qtype']);
 
-        $records = $this->get_records_recursivly($domain, $type);
+        $records = $this->getRecordsRecursivly($domain, $type);
         foreach ($records as $record) {
-            $answer[] = array('name' => $question[0]['qname'], 'class' => $question[0]['qclass'], 'ttl' => $record['ttl'], 'data' => array('type' => $question[0]['qtype'], 'value' => $record['answer']));
+            $answer[] = [
+                'name' => $question[0]['qname'],
+                'class' => $question[0]['qclass'],
+                'ttl' => $record['ttl'],
+                'data' => ['type' => $question[0]['qtype'], 'value' => $record['answer']],
+            ];
         }
 
         return $answer;
     }
 
-    private function get_records_recursivly($domain, $type)
+    private function getRecordsRecursivly($domain, $type)
     {
-        $result = array();
-        $dns_const_name = $this->get_dns_cost_name($type);
+        $result = [];
+        $dns_const_name = $this->getDnsCostName($type);
 
         if (!$dns_const_name) {
-            throw new Exception('Unsupported dns type to query.');
+            throw new \Exception('Unsupported dns type to query.');
         }
 
-        $dns_answer_name = $this->dns_answer_names[$dns_const_name];
+        $dns_answer_name = $this->dnsAnswerNames[$dns_const_name];
         $records = dns_get_record($domain, constant($dns_const_name));
 
         foreach ($records as $record) {
@@ -56,37 +61,34 @@ class RecursiveResolver implements ResolverInterface
             } else {
                 $answer = $record[$dns_answer_name];
             }
-            $result[] = array('answer' => $answer, 'ttl' => $record['ttl']);
+            $result[] = ['answer' => $answer, 'ttl' => $record['ttl']];
         }
 
         return $result;
     }
 
-    private function get_dns_cost_name($type)
+    private function getDnsCostName($type)
     {
-        $const_name = "DNS_" . strtoupper($type);
+        $const_name = "DNS_".strtoupper($type);
         $name = defined($const_name) ? $const_name : false;
 
         return $name;
     }
 
 
-    /**
-     * Getter method for $recursion_available property
-     *
-     * @return boolean
+    /*
+     * {@inheritdoc}
      */
-    public function allowsRecursion() {
-       return $this->recursion_available;
+    public function allowsRecursion()
+    {
+        return $this->recursionAvailable;
     }
-      
-     /**
-     * Check if the resolver knows about a domain
-     *
-     * @param  string  $domain the domain to check for
-     * @return boolean         true if the resolver holds info about $domain
+
+    /*
+     * {@inheritdoc}
      */
-    public function isAuthority($domain) {
+    public function isAuthority($domain)
+    {
         return false;
     }
 }

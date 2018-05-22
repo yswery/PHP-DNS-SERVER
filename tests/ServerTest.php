@@ -22,7 +22,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $this->server = new TestServerProxy;
     }
 
-    public function testDs_encode_label()
+    public function testEncodeLabel()
     {
         $input_1 = 'www.example.com.';
         $expectation_1 = chr(3) . 'www' . chr(7) . 'example' . chr(3) . 'com' . "\0";
@@ -33,8 +33,8 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $input_3 = 'tld.';
         $expectation_3 = chr(3) . 'tld' . "\0";
 
-        $this->assertEquals($expectation_1, $this->server->ds_encode_label($input_1));
-        $this->assertEquals($expectation_2, $this->server->ds_encode_label($input_2));
-        $this->assertEquals($expectation_3, $this->server->ds_encode_label($input_3));
+        $this->assertEquals($expectation_1, $this->server->encodeLabel($input_1));
+        $this->assertEquals($expectation_2, $this->server->encodeLabel($input_2));
+        $this->assertEquals($expectation_3, $this->server->encodeLabel($input_3));
     }
 }

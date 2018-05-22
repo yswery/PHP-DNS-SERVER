@@ -1,8 +1,4 @@
 <?php
-/**
- * @package yswery\DNS
- * @author Ivan Stanojevic <https://github.com/ivanstan>
- */
 
 namespace yswery\DNS;
 
