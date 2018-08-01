@@ -28,9 +28,9 @@ class TestServerProxy
         $this->server = new Server($storage);
     }
 
-    public function ds_encode_label($str, $offset = null)
+    public function encodeLabel($str, $offset = null)
     {
-        $method = new \ReflectionMethod(self::$name, 'ds_encode_label');
+        $method = new \ReflectionMethod(self::$name, 'encodeLabel');
         $method->setAccessible(true);
 
         return $method->invoke($this->server, $str, $offset);

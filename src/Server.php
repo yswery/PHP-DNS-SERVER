@@ -2,47 +2,64 @@
 
 namespace yswery\DNS;
 
+use PHPUnit\Runner\Exception;
 use React\Datagram\Socket;
-use yswery\DNS\ResolverInterface;
+use React\EventLoop\Factory as DataGramFactory;
+use React\Datagram\Factory as EventLoopFactory;
 
+/**
+ * Class Server
+ */
 class Server
 {
+    /**
+     * @var ResolverInterface $resolver
+     */
+    private $resolver;
 
     /**
+     * Bind address.
      *
-     * @throws \Exception
-     *
-     * @var ResolverInterface $ds_storage
+     * @var string $bind
      */
-    private $ds_storage;
+    private $bind;
 
-    public function __construct($ds_storage, $bind_ip = '0.0.0.0', $bind_port = 53, $default_ttl = 300, $max_packet_len = 512)
+    /**
+     * Bind port.
+     *
+     * @var int $port
+     */
+    private $port;
+
+    /**
+     * Default TTL.
+     *
+     * @var int $ttl
+     */
+    private $ttl;
+
+    public function __construct(ResolverInterface $resolver, $bind = '0.0.0.0', $port = 53, $ttl = 300)
     {
-        $this->DS_PORT = $bind_port;
-        $this->DS_IP = $bind_ip;
-        $this->DS_TTL = $default_ttl;
-        $this->DS_MAX_LENGTH = $max_packet_len;
-        $this->ds_storage = $ds_storage;
+        $this->port = $port;
+        $this->bind = $bind;
+        $this->ttl = $ttl;
+        $this->resolver = $resolver;
 
-        ini_set('display_errors', true);
-        ini_set('error_reporting', E_ALL);
-
-        set_error_handler(array($this, 'ds_error'), E_ALL);
         set_time_limit(0);
 
         if (!extension_loaded('sockets') || !function_exists('socket_create')) {
-            $this->ds_error(E_USER_ERROR, 'Socket extension or function not found.', __FILE__, __LINE__);
+            throw new Exception('Socket extension or function not found.');
         }
     }
 
     public function start()
     {
-        $loop = \React\EventLoop\Factory::create();
-        $factory = new \React\Datagram\Factory($loop);
+        $loop = DataGramFactory::create();
+        $factory = new EventLoopFactory($loop);
 
-        $factory->createServer($this->DS_IP.':'.$this->DS_PORT)->then(function (Socket $server) {
-            $server->on('message', function($message, $address, $server) {
-                $response = $this->ds_handle_query($message);
+        $factory->createServer($this->bind.':'.$this->port)->then(function (Socket $server) {
+            $server->on('message', function ($message, $address, $server) {
+                $response = $this->handleQuery($message);
                 $server->send($response, $address);
             });
         });
@@ -50,37 +67,38 @@ class Server
         $loop->run();
     }
 
-    private function ds_handle_query($buffer)
+    private function handleQuery($message)
     {
-        $data = unpack('npacket_id/nflags/nqdcount/nancount/nnscount/narcount', $buffer);
-        $flags = $this->ds_decode_flags($data['flags']);
+        $data = unpack('npacket_id/nflags/nqdcount/nancount/nnscount/narcount', $message);
+        $flags = $this->decodeFlags($data['flags']);
         $offset = 12;
 
-        $question = $this->ds_decode_question_rr($buffer, $offset, $data['qdcount']);
-        $authority = $this->ds_decode_rr($buffer, $offset, $data['nscount']);
-        $additional = $this->ds_decode_rr($buffer, $offset, $data['arcount']);
-        $answer = $this->ds_storage->getAnswer($question);
+        $question = $this->decodeQuestionRR($message, $offset, $data['qdcount']);
+        $authority = $this->decodeRR($message, $offset, $data['nscount']);
+        $additional = $this->decodeRR($message, $offset, $data['arcount']);
+        $answer = $this->resolver->getAnswer($question);
         $flags['qr'] = 1;
-        $flags['ra'] = $this->ds_storage->allowsRecursion() ? 1 : 0;
-        $flags['aa'] = $this->ds_storage->isAuthority($question[0]['qname']) ? 1 : 0;
+        $flags['ra'] = $this->resolver->allowsRecursion() ? 1 : 0;
+        $flags['aa'] = $this->resolver->isAuthority($question[0]['qname']) ? 1 : 0;
 
         $qdcount = count($question);
         $ancount = count($answer);
         $nscount = count($authority);
         $arcount = count($additional);
 
-        $response = pack('nnnnnn', $data['packet_id'], $this->ds_encode_flags($flags), $qdcount, $ancount, $nscount, $arcount);
-        $response .= ($p = $this->ds_encode_question_rr($question, strlen($response)));
-        $response .= ($p = $this->ds_encode_rr($answer, strlen($response)));
-        $response .= $this->ds_encode_rr($authority, strlen($response));
-        $response .= $this->ds_encode_rr($additional, strlen($response));
+        $response = pack('nnnnnn', $data['packet_id'], $this->encodeFlags($flags), $qdcount, $ancount, $nscount,
+            $arcount);
+        $response .= ($p = $this->encodeQuestionRR($question, strlen($response)));
+        $response .= ($p = $this->encodeRR($answer, strlen($response)));
+        $response .= $this->encodeRR($authority, strlen($response));
+        $response .= $this->encodeRR($additional, strlen($response));
 
         return $response;
     }
 
-    private function ds_decode_flags($flags)
+    private function decodeFlags($flags)
     {
-        $res = array();
+        $res = [];
 
         $res['qr'] = $flags >> 15 & 0x1;
         $res['opcode'] = $flags >> 11 & 0xf;
@@ -94,24 +112,25 @@ class Server
         return $res;
     }
 
-    private function ds_decode_question_rr($pkt, &$offset, $count)
+    private function decodeQuestionRR($pkt, &$offset, $count)
     {
-        $res = array();
+        $res = [];
 
         for ($i = 0; $i < $count; ++$i) {
             if ($offset > strlen($pkt)) {
                 return false;
             }
-            $qname = $this->ds_decode_label($pkt, $offset);
+            $qname = $this->decodeLabel($pkt, $offset);
             $tmp = unpack('nqtype/nqclass', substr($pkt, $offset, 4));
             $offset += 4;
             $tmp['qname'] = $qname;
             $res[] = $tmp;
         }
+
         return $res;
     }
 
-    private function ds_decode_label($pkt, &$offset)
+    private function decodeLabel($pkt, &$offset)
     {
         $end_offset = null;
         $qname = '';
@@ -144,7 +163,7 @@ class Server
                 ++$offset;
                 break;
             }
-            $qname .= substr($pkt, $offset + 1, $len) . '.';
+            $qname .= substr($pkt, $offset + 1, $len).'.';
             $offset += $len + 1;
         }
 
@@ -155,18 +174,18 @@ class Server
         return $qname;
     }
 
-    private function ds_decode_rr($pkt, &$offset, $count)
+    private function decodeRR($pkt, &$offset, $count)
     {
-        $res = array();
+        $res = [];
 
         for ($i = 0; $i < $count; ++$i) {
             // read qname
-            $qname = $this->ds_decode_label($pkt, $offset);
+            $qname = $this->decodeLabel($pkt, $offset);
             // read qtype & qclass
             $tmp = unpack('ntype/nclass/Nttl/ndlength', substr($pkt, $offset, 10));
             $tmp['name'] = $qname;
             $offset += 10;
-            $tmp['data'] = $this->ds_decode_type($tmp['type'], substr($pkt, $offset, $tmp['dlength']));
+            $tmp['data'] = $this->decodeType($tmp['type'], substr($pkt, $offset, $tmp['dlength']));
             $offset += $tmp['dlength'];
             $res[] = $tmp;
         }
@@ -174,9 +193,9 @@ class Server
         return $res;
     }
 
-    private function ds_decode_type($type, $val)
+    private function decodeType($type, $val)
     {
-        $data = array();
+        $data = [];
 
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
@@ -187,13 +206,13 @@ class Server
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
                 $foo_offset = 0;
-                $data['value'] = $this->ds_decode_label($val, $foo_offset);
+                $data['value'] = $this->decodeLabel($val, $foo_offset);
                 break;
             case RecordTypeEnum::TYPE_SOA:
-                $data['value'] = array();
+                $data['value'] = [];
                 $offset = 0;
-                $data['value']['mname'] = $this->ds_decode_label($val, $offset);
-                $data['value']['rname'] = $this->ds_decode_label($val, $offset);
+                $data['value']['mname'] = $this->decodeLabel($val, $offset);
+                $data['value']['rname'] = $this->decodeLabel($val, $offset);
                 $next_values = unpack('Nserial/Nrefresh/Nretry/Nexpire/Nminimum', substr($val, $offset));
 
                 foreach ($next_values as $var => $val) {
@@ -203,7 +222,7 @@ class Server
                 break;
             case RecordTypeEnum::TYPE_MX:
                 $tmp = unpack('n', $val);
-                $data['value'] = array('priority' => $tmp[0], 'host' => substr($val, 2),);
+                $data['value'] = ['priority' => $tmp[0], 'host' => substr($val, 2)];
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 $len = ord($val[0]);
@@ -221,7 +240,13 @@ class Server
                 break;
             case RecordTypeEnum::TYPE_OPT:
                 $data['type'] = RecordTypeEnum::TYPE_OPT;
-                $data['value'] = array('type' => RecordTypeEnum::TYPE_OPT, 'ext_code' => $this->DS_TTL >> 24 & 0xff, 'udp_payload_size' => 4096, 'version' => $this->DS_TTL >> 16 & 0xff, 'flags' => $this->ds_decode_flags($this->DS_TTL & 0xffff));
+                $data['value'] = [
+                    'type' => RecordTypeEnum::TYPE_OPT,
+                    'ext_code' => $this->ttl >> 24 & 0xff,
+                    'udp_payload_size' => 4096,
+                    'version' => $this->ttl >> 16 & 0xff,
+                    'flags' => $this->decodeFlags($this->ttl & 0xffff),
+                ];
                 break;
             default:
                 $data = false;
@@ -230,7 +255,7 @@ class Server
         return $data;
     }
 
-    private function ds_encode_flags($flags)
+    private function encodeFlags($flags)
     {
         $val = 0;
 
@@ -246,7 +271,7 @@ class Server
         return $val;
     }
 
-    private function ds_encode_label($str, $offset = null)
+    private function encodeLabel($str, $offset = null)
     {
         if ($str === '.') {
             return "\0";
@@ -256,20 +281,20 @@ class Server
         $in_offset = 0;
 
         while (false !== $pos = strpos($str, '.', $in_offset)) {
-            $res .= chr($pos - $in_offset) . substr($str, $in_offset, $pos - $in_offset);
+            $res .= chr($pos - $in_offset).substr($str, $in_offset, $pos - $in_offset);
             $offset += ($pos - $in_offset) + 1;
             $in_offset = $pos + 1;
         }
 
-        return $res . "\0";
+        return $res."\0";
     }
 
-    private function ds_encode_question_rr($list, $offset)
+    private function encodeQuestionRR($list, $offset)
     {
         $res = '';
 
         foreach ($list as $rr) {
-            $lbl = $this->ds_encode_label($rr['qname'], $offset);
+            $lbl = $this->encodeLabel($rr['qname'], $offset);
             $offset += strlen($lbl) + 4;
             $res .= $lbl;
             $res .= pack('nn', $rr['qtype'], $rr['qclass']);
@@ -278,12 +303,12 @@ class Server
         return $res;
     }
 
-    private function ds_encode_rr($list, $offset)
+    private function encodeRR($list, $offset)
     {
         $res = '';
 
         foreach ($list as $rr) {
-            $lbl = $this->ds_encode_label($rr['name'], $offset);
+            $lbl = $this->encodeLabel($rr['name'], $offset);
             $res .= $lbl;
             $offset += strlen($lbl);
 
@@ -292,7 +317,7 @@ class Server
             }
 
             $offset += 10;
-            $data = $this->ds_encode_type($rr['data']['type'], $rr['data']['value'], $offset);
+            $data = $this->encodeType($rr['data']['type'], $rr['data']['value'], $offset);
 
             if (is_array($data)) {
                 // overloading written data
@@ -309,17 +334,17 @@ class Server
                     $data['ttl'] = $rr['ttl'];
                 }
                 $offset += strlen($data['data']);
-                $res .= pack('nnNn', $data['type'], $data['class'], $data['ttl'], strlen($data['data'])) . $data['data'];
+                $res .= pack('nnNn', $data['type'], $data['class'], $data['ttl'], strlen($data['data'])).$data['data'];
             } else {
                 $offset += strlen($data);
-                $res .= pack('nnNn', $rr['data']['type'], $rr['class'], $rr['ttl'], strlen($data)) . $data;
+                $res .= pack('nnNn', $rr['data']['type'], $rr['class'], $rr['ttl'], strlen($data)).$data;
             }
         }
 
         return $res;
     }
 
-    private function ds_encode_type($type, $val = null, $offset = null)
+    private function encodeType($type, $val = null, $offset = null)
     {
         $enc = '';
         switch ($type) {
@@ -335,64 +360,52 @@ class Server
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
-                $val = rtrim($val, '.') . '.';
-                $enc = $this->ds_encode_label($val, $offset);
+                $val = rtrim($val, '.').'.';
+                $enc = $this->encodeLabel($val, $offset);
                 break;
             case RecordTypeEnum::TYPE_SOA:
-                $val['mname'] = rtrim($val['mname'], '.') . '.';
-                $val['rname'] = rtrim($val['rname'], '.') . '.';
-                $enc .= $this->ds_encode_label($val['mname'], $offset);
-                $enc .= $this->ds_encode_label($val['rname'], $offset + strlen($enc));
-                $enc .= pack('NNNNN', $val['serial'], $val['refresh'], $val['retry'], $val['expire'], $val['minimum-ttl']);
+                $val['mname'] = rtrim($val['mname'], '.').'.';
+                $val['rname'] = rtrim($val['rname'], '.').'.';
+                $enc .= $this->encodeLabel($val['mname'], $offset);
+                $enc .= $this->encodeLabel($val['rname'], $offset + strlen($enc));
+                $enc .= pack('NNNNN', $val['serial'], $val['refresh'], $val['retry'], $val['expire'],
+                    $val['minimum-ttl']);
                 break;
             case RecordTypeEnum::TYPE_MX:
                 if (!is_array($val)) {
-                    $val = array(
+                    $val = [
                         'priority' => 10,
                         'target' => $val,
-                    );
+                    ];
                 }
 
-                $enc = pack('n', (int) $val['priority']);
-                $enc .= $this->ds_encode_label(rtrim($val['target'], '.') . '.', $offset + 2);
+                $enc = pack('n', (int)$val['priority']);
+                $enc .= $this->encodeLabel(rtrim($val['target'], '.').'.', $offset + 2);
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 if (strlen($val) > 255) {
                     $val = substr($val, 0, 255);
                 }
 
-                $enc = chr(strlen($val)) . $val;
+                $enc = chr(strlen($val)).$val;
                 break;
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:
                 $enc = '';
                 break;
             case RecordTypeEnum::TYPE_OPT:
-                $enc = array(
-                    'class' =>  $val['udp_payload_size'],
-                    'ttl' =>    (($val['ext_code'] & 0xff) << 24) |
-                                (($val['version'] & 0xff) << 16) |
-                                ($this->ds_encode_flags($val['flags']) & 0xffff),
-                    'data' =>   '', // TODO: encode data
-                );
+                $enc = [
+                    'class' => $val['udp_payload_size'],
+                    'ttl' => (($val['ext_code'] & 0xff) << 24) |
+                        (($val['version'] & 0xff) << 16) |
+                        ($this->encodeFlags($val['flags']) & 0xffff),
+                    'data' => '', // TODO: encode data
+                ];
                 break;
             default:
                 $enc = $val;
         }
 
         return $enc;
-    }
-
-    public function ds_error($code, $error, $file, $line)
-    {
-        if (!(error_reporting() & $code)) {
-            return;
-        }
-
-        $codes = array(E_ERROR => 'Error', E_WARNING => 'Warning', E_PARSE => 'Parse Error', E_NOTICE => 'Notice', E_CORE_ERROR => 'Core Error', E_CORE_WARNING => 'Core Warning', E_COMPILE_ERROR => 'Compile Error', E_COMPILE_WARNING => 'Compile Warning', E_USER_ERROR => 'User Error', E_USER_WARNING => 'User Warning', E_USER_NOTICE => 'User Notice', E_STRICT => 'Strict Notice', E_RECOVERABLE_ERROR => 'Recoverable Error', E_DEPRECATED => 'Deprecated Error', E_USER_DEPRECATED => 'User Deprecated Error');
-
-        $type = isset($codes[$code]) ? $codes[$code] : 'Unknown Error';
-
-        die(sprintf('DNS Server error: [%s] "%s" in file "%s" on line "%d".%s', $type, $error, $file, $line, PHP_EOL));
     }
 }

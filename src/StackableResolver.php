@@ -4,17 +4,19 @@ namespace yswery\DNS;
 
 class StackableResolver implements ResolverInterface
 {
-
     /**
      * @var array
      */
     protected $resolvers;
 
-    public function __construct(array $resolvers = array())
+    public function __construct(array $resolvers = [])
     {
         $this->resolvers = $resolvers;
     }
 
+    /*
+     * {@inheritdoc}
+     */
     public function getAnswer(array $question)
     {
         foreach ($this->resolvers as $resolver) {
@@ -24,34 +26,34 @@ class StackableResolver implements ResolverInterface
             }
         }
 
-        return array();
-    }
-
-    /**
-     * Check if any of the resoolvers supports recursion
-     *
-     * @return boolean true if any resolver supports recursion
-     */
-    public function allowsRecursion() {
-        foreach ($this->resolvers as $resolver) {
-            if ($resolver->allowsRecursion()) {
-              return true;
-            }
-        }
+        return [];
     }
 
     /*
-     * Check if any resolver knows about a domain
-     *
-     * @param  string  $domain the domain to check for
-     * @return boolean         true if some resolver holds info about $domain
+     * {@inheritdoc}
      */
-    public function isAuthority($domain) {
+    public function allowsRecursion()
+    {
+        foreach ($this->resolvers as $resolver) {
+            if ($resolver->allowsRecursion()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /*
+     * {@inheritdoc}
+     */
+    public function isAuthority($domain)
+    {
         foreach ($this->resolvers as $resolver) {
             if ($resolver->isAuthority($domain)) {
                 return true;
             }
         }
+
         return false;
     }
 }

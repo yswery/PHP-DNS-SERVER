@@ -9,10 +9,10 @@ $jsonResolver = new yswery\DNS\JsonResolver($record_file);
 // Recursive resolver acting as a fallback to the JsonResolver
 $recursiveResolver = new yswery\DNS\RecursiveResolver;
 
-$stackableResolver = new yswery\DNS\StackableResolver(array($jsonResolver, $recursiveResolver));
+$stackableResolver = new yswery\DNS\StackableResolver([$jsonResolver, $recursiveResolver]);
 
 // Creating a new instance of our class
-$dns = new yswery\DNS\Server($stackableResolver);
+$dns = new yswery\DNS\Server($jsonResolver);
 
 // Starting our DNS server
 $dns->start();
