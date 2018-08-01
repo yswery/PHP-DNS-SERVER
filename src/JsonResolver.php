@@ -45,6 +45,10 @@ class JsonResolver implements ResolverInterface
             throw new \InvalidArgumentException('Default TTL must be an integer.');
         }
 
+        foreach ($records as $domain => &$record) {
+            $record['domain'] = $domain;
+        }
+
         $this->ttl = $ttl;
         $this->records = $records;
         $this->recursionAvailable = false;
@@ -61,27 +65,43 @@ class JsonResolver implements ResolverInterface
         $domain = trim($qName, '.');
         $type = RecordTypeEnum::getName($qType);
 
-        // If there is no resource record or the record does not have the type, return an empty array.
-        if (!array_key_exists($domain, $this->records) || !isset($this->records[$domain][$type])) {
-            return [];
-        }
-
         $answer = [];
-        $data = (array)$this->records[$domain][$type];
+        $domains = $this->domainLookup($domain);
 
-        foreach ($data as $rdata) {
+        foreach ($domains as $domain) {
+
+            if (!isset($domain[$type])) {
+                continue;
+            }
+
             $answer[] = [
-                'name' => $qName,
+                'name' => $domain['domain'],
                 'class' => $qClass,
                 'ttl' => $this->ttl,
                 'data' => [
                     'type' => $qType,
-                    'value' => $rdata,
+                    'value' => $domain[$type],
                 ],
             ];
         }
 
         return $answer;
+    }
+
+    private function domainLookup($domain)
+    {
+        if (isset($this->records[$domain])) {
+            return $this->records[$domain];
+        }
+
+        $pattern = str_replace('.', '\.', $domain);
+        $pattern = str_replace('*', '.', $domain);
+
+        return array_filter($this->records, function ($record, $key) use ($pattern) {
+            if (preg_match('/'.$pattern.'/i', $key)) {
+                return $record;
+            }
+        }, ARRAY_FILTER_USE_BOTH);
     }
 
     /**
@@ -93,7 +113,6 @@ class JsonResolver implements ResolverInterface
     {
         return $this->records;
     }
-
 
     /*
      * {@inheritdoc}
