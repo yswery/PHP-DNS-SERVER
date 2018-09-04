@@ -81,6 +81,13 @@ class ServerTest extends \PHPUnit_Framework_TestCase
 
     public function testDs_encode_type()
     {
-        //Todo: Write test.
+        $input_1 = '192.168.0.1';
+        $expectation_1 = inet_pton($input_1);
+
+        $input_2 = 'dns1.example.com.';
+        $expectation_2 = chr(4) . 'dns1' . chr(7) . 'example' . chr(3) . 'com' . "\0";
+
+        $this->assertEquals($expectation_1, $this->server->ds_encode_type(1, $input_1, null));
+        $this->assertEquals($expectation_2, $this->server->ds_encode_type(2, $input_2, null));
     }
 }
