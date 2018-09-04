@@ -181,6 +181,7 @@ class Server
     private function ds_decode_type($type, $val)
     {
         $data = array();
+        $offset = 0;
 
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
@@ -190,12 +191,10 @@ class Server
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
-                $foo_offset = 0;
-                $data['value'] = $this->ds_decode_label($val, $foo_offset);
+                $data['value'] = $this->ds_decode_label($val, $offset);
                 break;
             case RecordTypeEnum::TYPE_SOA:
                 $data['value'] = array();
-                $offset = 0;
                 $data['value']['mname'] = $this->ds_decode_label($val, $offset);
                 $data['value']['rname'] = $this->ds_decode_label($val, $offset);
                 $next_values = unpack('Nserial/Nrefresh/Nretry/Nexpire/Nminimum', substr($val, $offset));
@@ -206,8 +205,10 @@ class Server
 
                 break;
             case RecordTypeEnum::TYPE_MX:
-                $tmp = unpack('n', $val);
-                $data['value'] = array('priority' => $tmp[0], 'host' => substr($val, 2),);
+                $data['value'] = [
+                    'priority' => unpack('npriority', $val)['priority'],
+                    'host' => $this->ds_decode_label(substr($val, 2), $offset),
+                ];
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 $len = ord($val[0]);
