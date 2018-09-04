@@ -3,20 +3,24 @@
 namespace yswery\DNS;
 
 use React\Datagram\Socket;
-use yswery\DNS\ResolverInterface;
 
 class Server
 {
-
     /**
-     *
-     * @throws \Exception
-     *
      * @var ResolverInterface $ds_storage
      */
     private $ds_storage;
 
-    public function __construct($ds_storage, $bind_ip = '0.0.0.0', $bind_port = 53, $default_ttl = 300, $max_packet_len = 512)
+    /**
+     * Server constructor.
+     *
+     * @param ResolverInterface $ds_storage
+     * @param string $bind_ip
+     * @param int $bind_port
+     * @param int $default_ttl
+     * @param int $max_packet_len
+     */
+    public function __construct(ResolverInterface $ds_storage, $bind_ip = '0.0.0.0', $bind_port = 53, $default_ttl = 300, $max_packet_len = 512)
     {
         $this->DS_PORT = $bind_port;
         $this->DS_IP = $bind_ip;
