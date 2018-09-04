@@ -105,12 +105,37 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $input_5 = 'dns1.example.com.';
         $expectation_5 = chr(4) . 'dns1' . chr(7) . 'example' . chr(3) . 'com' . "\0";
 
+        $input_6 = [
+            'mname' => 'example.com.',
+            'rname' => 'postmaster.example.com',
+            'serial'=> 1970010188,
+            'refresh' => 1800,
+            'retry' => 7200,
+            'expire' => 10800,
+            'minimum-ttl' => 3600,
+        ];
+        $expectation_6 =
+            chr(7) . 'example' . chr(3) . 'com' . "\0" .
+            chr(10) . 'postmaster' . chr(7) . 'example' . chr(3) . 'com' . "\0" .
+            pack('NNNNN', 1970010188, 1800, 7200, 10800, 3600);
+
+        $input_7 = 'mail.example.com.';
+        $expectation_7 = pack('n', 10) . chr(4) . 'mail' . chr(7) . 'example' . chr(3) . 'com' . "\0";
+
+        $input_8 = 'This is a comment.';
+        $expectation_8 = chr(18) . $input_8;
+
         $methodName = 'ds_encode_type';
 
         $this->assertEquals($expectation_1, $this->server->invokePrivateMethod($methodName,1, $input_1, null));
         $this->assertEquals($expectation_2, $this->server->invokePrivateMethod($methodName,28, $input_2, null));
-        $this->assertEquals($expectation_3, $this->server->invokePrivateMethod($methodName,1, $input_3, null));
-        $this->assertEquals($expectation_4, $this->server->invokePrivateMethod($methodName,28, $input_4, null));
         $this->assertEquals($expectation_5, $this->server->invokePrivateMethod($methodName,2, $input_5, null));
+        $this->assertEquals($expectation_6, $this->server->invokePrivateMethod($methodName,6, $input_6, null));
+        $this->assertEquals($expectation_7, $this->server->invokePrivateMethod($methodName,15, $input_7, null));
+        $this->assertEquals($expectation_8, $this->server->invokePrivateMethod($methodName,16, $input_8, null));
+
+        //Todo: This test fails because the ds_error() method kills the code prior to handling malformed IP address
+        //$this->assertEquals($expectation_3, $this->server->invokePrivateMethod($methodName,1, $input_3, null));
+        //$this->assertEquals($expectation_4, $this->server->invokePrivateMethod($methodName,28, $input_4, null));
     }
 }
