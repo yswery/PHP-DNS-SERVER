@@ -28,11 +28,39 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $this->server = new TestServerProxy($storage);
     }
 
-    public function testDs_encode_flags()
+    /**
+     * Test the ds_encode_flags() and ds_decode_flags() methods.
+     *
+     * @throws \ReflectionException
+     */
+    public function test_encode_decode_flags()
+    {
+        $flags = [
+            'qr' => 1,      //1 bit
+            'opcode' => 0,  //4 bits
+            'aa' => 1,      //1 bit
+            'tc' => 0,      //1 bit
+            'rd' => 0,      //1 bit
+            'ra' => 0,      //1 bit
+            'z' => 0,       //3 bits
+            'rcode' => 0,   //4 bits
+        ];
+
+        $encoded = 0b1000010000000000;
+
+        $this->assertEquals($encoded, $this->server->invokePrivateMethod('ds_encode_flags', $flags));
+        $this->assertEquals($flags, $this->server->invokePrivateMethod('ds_decode_flags', $encoded));
+    }
+
+
+    public function testDs_decode_label()
     {
         //Todo: Write test.
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public function testDs_encode_label()
     {
         $input_1 = 'www.example.com.';
@@ -51,6 +79,14 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectation_3, $this->server->invokePrivateMethod($methodName, $input_3));
     }
 
+    public function testDs_decode_question_rr()
+    {
+        //Todo: Write test.
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
     public function testDs_encode_question_rr()
     {
         $input_1 = [[
@@ -83,29 +119,39 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectation_3, $this->server->invokePrivateMethod($methodName,$input_3, 0));
     }
 
+    public function testDs_decode_rr()
+    {
+        //Todo: Write test.
+    }
+
     public function testDs_encode_rr()
     {
         //Todo: Write test.
     }
 
-    public function testDs_encode_type()
+    /**
+     * Tests the ds_encode_type() and ds_decode_type() methods.
+     *
+     * @throws \ReflectionException
+     */
+    public function testDs_encode_decode_type()
     {
-        $input_1 = '192.168.0.1';
-        $expectation_1 = inet_pton($input_1);
+        $decoded_1 = '192.168.0.1';
+        $encoded_1 = inet_pton($decoded_1);
 
-        $input_2 = '2001:acad:1337:b8::19';
-        $expectation_2 = inet_pton($input_2);
+        $decoded_2 = '2001:acad:1337:b8::19';
+        $encoded_2 = inet_pton($decoded_2);
 
-        $input_3 = '192.168.1';
-        $expectation_3 = str_repeat("\0", 4);
+        $decoded_3 = '192.168.1';
+        $encoded_3 = str_repeat("\0", 4);
 
-        $input_4 = '2001:acad:1337:b8:19';
-        $expectation_4 = str_repeat("\0", 16);
+        $decoded_4 = '2001:acad:1337:b8:19';
+        $encoded_4 = str_repeat("\0", 16);
 
-        $input_5 = 'dns1.example.com.';
-        $expectation_5 = chr(4) . 'dns1' . chr(7) . 'example' . chr(3) . 'com' . "\0";
+        $decoded_5 = 'dns1.example.com.';
+        $encoded_5 = chr(4) . 'dns1' . chr(7) . 'example' . chr(3) . 'com' . "\0";
 
-        $input_6 = [
+        $decoded_6 = [
             'mname' => 'example.com.',
             'rname' => 'postmaster.example.com',
             'serial'=> 1970010188,
@@ -114,28 +160,51 @@ class ServerTest extends \PHPUnit_Framework_TestCase
             'expire' => 10800,
             'minimum-ttl' => 3600,
         ];
-        $expectation_6 =
+
+        $decoded_6_prime = [
+            'mname' => 'example.com.',
+            'rname' => 'postmaster.example.com.',
+            'serial'=> 1970010188,
+            'refresh' => 1800,
+            'retry' => 7200,
+            'expire' => 10800,
+            'minimum' => 3600,
+        ];
+
+        $encoded_6 =
             chr(7) . 'example' . chr(3) . 'com' . "\0" .
             chr(10) . 'postmaster' . chr(7) . 'example' . chr(3) . 'com' . "\0" .
             pack('NNNNN', 1970010188, 1800, 7200, 10800, 3600);
 
-        $input_7 = 'mail.example.com.';
-        $expectation_7 = pack('n', 10) . chr(4) . 'mail' . chr(7) . 'example' . chr(3) . 'com' . "\0";
+        $decoded_7 = 'mail.example.com.';
+        $encoded_7 = pack('n', 10) . chr(4) . 'mail' . chr(7) . 'example' . chr(3) . 'com' . "\0";
+        $decoded_7_prime = [
+            'priority' => 10,
+            'host' => 'mail.example.com.',
+        ];
 
-        $input_8 = 'This is a comment.';
-        $expectation_8 = chr(18) . $input_8;
+        $decoded_8 = 'This is a comment.';
+        $encoded_8 = chr(18) . $decoded_8;
 
         $methodName = 'ds_encode_type';
+        $this->assertEquals($encoded_1, $this->server->invokePrivateMethod($methodName,1, $decoded_1, null));
+        $this->assertEquals($encoded_2, $this->server->invokePrivateMethod($methodName,28, $decoded_2, null));
+        $this->assertEquals($encoded_5, $this->server->invokePrivateMethod($methodName,2, $decoded_5, null));
+        $this->assertEquals($encoded_6, $this->server->invokePrivateMethod($methodName,6, $decoded_6, null));
+        $this->assertEquals($encoded_7, $this->server->invokePrivateMethod($methodName,15, $decoded_7, null));
+        $this->assertEquals($encoded_8, $this->server->invokePrivateMethod($methodName,16, $decoded_8, null));
 
-        $this->assertEquals($expectation_1, $this->server->invokePrivateMethod($methodName,1, $input_1, null));
-        $this->assertEquals($expectation_2, $this->server->invokePrivateMethod($methodName,28, $input_2, null));
-        $this->assertEquals($expectation_5, $this->server->invokePrivateMethod($methodName,2, $input_5, null));
-        $this->assertEquals($expectation_6, $this->server->invokePrivateMethod($methodName,6, $input_6, null));
-        $this->assertEquals($expectation_7, $this->server->invokePrivateMethod($methodName,15, $input_7, null));
-        $this->assertEquals($expectation_8, $this->server->invokePrivateMethod($methodName,16, $input_8, null));
+        $methodName = 'ds_decode_type';
+        $this->assertEquals($decoded_1, $this->server->invokePrivateMethod($methodName,1, $encoded_1, null)['value']);
+        $this->assertEquals($decoded_2, $this->server->invokePrivateMethod($methodName,28, $encoded_2, null)['value']);
+        $this->assertEquals($decoded_5, $this->server->invokePrivateMethod($methodName,2, $encoded_5, null)['value']);
+        $this->assertEquals($decoded_6_prime, $this->server->invokePrivateMethod($methodName,6, $encoded_6, null)['value']);
+        $this->assertEquals($decoded_7_prime, $this->server->invokePrivateMethod($methodName,15, $encoded_7, null)['value']);
+        $this->assertEquals($decoded_8, $this->server->invokePrivateMethod($methodName,16, $encoded_8, null)['value']);
+
 
         //Todo: This test fails because the ds_error() method kills the code prior to handling malformed IP address
-        //$this->assertEquals($expectation_3, $this->server->invokePrivateMethod($methodName,1, $input_3, null));
-        //$this->assertEquals($expectation_4, $this->server->invokePrivateMethod($methodName,28, $input_4, null));
+        //$this->assertEquals($encoded_3, $this->server->invokePrivateMethod($methodName,1, $decoded_3, null));
+        //$this->assertEquals($encoded_4, $this->server->invokePrivateMethod($methodName,28, $decoded_4, null));
     }
 }
