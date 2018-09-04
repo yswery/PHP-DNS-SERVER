@@ -357,10 +357,7 @@ class Server
                 $enc .= $this->ds_encode_label(rtrim($val['target'], '.') . '.', $offset + 2);
                 break;
             case RecordTypeEnum::TYPE_TXT:
-                if (strlen($val) > 255) {
-                    $val = substr($val, 0, 255);
-                }
-
+                $val = substr($val, 0, 255);
                 $enc = chr(strlen($val)) . $val;
                 break;
             case RecordTypeEnum::TYPE_AXFR:
