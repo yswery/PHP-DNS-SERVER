@@ -22,6 +22,12 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $this->server = new TestServerProxy;
     }
 
+
+    public function testDs_encode_flags()
+    {
+        //Todo: Write test.
+    }
+
     public function testDs_encode_label()
     {
         $input_1 = 'www.example.com.';
@@ -36,5 +42,45 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectation_1, $this->server->ds_encode_label($input_1));
         $this->assertEquals($expectation_2, $this->server->ds_encode_label($input_2));
         $this->assertEquals($expectation_3, $this->server->ds_encode_label($input_3));
+    }
+
+    public function testDs_encode_question_rr()
+    {
+        $input_1 = [[
+            'qname' => 'www.example.com.',
+            'qtype' => 1, //A Record
+            'qclass' => 1, //IN
+            ]];
+
+        $expectation_1 =
+            chr(3) . 'www' . chr(7) . 'example' . chr(3) . 'com' . "\0" .
+            pack('nn', 1, 1);
+
+        $input_2 = [[
+            'qname' => 'domain.com.au.',
+            'qtype' => 15, //MX Record
+            'qclass' => 1, //IN
+        ]];
+
+        $expectation_2 =
+            chr(6) . 'domain' . chr(3) . 'com' . chr(2) . 'au' . "\0" .
+            pack('nn', 15, 1);
+
+        $input_3 = [$input_1[0], $input_2[0]];
+        $expectation_3 = $expectation_1 . $expectation_2;
+
+        $this->assertEquals($expectation_1, $this->server->ds_encode_question_rr($input_1, 0));
+        $this->assertEquals($expectation_2, $this->server->ds_encode_question_rr($input_2, 0));
+        $this->assertEquals($expectation_3, $this->server->ds_encode_question_rr($input_3, 0));
+    }
+
+    public function testDs_encode_rr()
+    {
+        //Todo: Write test.
+    }
+
+    public function testDs_encode_type()
+    {
+        //Todo: Write test.
     }
 }
