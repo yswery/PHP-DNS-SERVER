@@ -52,7 +52,11 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($flags, $this->server->invokePrivateMethod('ds_decode_flags', $encoded));
     }
 
-
+    /**
+     * Cannot write test as one cannot pass by reference using a reflection method.
+     *
+     * @Todo Write test case.
+     */
     public function testDs_decode_label()
     {
         //Todo: Write test.
@@ -79,9 +83,13 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectation_3, $this->server->invokePrivateMethod($methodName, $input_3));
     }
 
+    /**
+     * Cannot write test as one cannot pass by reference using a reflection method.
+     *
+     * @Todo Write test case.
+     */
     public function testDs_decode_question_rr()
     {
-        //Todo: Write test.
     }
 
     /**
@@ -119,14 +127,56 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectation_3, $this->server->invokePrivateMethod($methodName,$input_3, 0));
     }
 
+    /**
+     * Cannot write test as one cannot pass by reference using a reflection method.
+     *
+     * @Todo Write test case.
+     */
     public function testDs_decode_rr()
     {
-        //Todo: Write test.
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public function testDs_encode_rr()
     {
-        //Todo: Write test.
+        $name = 'example.com.';
+        $nameEncoded = $this->server->invokePrivateMethod('ds_encode_label', $name);
+        $exchange = 'mail.example.com.';
+        $exchangeEncoded = $this->server->invokePrivateMethod('ds_encode_label', $exchange);
+        $priority = 10;
+        $ttl = 1337;
+        $class = 1; //INTERNET
+        $type = 15; //MX
+        $ipAddress = '192.163.5.2';
+
+        $rdata = pack('n', $priority) . $exchangeEncoded;
+        $rdata2 = inet_pton($ipAddress);
+
+        $decoded = $decoded2 = [
+            'name' => $name,
+            'class' => $class,
+            'ttl' => $ttl,
+            'data' => [
+                'type' => $type,
+                'value' => [
+                    'priority' => $priority,
+                    'target' => $exchange,
+                ],
+            ],
+        ];
+
+        $decoded2['data'] = [
+            'type' => 1,
+            'value' => $ipAddress,
+        ];
+
+        $encoded = $nameEncoded . pack('nnNn', $type, $class, $ttl, strlen($rdata)) . $rdata;
+        $encoded2 = $nameEncoded . pack('nnNn', 1, $class, $ttl, strlen($rdata2)) . $rdata2;
+
+        $this->assertEquals($encoded, $this->server->invokePrivateMethod('ds_encode_rr', [$decoded], 0));
+        $this->assertEquals($encoded2, $this->server->invokePrivateMethod('ds_encode_rr', [$decoded2], 0));
     }
 
     /**
@@ -141,12 +191,6 @@ class ServerTest extends \PHPUnit_Framework_TestCase
 
         $decoded_2 = '2001:acad:1337:b8::19';
         $encoded_2 = inet_pton($decoded_2);
-
-        $decoded_3 = '192.168.1';
-        $encoded_3 = str_repeat("\0", 4);
-
-        $decoded_4 = '2001:acad:1337:b8:19';
-        $encoded_4 = str_repeat("\0", 16);
 
         $decoded_5 = 'dns1.example.com.';
         $encoded_5 = chr(4) . 'dns1' . chr(7) . 'example' . chr(3) . 'com' . "\0";
@@ -202,8 +246,11 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($decoded_7_prime, $this->server->invokePrivateMethod($methodName,15, $encoded_7, null)['value']);
         $this->assertEquals($decoded_8, $this->server->invokePrivateMethod($methodName,16, $encoded_8, null)['value']);
 
-
         //Todo: This test fails because the ds_error() method kills the code prior to handling malformed IP address
+        //$decoded_3 = '192.168.1';
+        //$encoded_3 = str_repeat("\0", 4);
+        //$decoded_4 = '2001:acad:1337:b8:19';
+        //$encoded_4 = str_repeat("\0", 16);
         //$this->assertEquals($encoded_3, $this->server->invokePrivateMethod($methodName,1, $decoded_3, null));
         //$this->assertEquals($encoded_4, $this->server->invokePrivateMethod($methodName,28, $decoded_4, null));
     }
