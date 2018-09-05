@@ -11,21 +11,16 @@
 namespace yswery\DNS\Tests;
 
 use yswery\DNS\Server;
+use yswery\DNS\ResolverInterface;
 
 class TestServerProxy extends Server
 {
-    /**
-     * Intercept the parent ds_error() method to prevent PHP exiting before PHPUnit has finished.
-     *
-     * @param integer $code
-     * @param string $error
-     * @param string $file
-     * @param integer $line
-     * @throws \ErrorException
-     */
-    public function ds_error($code, $error, $file, $line)
+    public function __construct(ResolverInterface $ds_storage, $bind_ip = '0.0.0.0', $bind_port = 53, $default_ttl = 300, $max_packet_len = 512)
     {
-        throw new \ErrorException($error, $code, 1, $file, $line);
+        parent::__construct($ds_storage, $bind_ip, $bind_port, $default_ttl, $max_packet_len);
+
+        //Prevent application from dying while testing
+        restore_error_handler();
     }
 
     /**

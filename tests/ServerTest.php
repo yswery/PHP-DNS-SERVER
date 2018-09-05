@@ -192,6 +192,12 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $decoded_2 = '2001:acad:1337:b8::19';
         $encoded_2 = inet_pton($decoded_2);
 
+        $decoded_3 = '192.168.1';
+        $encoded_3 = str_repeat("\0", 4);
+
+        $decoded_4 = '2001:acad:1337:b8:19';
+        $encoded_4 = str_repeat("\0", 16);
+
         $decoded_5 = 'dns1.example.com.';
         $encoded_5 = chr(4) . 'dns1' . chr(7) . 'example' . chr(3) . 'com' . "\0";
 
@@ -233,6 +239,8 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $methodName = 'ds_encode_type';
         $this->assertEquals($encoded_1, $this->server->invokePrivateMethod($methodName,1, $decoded_1, null));
         $this->assertEquals($encoded_2, $this->server->invokePrivateMethod($methodName,28, $decoded_2, null));
+        $this->assertEquals($encoded_3, $this->server->invokePrivateMethod($methodName,1, $decoded_3, null));
+        $this->assertEquals($encoded_4, $this->server->invokePrivateMethod($methodName,28, $decoded_4, null));
         $this->assertEquals($encoded_5, $this->server->invokePrivateMethod($methodName,2, $decoded_5, null));
         $this->assertEquals($encoded_6, $this->server->invokePrivateMethod($methodName,6, $decoded_6, null));
         $this->assertEquals($encoded_7, $this->server->invokePrivateMethod($methodName,15, $decoded_7, null));
@@ -245,13 +253,5 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($decoded_6_prime, $this->server->invokePrivateMethod($methodName,6, $encoded_6, null)['value']);
         $this->assertEquals($decoded_7_prime, $this->server->invokePrivateMethod($methodName,15, $encoded_7, null)['value']);
         $this->assertEquals($decoded_8, $this->server->invokePrivateMethod($methodName,16, $encoded_8, null)['value']);
-
-        //Todo: This test fails because the ds_error() method kills the code prior to handling malformed IP address
-        //$decoded_3 = '192.168.1';
-        //$encoded_3 = str_repeat("\0", 4);
-        //$decoded_4 = '2001:acad:1337:b8:19';
-        //$encoded_4 = str_repeat("\0", 16);
-        //$this->assertEquals($encoded_3, $this->server->invokePrivateMethod($methodName,1, $decoded_3, null));
-        //$this->assertEquals($encoded_4, $this->server->invokePrivateMethod($methodName,28, $decoded_4, null));
     }
 }

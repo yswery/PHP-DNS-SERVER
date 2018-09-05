@@ -330,12 +330,8 @@ class Server
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
             case RecordTypeEnum::TYPE_AAAA:
-                $enc = inet_pton($val);
-                // Check that the IP address is valid, if not, return an invalid address
                 $n = (RecordTypeEnum::TYPE_A === $type) ? 4 : 16;
-                if (strlen($enc) !== $n) {
-                    $enc = str_repeat("\0", $n);
-                }
+                $enc = filter_var($val, FILTER_VALIDATE_IP) ? inet_pton($val) : str_repeat("\0", $n);
                 break;
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
