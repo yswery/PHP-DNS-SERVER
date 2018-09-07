@@ -256,18 +256,40 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($decoded_8, $this->server->invokePrivateMethod($methodName,16, $encoded_8, null)['value']);
     }
 
-    public function testSocket()
+    /**
+     * @param $name
+     * @param $type
+     * @param $id
+     * @return array
+     * @throws \ReflectionException
+     */
+    private function encodeQuery($name, $type, $id)
     {
-        $id = 1337;
+        $qname = $this->server->invokePrivateMethod('ds_encode_label', $name);
         $flags = 0b0000000000000000;
         $header = pack('nnnnnn', $id, $flags, 1, 0, 0, 0);
-        $qname = chr(7) . 'example' . chr(3);
-        $qtype = RecordTypeEnum::TYPE_A;
-        $qclass = 1; //IN
+        $question = $qname . pack('nn', $type, 1);
 
-        $question = $qname . pack('nn', $qtype, $qclass);
-        $packet = $header . $question;
+        return [$header, $question];
+    }
 
-        $response = $this->server->invokePrivateMethod('ds_handle_query', $packet);
+    /**
+     * @throws \ReflectionException
+     */
+    public function testDs_handle_query()
+    {
+        list($queryHeader, $question) = $this->encodeQuery($name = 'test.com.', RecordTypeEnum::TYPE_A, $id = 1337);
+        $packet = $queryHeader . $question;
+
+        $flags = 0b1000010000000000;
+        $qname = $this->server->invokePrivateMethod('ds_encode_label', $name);
+        $header = pack('nnnnnn', $id, $flags, 1, 1, 0, 0);
+
+        $rdata = inet_pton('111.111.111.111');
+        $answer = $qname . pack('nnNn', 1, 1, 300, strlen($rdata)) . $rdata;
+
+        $expectation = $header . $question . $answer;
+
+        $this->assertEquals($expectation, $this->server->invokePrivateMethod('ds_handle_query', $packet));
     }
 }
