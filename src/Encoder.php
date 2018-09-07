@@ -21,21 +21,18 @@ class Encoder
         return $val;
     }
     
-    public static function encodeLabel($label)
+    public static function encodeLabel($domain)
     {
-        if ($label === '.') {
+        if ('.' === $domain) {
             return "\0";
         }
 
+        $domain = rtrim($domain, '.') . '.';
         $res = '';
-        $offset = 0;
 
-        while (false !== $pos = strpos($label, '.', $offset)) {
-            $res .= chr($pos - $offset) . substr($label, $offset, $pos - $offset);
-            $offset = $pos + 1;
+        foreach (explode('.', $domain) as $label) {
+            $res .= chr(strlen($label)) . $label;
         }
-        
-        $res .= "\0";
 
         return $res;
     }
@@ -64,12 +61,9 @@ class Encoder
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
-                $val = rtrim($val, '.') . '.';
                 $enc = self::encodeLabel($val);
                 break;
             case RecordTypeEnum::TYPE_SOA:
-                $val['mname'] = rtrim($val['mname'], '.') . '.';
-                $val['rname'] = rtrim($val['rname'], '.') . '.';
                 $enc .= self::encodeLabel($val['mname']);
                 $enc .= self::encodeLabel($val['rname']);
                 $enc .= pack('NNNNN', $val['serial'], $val['refresh'], $val['retry'], $val['expire'], $val['minimum-ttl']);
@@ -83,7 +77,7 @@ class Encoder
                 }
 
                 $enc = pack('n', (int) $val['priority']);
-                $enc .= self::encodeLabel(rtrim($val['target'], '.') . '.');
+                $enc .= self::encodeLabel($val['target']);
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 $val = substr($val, 0, 255);

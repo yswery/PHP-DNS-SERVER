@@ -5,6 +5,10 @@ namespace yswery\DNS;
 
 class Decoder
 {
+    /**
+     * @param string $flags
+     * @return array
+     */
     public static function decodeFlags($flags)
     {
         $res = array();
@@ -21,6 +25,12 @@ class Decoder
         return $res;
     }
 
+    /**
+     * @param string $pkt
+     * @param integer $offset
+     * @param integer $count
+     * @return array|bool
+     */
     public static function decodeQuestionResourceRecord($pkt, &$offset, $count)
     {
         $res = array();
@@ -48,17 +58,14 @@ class Decoder
             $len = ord($pkt[$offset]);
             $type = $len >> 6 & 0x2;
 
-            if ($type) {
-                switch ($type) {
-                    case 0x2:
-                        $new_offset = unpack('noffset', substr($pkt, $offset, 2));
-                        $end_offset = $offset + 2;
-                        $offset = $new_offset['offset'] & 0x3fff;
-                        break;
-                    case 0x1:
-                        break;
-                }
-                continue;
+            switch ($type) {
+                case 0x2:
+                    $new_offset = unpack('noffset', substr($pkt, $offset, 2));
+                    $end_offset = $offset + 2;
+                    $offset = $new_offset['offset'] & 0x3fff;
+                case 0x1:
+                    continue;
+                    break;
             }
 
             if ($len > (strlen($pkt) - $offset)) {
@@ -118,15 +125,13 @@ class Decoder
                 $data['value'] = self::decodeLabel($val, $offset);
                 break;
             case RecordTypeEnum::TYPE_SOA:
-                $data['value'] = array();
-                $data['value']['mname'] = self::decodeLabel($val, $offset);
-                $data['value']['rname'] = self::decodeLabel($val, $offset);
-                $next_values = unpack('Nserial/Nrefresh/Nretry/Nexpire/Nminimum', substr($val, $offset));
-
-                foreach ($next_values as $var => $val) {
-                    $data['value'][$var] = $val;
-                }
-
+                $data['value'] = array_merge(
+                    [
+                        'mname' => self::decodeLabel($val, $offset),
+                        'rname' => self::decodeLabel($val, $offset),
+                    ],
+                    unpack('Nserial/Nrefresh/Nretry/Nexpire/Nminimum', substr($val, $offset))
+                );
                 break;
             case RecordTypeEnum::TYPE_MX:
                 $data['value'] = [
