@@ -57,7 +57,35 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
 
     public function testDecodeQuestionResourceRecord()
     {
-        //Todo: Write test.
+        $decoded_1 = [[
+            'qname' => 'www.example.com.',
+            'qtype' => RecordTypeEnum::TYPE_A,
+            'qclass' => 1, //IN
+        ]];
+
+        $encoded_1 =
+            chr(3) . 'www' . chr(7) . 'example' . chr(3) . 'com' . "\0" .
+            pack('nn', 1, 1);
+
+        $decoded_2 = [[
+            'qname' => 'domain.com.au.',
+            'qtype' => RecordTypeEnum::TYPE_MX,
+            'qclass' => 1, //IN
+        ]];
+
+        $encoded_2 =
+            chr(6) . 'domain' . chr(3) . 'com' . chr(2) . 'au' . "\0" .
+            pack('nn', 15, 1);
+
+        $decoded_3 = [$decoded_1[0], $decoded_2[0]];
+        $encoded_3 = $encoded_1 . $encoded_2;
+
+        $offset = 0;
+        $this->assertEquals($decoded_1, Decoder::decodeQuestionResourceRecord($encoded_1, $offset, 1));
+        $offset = 0;
+        $this->assertEquals($decoded_2, Decoder::decodeQuestionResourceRecord($encoded_2, $offset, 1));
+        $offset = 0;
+        $this->assertEquals($decoded_3, Decoder::decodeQuestionResourceRecord($encoded_3, $offset, 2));
     }
     
     public function testDecodeResourceRecord()
@@ -69,7 +97,7 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
         $priority = 10;
         $ttl = 1337;
         $class = 1; //INTERNET
-        $type = 15; //MX
+        $type = RecordTypeEnum::TYPE_MX;
         $ipAddress = '192.163.5.2';
 
         $rdata = pack('n', $priority) . $exchangeEncoded;
@@ -143,13 +171,13 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
         ];
 
         $decoded_8 = 'This is a comment.';
-        $encoded_8 = chr(18) . $decoded_8;
+        $encoded_8 = chr(strlen($decoded_8)) . $decoded_8;
 
-        $this->assertEquals($decoded_1, Decoder::decodeType(1, $encoded_1)['value']);
-        $this->assertEquals($decoded_2, Decoder::decodeType(28, $encoded_2)['value']);
-        $this->assertEquals($decoded_5, Decoder::decodeType(2, $encoded_5)['value']);
-        $this->assertEquals($decoded_6_prime, Decoder::decodeType(6, $encoded_6)['value']);
-        $this->assertEquals($decoded_7_prime, Decoder::decodeType(15, $encoded_7)['value']);
-        $this->assertEquals($decoded_8, Decoder::decodeType(16, $encoded_8)['value']);
+        $this->assertEquals($decoded_1, Decoder::decodeType(RecordTypeEnum::TYPE_A, $encoded_1)['value']);
+        $this->assertEquals($decoded_2, Decoder::decodeType(RecordTypeEnum::TYPE_AAAA, $encoded_2)['value']);
+        $this->assertEquals($decoded_5, Decoder::decodeType(RecordTypeEnum::TYPE_NS, $encoded_5)['value']);
+        $this->assertEquals($decoded_6_prime, Decoder::decodeType(RecordTypeEnum::TYPE_SOA, $encoded_6)['value']);
+        $this->assertEquals($decoded_7_prime, Decoder::decodeType(RecordTypeEnum::TYPE_MX, $encoded_7)['value']);
+        $this->assertEquals($decoded_8, Decoder::decodeType(RecordTypeEnum::TYPE_TXT, $encoded_8)['value']);
     }
 }
