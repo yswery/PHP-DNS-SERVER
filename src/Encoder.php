@@ -114,8 +114,7 @@ class Encoder
         $res = '';
 
         foreach ($resourceRecords as $rr) {
-            $lbl = self::encodeLabel($rr['name']);
-            $res .= $lbl;
+            $res .= self::encodeLabel($rr['name']);
 
             if (!is_array($rr['data'])) {
                 throw new \UnexpectedValueException(sprintf('Resource Record data must by of type "Array", "%s" given.', gettype($rr['data'])));
