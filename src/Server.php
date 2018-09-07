@@ -73,11 +73,11 @@ class Server
         $nscount = count($authority);
         $arcount = count($additional);
 
-        $response = pack('nnnnnn', $data['packet_id'], $this->ds_encode_flags($flags), $qdcount, $ancount, $nscount, $arcount);
-        $response .= ($p = $this->ds_encode_question_rr($question, strlen($response)));
-        $response .= ($p = $this->ds_encode_rr($answer, strlen($response)));
-        $response .= $this->ds_encode_rr($authority, strlen($response));
-        $response .= $this->ds_encode_rr($additional, strlen($response));
+        $response = pack('nnnnnn', $data['packet_id'], Encoder::encodeFlags($flags), $qdcount, $ancount, $nscount, $arcount);
+        $response .= Encoder::encodeQuestionResourceRecord($question);
+        $response .= Encoder::encodeResourceRecord($answer);
+        $response .= Encoder::encodeResourceRecord($authority);
+        $response .= Encoder::encodeResourceRecord($additional);
 
         return $response;
     }
@@ -235,150 +235,59 @@ class Server
         return $data;
     }
 
+    /**
+     * @param $flags
+     * @return int
+     * @deprecated
+     */
     private function ds_encode_flags($flags)
     {
-        $val = 0;
-
-        $val |= ($flags['qr'] & 0x1) << 15;
-        $val |= ($flags['opcode'] & 0xf) << 11;
-        $val |= ($flags['aa'] & 0x1) << 10;
-        $val |= ($flags['tc'] & 0x1) << 9;
-        $val |= ($flags['rd'] & 0x1) << 8;
-        $val |= ($flags['ra'] & 0x1) << 7;
-        $val |= ($flags['z'] & 0x7) << 4;
-        $val |= ($flags['rcode'] & 0xf);
-
-        return $val;
+        return Encoder::encodeFlags($flags);
     }
 
+    /**
+     * @param $str
+     * @param null $offset
+     * @return string
+     * @deprecated
+     */
     private function ds_encode_label($str, $offset = null)
     {
-        if ($str === '.') {
-            return "\0";
-        }
-
-        $res = '';
-        $in_offset = 0;
-
-        while (false !== $pos = strpos($str, '.', $in_offset)) {
-            $res .= chr($pos - $in_offset) . substr($str, $in_offset, $pos - $in_offset);
-            $offset += ($pos - $in_offset) + 1;
-            $in_offset = $pos + 1;
-        }
-
-        return $res . "\0";
+        return Encoder::encodeLabel($str);
     }
 
+    /**
+     * @param $list
+     * @param $offset
+     * @return string
+     * @deprecated
+     */
     private function ds_encode_question_rr($list, $offset)
     {
-        $res = '';
-
-        foreach ($list as $rr) {
-            $lbl = $this->ds_encode_label($rr['qname'], $offset);
-            $offset += strlen($lbl) + 4;
-            $res .= $lbl;
-            $res .= pack('nn', $rr['qtype'], $rr['qclass']);
-        }
-
-        return $res;
+        return Encoder::encodeQuestionResourceRecord($list);
     }
 
+    /**
+     * @param $list
+     * @param $offset
+     * @return string
+     * @deprecated
+     */
     private function ds_encode_rr($list, $offset)
     {
-        $res = '';
-
-        foreach ($list as $rr) {
-            $lbl = $this->ds_encode_label($rr['name'], $offset);
-            $res .= $lbl;
-            $offset += strlen($lbl);
-
-            if (!is_array($rr['data'])) {
-                return false;
-            }
-
-            $offset += 10;
-            $data = $this->ds_encode_type($rr['data']['type'], $rr['data']['value'], $offset);
-
-            if (is_array($data)) {
-                // overloading written data
-                if (!isset($data['type'])) {
-                    $data['type'] = $rr['data']['type'];
-                }
-                if (!isset($data['data'])) {
-                    $data['data'] = '';
-                }
-                if (!isset($data['class'])) {
-                    $data['class'] = $rr['class'];
-                }
-                if (!isset($data['ttl'])) {
-                    $data['ttl'] = $rr['ttl'];
-                }
-                $offset += strlen($data['data']);
-                $res .= pack('nnNn', $data['type'], $data['class'], $data['ttl'], strlen($data['data'])) . $data['data'];
-            } else {
-                $offset += strlen($data);
-                $res .= pack('nnNn', $rr['data']['type'], $rr['class'], $rr['ttl'], strlen($data)) . $data;
-            }
-        }
-
-        return $res;
+        return Encoder::encodeResourceRecord($list);
     }
 
+    /**
+     * @param $type
+     * @param null $val
+     * @param null $offset
+     * @return string
+     * @deprecated
+     */
     private function ds_encode_type($type, $val = null, $offset = null)
     {
-        $enc = '';
-        switch ($type) {
-            case RecordTypeEnum::TYPE_A:
-            case RecordTypeEnum::TYPE_AAAA:
-                $n = (RecordTypeEnum::TYPE_A === $type) ? 4 : 16;
-                $enc = filter_var($val, FILTER_VALIDATE_IP) ? inet_pton($val) : str_repeat("\0", $n);
-                break;
-            case RecordTypeEnum::TYPE_NS:
-            case RecordTypeEnum::TYPE_CNAME:
-            case RecordTypeEnum::TYPE_PTR:
-                $val = rtrim($val, '.') . '.';
-                $enc = $this->ds_encode_label($val, $offset);
-                break;
-            case RecordTypeEnum::TYPE_SOA:
-                $val['mname'] = rtrim($val['mname'], '.') . '.';
-                $val['rname'] = rtrim($val['rname'], '.') . '.';
-                $enc .= $this->ds_encode_label($val['mname'], $offset);
-                $enc .= $this->ds_encode_label($val['rname'], $offset + strlen($enc));
-                $enc .= pack('NNNNN', $val['serial'], $val['refresh'], $val['retry'], $val['expire'], $val['minimum-ttl']);
-                break;
-            case RecordTypeEnum::TYPE_MX:
-                if (!is_array($val)) {
-                    $val = array(
-                        'priority' => 10,
-                        'target' => $val,
-                    );
-                }
-
-                $enc = pack('n', (int) $val['priority']);
-                $enc .= $this->ds_encode_label(rtrim($val['target'], '.') . '.', $offset + 2);
-                break;
-            case RecordTypeEnum::TYPE_TXT:
-                $val = substr($val, 0, 255);
-                $enc = chr(strlen($val)) . $val;
-                break;
-            case RecordTypeEnum::TYPE_AXFR:
-            case RecordTypeEnum::TYPE_ANY:
-                $enc = '';
-                break;
-            case RecordTypeEnum::TYPE_OPT:
-                $enc = array(
-                    'class' =>  $val['udp_payload_size'],
-                    'ttl' =>    (($val['ext_code'] & 0xff) << 24) |
-                                (($val['version'] & 0xff) << 16) |
-                                ($this->ds_encode_flags($val['flags']) & 0xffff),
-                    'data' =>   '', // TODO: encode data
-                );
-                break;
-            default:
-                $enc = $val;
-        }
-
-        return $enc;
+        return Encoder::encodeType($type, $val);
     }
 
     public function ds_error($code, $error, $file, $line)
