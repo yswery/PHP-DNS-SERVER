@@ -11,6 +11,7 @@
 namespace yswery\DNS\Tests;
 
 use yswery\DNS\JsonResolver;
+use yswery\DNS\RecordTypeEnum;
 
 class ServerTest extends \PHPUnit_Framework_TestCase
 {
@@ -253,5 +254,20 @@ class ServerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($decoded_6_prime, $this->server->invokePrivateMethod($methodName,6, $encoded_6, null)['value']);
         $this->assertEquals($decoded_7_prime, $this->server->invokePrivateMethod($methodName,15, $encoded_7, null)['value']);
         $this->assertEquals($decoded_8, $this->server->invokePrivateMethod($methodName,16, $encoded_8, null)['value']);
+    }
+
+    public function testSocket()
+    {
+        $id = 1337;
+        $flags = 0b0000000000000000;
+        $header = pack('nnnnnn', $id, $flags, 1, 0, 0, 0);
+        $qname = chr(7) . 'example' . chr(3);
+        $qtype = RecordTypeEnum::TYPE_A;
+        $qclass = 1; //IN
+
+        $question = $qname . pack('nn', $qtype, $qclass);
+        $packet = $header . $question;
+
+        $response = $this->server->invokePrivateMethod('ds_handle_query', $packet);
     }
 }
