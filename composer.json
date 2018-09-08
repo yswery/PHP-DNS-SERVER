@@ -19,6 +19,10 @@
         {
             "name": "Ivan Stanojevic",
             "email": "ivanstan@gmail.com"
+        },
+        {
+            "name": "Samuel Williams",
+            "email": "sam@badcow.co"
         }
     ],
     "require": {
