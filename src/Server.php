@@ -3,20 +3,24 @@
 namespace yswery\DNS;
 
 use React\Datagram\Socket;
-use yswery\DNS\ResolverInterface;
 
 class Server
 {
-
     /**
-     *
-     * @throws \Exception
-     *
      * @var ResolverInterface $ds_storage
      */
     private $ds_storage;
 
-    public function __construct($ds_storage, $bind_ip = '0.0.0.0', $bind_port = 53, $default_ttl = 300, $max_packet_len = 512)
+    /**
+     * Server constructor.
+     *
+     * @param ResolverInterface $ds_storage
+     * @param string $bind_ip
+     * @param int $bind_port
+     * @param int $default_ttl
+     * @param int $max_packet_len
+     */
+    public function __construct(ResolverInterface $ds_storage, $bind_ip = '0.0.0.0', $bind_port = 53, $default_ttl = 300, $max_packet_len = 512)
     {
         $this->DS_PORT = $bind_port;
         $this->DS_IP = $bind_ip;
@@ -177,6 +181,7 @@ class Server
     private function ds_decode_type($type, $val)
     {
         $data = array();
+        $offset = 0;
 
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
@@ -186,12 +191,10 @@ class Server
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
-                $foo_offset = 0;
-                $data['value'] = $this->ds_decode_label($val, $foo_offset);
+                $data['value'] = $this->ds_decode_label($val, $offset);
                 break;
             case RecordTypeEnum::TYPE_SOA:
                 $data['value'] = array();
-                $offset = 0;
                 $data['value']['mname'] = $this->ds_decode_label($val, $offset);
                 $data['value']['rname'] = $this->ds_decode_label($val, $offset);
                 $next_values = unpack('Nserial/Nrefresh/Nretry/Nexpire/Nminimum', substr($val, $offset));
@@ -202,8 +205,10 @@ class Server
 
                 break;
             case RecordTypeEnum::TYPE_MX:
-                $tmp = unpack('n', $val);
-                $data['value'] = array('priority' => $tmp[0], 'host' => substr($val, 2),);
+                $data['value'] = [
+                    'priority' => unpack('npriority', $val)['priority'],
+                    'host' => $this->ds_decode_label(substr($val, 2), $offset),
+                ];
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 $len = ord($val[0]);
@@ -325,12 +330,8 @@ class Server
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
             case RecordTypeEnum::TYPE_AAAA:
-                $enc = inet_pton($val);
-                // Check that the IP address is valid, if not, return an invalid address
                 $n = (RecordTypeEnum::TYPE_A === $type) ? 4 : 16;
-                if (strlen($enc) !== $n) {
-                    $enc = str_repeat("\0", $n);
-                }
+                $enc = filter_var($val, FILTER_VALIDATE_IP) ? inet_pton($val) : str_repeat("\0", $n);
                 break;
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
@@ -357,10 +358,7 @@ class Server
                 $enc .= $this->ds_encode_label(rtrim($val['target'], '.') . '.', $offset + 2);
                 break;
             case RecordTypeEnum::TYPE_TXT:
-                if (strlen($val) > 255) {
-                    $val = substr($val, 0, 255);
-                }
-
+                $val = substr($val, 0, 255);
                 $enc = chr(strlen($val)) . $val;
                 break;
             case RecordTypeEnum::TYPE_AXFR:

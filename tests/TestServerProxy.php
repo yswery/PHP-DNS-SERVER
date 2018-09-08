@@ -10,29 +10,32 @@
 
 namespace yswery\DNS\Tests;
 
-use yswery\DNS\JsonResolver;
 use yswery\DNS\Server;
+use yswery\DNS\ResolverInterface;
 
-class TestServerProxy
+class TestServerProxy extends Server
 {
-    private static $name = 'yswery\DNS\Server';
-
-    /**
-     * @var Server
-     */
-    protected $server;
-
-    public function __construct()
+    public function __construct(ResolverInterface $ds_storage, $bind_ip = '0.0.0.0', $bind_port = 53, $default_ttl = 300, $max_packet_len = 512)
     {
-        $storage = new JsonResolver(__DIR__ . '/test_records.json');
-        $this->server = new Server($storage);
+        parent::__construct($ds_storage, $bind_ip, $bind_port, $default_ttl, $max_packet_len);
+
+        //Prevent application from dying while testing
+        restore_error_handler();
     }
 
-    public function ds_encode_label($str, $offset = null)
+    /**
+     * Provides access to the private methods so that they can be unit tested.
+     *
+     * @param string $methodName The name of the private method to be publicly called.
+     * @param mixed ...$params The parameters of the private method.
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    public function invokePrivateMethod($methodName, ...$params)
     {
-        $method = new \ReflectionMethod(self::$name, 'ds_encode_label');
+        $method = new \ReflectionMethod('\\yswery\\DNS\\Server', $methodName);
         $method->setAccessible(true);
 
-        return $method->invoke($this->server, $str, $offset);
+        return $method->invoke($this, ...$params);
     }
 }
