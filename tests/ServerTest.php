@@ -13,6 +13,7 @@ namespace yswery\DNS\Tests;
 use yswery\DNS\JsonResolver;
 use yswery\DNS\RecordTypeEnum;
 use yswery\DNS\Encoder;
+use yswery\DNS\Server;
 
 class ServerTest extends \PHPUnit_Framework_TestCase
 {
@@ -27,7 +28,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $storage = new JsonResolver(__DIR__ . '/test_records.json');
-        $this->server = new TestServerProxy($storage);
+        $this->server = new Server($storage);
     }
 
     /**
@@ -35,7 +36,6 @@ class ServerTest extends \PHPUnit_Framework_TestCase
      * @param $type
      * @param $id
      * @return array
-     * @throws \ReflectionException
      */
     private function encodeQuery($name, $type, $id)
     {
@@ -48,9 +48,9 @@ class ServerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws \yswery\DNS\UnsupportedTypeException
      */
-    public function testDs_handle_query()
+    public function testHandleQueryFromStream()
     {
         list($queryHeader, $question) = $this->encodeQuery($name = 'test.com.', RecordTypeEnum::TYPE_A, $id = 1337);
         $packet = $queryHeader . $question;
@@ -64,6 +64,6 @@ class ServerTest extends \PHPUnit_Framework_TestCase
 
         $expectation = $header . $question . $answer;
 
-        $this->assertEquals($expectation, $this->server->invokePrivateMethod('ds_handle_query', $packet));
+        $this->assertEquals($expectation, $this->server->handleQueryFromStream($packet));
     }
 }
