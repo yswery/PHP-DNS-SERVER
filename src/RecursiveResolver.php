@@ -20,17 +20,17 @@ class RecursiveResolver implements ResolverInterface
         'DNS_PTR' => 'target',
     );
 
-    public function getAnswer(array $question)
+    public function getAnswer(array $question): array
     {
         $answer = array();
 
-        $domain = $question[0]['qname'];
+        $domain = $question[0]['name'];
 
         $type = RecordTypeEnum::get_name($question[0]['qtype']);
 
         $records = $this->get_records_recursivly($domain, $type);
         foreach ($records as $record) {
-            $answer[] = array('name' => $question[0]['qname'], 'class' => $question[0]['qclass'], 'ttl' => $record['ttl'], 'data' => array('type' => $question[0]['qtype'], 'value' => $record['answer']));
+            $answer[] = array('name' => $question[0]['name'], 'class' => $question[0]['class'], 'ttl' => $record['ttl'], 'data' => array('type' => $question[0]['type'], 'value' => $record['answer']));
         }
 
         return $answer;
@@ -76,7 +76,8 @@ class RecursiveResolver implements ResolverInterface
      *
      * @return boolean
      */
-    public function allowsRecursion() {
+    public function allowsRecursion(): bool
+    {
        return $this->recursion_available;
     }
       
@@ -86,7 +87,8 @@ class RecursiveResolver implements ResolverInterface
      * @param  string  $domain the domain to check for
      * @return boolean         true if the resolver holds info about $domain
      */
-    public function isAuthority($domain) {
+    public function isAuthority($domain): bool
+    {
         return false;
     }
 }

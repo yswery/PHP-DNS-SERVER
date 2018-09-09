@@ -15,7 +15,7 @@ class StackableResolver implements ResolverInterface
         $this->resolvers = $resolvers;
     }
 
-    public function getAnswer(array $question)
+    public function getAnswer(array $question): array
     {
         foreach ($this->resolvers as $resolver) {
             $answer = $resolver->getAnswer($question);
@@ -32,7 +32,8 @@ class StackableResolver implements ResolverInterface
      *
      * @return boolean true if any resolver supports recursion
      */
-    public function allowsRecursion() {
+    public function allowsRecursion(): bool
+    {
         foreach ($this->resolvers as $resolver) {
             if ($resolver->allowsRecursion()) {
               return true;
@@ -46,7 +47,8 @@ class StackableResolver implements ResolverInterface
      * @param  string  $domain the domain to check for
      * @return boolean         true if some resolver holds info about $domain
      */
-    public function isAuthority($domain) {
+    public function isAuthority($domain): bool
+    {
         foreach ($this->resolvers as $resolver) {
             if ($resolver->isAuthority($domain)) {
                 return true;

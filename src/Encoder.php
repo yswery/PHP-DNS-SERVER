@@ -54,18 +54,11 @@ class Encoder
             case RecordTypeEnum::TYPE_SOA:
                 $enc .= self::encodeLabel($val['mname']);
                 $enc .= self::encodeLabel($val['rname']);
-                $enc .= pack('NNNNN', $val['serial'], $val['refresh'], $val['retry'], $val['expire'], $val['minimum-ttl']);
+                $enc .= pack('NNNNN', $val['serial'], $val['refresh'], $val['retry'], $val['expire'], $val['minimum']);
                 break;
             case RecordTypeEnum::TYPE_MX:
-                if (!is_array($val)) {
-                    $val = array(
-                        'priority' => 10,
-                        'target' => $val,
-                    );
-                }
-
-                $enc = pack('n', (int) $val['priority']);
-                $enc .= self::encodeLabel($val['target']);
+                $enc = pack('n', (int) $val['preference']);
+                $enc .= self::encodeLabel($val['exchange']);
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 $val = substr($val, 0, 255);
@@ -92,48 +85,23 @@ class Encoder
     }
 
     /**
-     * Encodes resource records from array.
-     *
-     * @param array $resourceRecords
-     * @param bool $isQuestion Specify if this is a resource record for the question section
+     * @param ResourceRecord[] $resourceRecords
      * @return string
      */
-    public static function encodeResourceRecord(array $resourceRecords, $isQuestion = false)
+    public static function encodeResourceRecords(array $resourceRecords)
     {
         $res = '';
 
         foreach ($resourceRecords as $rr) {
-            if ($isQuestion) {
-                $res .= self::encodeLabel($rr['qname']);
-                $res .= pack('nn', $rr['qtype'], $rr['qclass']);
+            $res .= self::encodeLabel($rr->getName());
+            if ($rr->isQuestion()) {
+                $res .= pack('nn', $rr->getType(), $rr->getClass());
                 continue;
             }
 
-            $res .= self::encodeLabel($rr['name']);
-
-            if (!is_array($rr['data'])) {
-                throw new \UnexpectedValueException(sprintf('Resource Record data must by of type "Array", "%s" given.', gettype($rr['data'])));
-            }
-            $data = self::EncodeType($rr['data']['type'], $rr['data']['value']);
-
-            if (is_array($data)) {
-                // overloading written data
-                if (!isset($data['type'])) {
-                    $data['type'] = $rr['data']['type'];
-                }
-                if (!isset($data['data'])) {
-                    $data['data'] = '';
-                }
-                if (!isset($data['class'])) {
-                    $data['class'] = $rr['class'];
-                }
-                if (!isset($data['ttl'])) {
-                    $data['ttl'] = $rr['ttl'];
-                }
-                $res .= pack('nnNn', $data['type'], $data['class'], $data['ttl'], strlen($data['data'])) . $data['data'];
-            } else {
-                $res .= pack('nnNn', $rr['data']['type'], $rr['class'], $rr['ttl'], strlen($data)) . $data;
-            }
+            $data = self::EncodeType($rr->getType(), $rr->getRdata());
+            $res .= pack('nnNn', $rr->getType(), $rr->getClass(), $rr->getTtl(), strlen($data));
+            $res .= $data;
         }
 
         return $res;

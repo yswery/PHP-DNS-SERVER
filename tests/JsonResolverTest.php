@@ -2,6 +2,9 @@
 
 use yswery\DNS\JsonResolver;
 
+use yswery\DNS\ResourceRecord;
+use yswery\DNS\RecordTypeEnum;
+
 class JsonResolverTest extends PHPUnit_Framework_TestCase
 {
     /**
@@ -48,64 +51,50 @@ class JsonResolverTest extends PHPUnit_Framework_TestCase
     
     public function testHostRecordResolves()
     {
-        $question = array(array(
-            'qname' => 'test.com',
-            'qtype' => \yswery\DNS\RecordTypeEnum::TYPE_A,
-            'qclass' => 1,
-        ));
-        $expected = array(array(
-            'name' => 'test.com',
-            'class' => 1,
-            'ttl' => 300,
-            'data' => array(
-                'type' => 1,
-                'value' => '111.111.111.111',
-            ),
-        ));
-        $answer = $this->storage->getAnswer($question);
-        $this->assertTrue($answer === $expected);
+        $question[] = (new ResourceRecord())
+            ->setName('test.com')
+            ->setType(RecordTypeEnum::TYPE_A)
+            ->setQuestion(true);
+
+        $expectation[] = (new ResourceRecord())
+            ->setName('test.com')
+            ->setType(RecordTypeEnum::TYPE_A)
+            ->setTtl(300)
+            ->setRdata('111.111.111.111');
+
+        $this->assertEquals($expectation, $this->storage->getAnswer($question));
     }
 
     public function testUnconfiguredRecordDoesNotResolve()
     {
-        $question = array(array(
-            'qname' => 'testestestes.com',
-            'qtype' => \yswery\DNS\RecordTypeEnum::TYPE_A,
-            'qclass' => 1,
-        ));
-        $answer = $this->storage->getAnswer($question);
-        $this->assertTrue($answer === array());
+        $question[] = (new ResourceRecord())
+            ->setName('testestestes.com')
+            ->setType(RecordTypeEnum::TYPE_A)
+            ->setQuestion(true);
+
+        $this->assertEmpty($this->storage->getAnswer($question));
     }
 
     public function testHostRecordReturnsArray()
     {
-        $question = array(array(
-            'qname' => 'test2.com',
-            'qtype' => \yswery\DNS\RecordTypeEnum::TYPE_A,
-            'qclass' => 1,
-        ));
-        $expected = array(
-            array(
-                'name' => 'test2.com',
-                'class' => 1,
-                'ttl' => 300,
-                'data' => array(
-                    'type' => 1,
-                    'value' => '111.111.111.111',
-                ),
-            ),
-            array(
-                'name' => 'test2.com',
-                'class' => 1,
-                'ttl' => 300,
-                'data' => array(
-                    'type' => 1,
-                    'value' => '112.112.112.112',
-                ),
-            ),
-        );
-        $answer = $this->storage->getAnswer($question);
-        $this->assertTrue($answer === $expected);
+        $question[] = (new ResourceRecord())
+            ->setName('test2.com')
+            ->setType(RecordTypeEnum::TYPE_A)
+            ->setQuestion(true);
+
+        $expectation[] = (new ResourceRecord())
+            ->setName('test2.com')
+            ->setType(RecordTypeEnum::TYPE_A)
+            ->setTtl(300)
+            ->setRdata('111.111.111.111');
+
+        $expectation[] = (new ResourceRecord())
+            ->setName('test2.com')
+            ->setType(RecordTypeEnum::TYPE_A)
+            ->setTtl(300)
+            ->setRdata('112.112.112.112');
+
+        $this->assertEquals($expectation, $this->storage->getAnswer($question));
     }
 
     /**

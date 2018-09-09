@@ -66,48 +66,63 @@ class Decoder
         return $qname;
     }
 
-    public static function decodeResourceRecord($pkt, &$offset, $count, $isQuestion = false)
+    /**
+     * @param string $pkt
+     * @param int $offset
+     * @param int $count
+     * @param bool $isQuestion
+     * @return ResourceRecord[]
+     * @throws UnsupportedTypeException
+     */
+    public static function decodeResourceRecords($pkt, &$offset, $count, $isQuestion = false): array
     {
         $resourceRecords = array();
 
         for ($i = 0; $i < $count; ++$i) {
-            $name = self::decodeLabel($pkt, $offset);
+            ($rr = new ResourceRecord)
+                ->setQuestion($isQuestion)
+                ->setName(self::decodeLabel($pkt, $offset));
 
-            if ($isQuestion) {
-                $resourceRecord = unpack('nqtype/nqclass', substr($pkt, $offset, 4));
-                $resourceRecord['qname'] = $name;
+            if ($rr->isQuestion()) {
+                $values = unpack('ntype/nclass', substr($pkt, $offset, 4));
+                $rr->setType($values['type'])->setClass($values['class']);
                 $offset += 4;
             } else {
-                $resourceRecord = unpack('ntype/nclass/Nttl/ndlength', substr($pkt, $offset, 10));
-                $resourceRecord['name'] = $name;
+                $values = unpack('ntype/nclass/Nttl/ndlength', substr($pkt, $offset, 10));
+                $rr->setType($values['type'])->setClass($values['class'])->setTtl($values['ttl']);
                 $offset += 10;
-                $resourceRecord['data'] = self::decodeType($resourceRecord['type'], substr($pkt, $offset, $resourceRecord['dlength']));
-                $offset += $resourceRecord['dlength'];
+                $rr->setRdata(self::decodeType($rr->getType(), substr($pkt, $offset, $values['dlength'])));
+                $offset += $values['dlength'];
             }
 
-            $resourceRecords[] = $resourceRecord;
+            $resourceRecords[] = $rr;
         }
 
         return $resourceRecords;
     }
 
+    /**
+     * @param int $type
+     * @param string $val
+     * @return array|string
+     * @throws UnsupportedTypeException
+     */
     public static function decodeType($type, $val)
     {
-        $data = array();
         $offset = 0;
 
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
             case RecordTypeEnum::TYPE_AAAA:
-                $data['value'] = inet_ntop($val);
+                $data = inet_ntop($val);
                 break;
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
-                $data['value'] = self::decodeLabel($val, $offset);
+                $data = self::decodeLabel($val, $offset);
                 break;
             case RecordTypeEnum::TYPE_SOA:
-                $data['value'] = array_merge(
+                $data = array_merge(
                     [
                         'mname' => self::decodeLabel($val, $offset),
                         'rname' => self::decodeLabel($val, $offset),
@@ -116,27 +131,27 @@ class Decoder
                 );
                 break;
             case RecordTypeEnum::TYPE_MX:
-                $data['value'] = [
-                    'priority' => unpack('npriority', $val)['priority'],
-                    'host' => self::decodeLabel(substr($val, 2), $offset),
+                $data = [
+                    'preference' => unpack('npreference', $val)['preference'],
+                    'exchange' => self::decodeLabel(substr($val, 2), $offset),
                 ];
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 $len = ord($val[0]);
 
                 if ((strlen($val) + 1) < $len) {
-                    $data['value'] = null;
+                    $data = null;
                     break;
                 }
 
-                $data['value'] = substr($val, 1, $len);
+                $data = substr($val, 1, $len);
                 break;
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:
-                $data['value'] = null;
+                $data = null;
                 break;
             default:
-                $data = false;
+                throw new UnsupportedTypeException(sprintf('The type "%s" is not supported.', $type));
         }
 
         return $data;

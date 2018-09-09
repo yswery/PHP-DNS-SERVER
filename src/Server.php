@@ -74,27 +74,32 @@ class Server
         $loop->run();
     }
 
+    /**
+     * @param $buffer
+     * @return string
+     * @throws UnsupportedTypeException
+     */
     private function ds_handle_query($buffer)
     {
         $offset = 0;
         $header = Decoder::decodeHeader($buffer, $offset);
 
-        $question = Decoder::decodeResourceRecord($buffer, $offset, $header->getQuestionCount(), true);
-        $authority = Decoder::decodeResourceRecord($buffer, $offset, $header->getAnswerCount());
-        $additional = Decoder::decodeResourceRecord($buffer, $offset, $header->getAdditionalRecordsCount());
+        $question = Decoder::decodeResourceRecords($buffer, $offset, $header->getQuestionCount(), true);
+        $authority = Decoder::decodeResourceRecords($buffer, $offset, $header->getAnswerCount());
+        $additional = Decoder::decodeResourceRecords($buffer, $offset, $header->getAdditionalRecordsCount());
         $answer = $this->resolver->getAnswer($question);
 
         $header->setResponse(true);
         $header->setRecursionAvailable($this->resolver->allowsRecursion());
-        $header->setAuthoritative($this->resolver->isAuthority($question[0]['qname']));
+        $header->setAuthoritative($this->resolver->isAuthority(($question[0])->getName()));
 
         $header->setAnswerCount(count($answer));
 
         $response = Encoder::encodeHeader($header);
-        $response .= Encoder::encodeResourceRecord($question, true);
-        $response .= Encoder::encodeResourceRecord($answer);
-        $response .= Encoder::encodeResourceRecord($authority);
-        $response .= Encoder::encodeResourceRecord($additional);
+        $response .= Encoder::encodeResourceRecords($question);
+        $response .= Encoder::encodeResourceRecords($answer);
+        $response .= Encoder::encodeResourceRecords($authority);
+        $response .= Encoder::encodeResourceRecords($additional);
 
         return $response;
     }

@@ -17,7 +17,7 @@
          "retry":"7200",
          "refresh":"1800",
          "expire":"8600",
-         "minimum-ttl":"300"
+         "minimum":"300"
       }]
    },
    "test2.com":{  
@@ -27,12 +27,12 @@
       ],
       "MX":[  
          {  
-            "priority":20,
-            "target":"mail-gw1.test2.com."
+            "preference":20,
+            "exchange":"mail-gw1.test2.com."
          },
          {  
-            "priority":30,
-            "target":"mail-gw2.test2.com."
+            "preference":30,
+            "exchange":"mail-gw2.test2.com."
          }
       ]
    }

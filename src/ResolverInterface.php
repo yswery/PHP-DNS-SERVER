@@ -14,18 +14,18 @@ interface ResolverInterface
     /**
      * Return answer for given query.
      *
-     * @param array $query
+     * @param ResourceRecord[] $query
      *
-     * @return array
+     * @return ResourceRecord[]
      */
-    public function getAnswer(array $query);
+    public function getAnswer(array $query): array;
 
     /**
      * Returns true if resolver supports recursion.
      *
      * @return boolean
      */
-    public function allowsRecursion();
+    public function allowsRecursion(): bool;
 
     /**
      * Check if the resolver knows about a domain.
@@ -35,5 +35,5 @@ interface ResolverInterface
      *
      * @return boolean
      */
-    public function isAuthority($domain);
+    public function isAuthority($domain): bool;
 }

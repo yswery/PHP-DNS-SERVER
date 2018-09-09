@@ -53,14 +53,15 @@ class JsonResolver implements ResolverInterface
     }
 
     /**
-     * @param array $question
+     * @param ResourceRecord[] $question
      * @return array
      */
-    public function getAnswer(array $question)
+    public function getAnswer(array $question): array
     {
-        $q_name = $question[0]['qname'];
-        $q_type = $question[0]['qtype'];
-        $q_class = $question[0]['qclass'];
+        $q_name = ($question[0])->getName();
+        $q_type = ($question[0])->getType();
+        $q_class = ($question[0])->getClass();
+
         $domain = trim($q_name, '.');
         $type = RecordTypeEnum::get_name($q_type);
 
@@ -73,15 +74,12 @@ class JsonResolver implements ResolverInterface
         $data = (array) $this->dns_records[$domain][$type];
 
         foreach ($data as $rdata) {
-            $answer[] = array(
-                'name' => $q_name,
-                'class' => $q_class,
-                'ttl' => $this->DS_TTL,
-                'data' => array(
-                    'type' => $q_type,
-                    'value' => $rdata,
-                ),
-            );
+            $answer[] = (new ResourceRecord())
+                ->setName($q_name)
+                ->setType($q_type)
+                ->setClass($q_class)
+                ->setTtl($this->DS_TTL)
+                ->setRdata($rdata);
         }
 
         return $answer;
@@ -103,7 +101,8 @@ class JsonResolver implements ResolverInterface
      *
      * @return boolean
      */
-    public function allowsRecursion() {
+    public function allowsRecursion(): bool
+    {
         return $this->recursion_available;
     }
   
@@ -113,7 +112,8 @@ class JsonResolver implements ResolverInterface
      * @param  string  $domain the domain to check for
      * @return boolean         true if the resolver holds info about $domain
      */
-    public function isAuthority($domain) {
+    public function isAuthority($domain): bool
+    {
         $domain = trim($domain, '.');
         return array_key_exists($domain, $this->dns_records);
     }

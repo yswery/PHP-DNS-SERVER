@@ -13,6 +13,7 @@ namespace yswery\DNS\Tests;
 use yswery\DNS\Decoder;
 use yswery\DNS\Encoder;
 use yswery\DNS\RecordTypeEnum;
+use yswery\DNS\ResourceRecord;
 
 class DecoderTest extends \PHPUnit_Framework_TestCase
 {
@@ -57,21 +58,19 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
 
     public function testDecodeQuestionResourceRecord()
     {
-        $decoded_1 = [[
-            'qname' => 'www.example.com.',
-            'qtype' => RecordTypeEnum::TYPE_A,
-            'qclass' => 1, //IN
-        ]];
+        $decoded_1[] = (new ResourceRecord)
+            ->setName('www.example.com.')
+            ->setType(RecordTypeEnum::TYPE_A)
+            ->setQuestion(true);
 
         $encoded_1 =
             chr(3) . 'www' . chr(7) . 'example' . chr(3) . 'com' . "\0" .
             pack('nn', 1, 1);
 
-        $decoded_2 = [[
-            'qname' => 'domain.com.au.',
-            'qtype' => RecordTypeEnum::TYPE_MX,
-            'qclass' => 1, //IN
-        ]];
+        $decoded_2[] = (new ResourceRecord)
+            ->setName('domain.com.au.')
+            ->setType(RecordTypeEnum::TYPE_MX)
+            ->setQuestion(true);
 
         $encoded_2 =
             chr(6) . 'domain' . chr(3) . 'com' . chr(2) . 'au' . "\0" .
@@ -81,14 +80,17 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
         $encoded_3 = $encoded_1 . $encoded_2;
 
         $offset = 0;
-        $this->assertEquals($decoded_1, Decoder::decodeResourceRecord($encoded_1, $offset, 1, true));
+        $this->assertEquals($decoded_1, Decoder::decodeResourceRecords($encoded_1, $offset, 1, true));
         $offset = 0;
-        $this->assertEquals($decoded_2, Decoder::decodeResourceRecord($encoded_2, $offset, 1, true));
+        $this->assertEquals($decoded_2, Decoder::decodeResourceRecords($encoded_2, $offset, 1, true));
         $offset = 0;
-        $this->assertEquals($decoded_3, Decoder::decodeResourceRecord($encoded_3, $offset, 2, true));
+        $this->assertEquals($decoded_3, Decoder::decodeResourceRecords($encoded_3, $offset, 2, true));
     }
-    
-    public function testDecodeResourceRecord()
+
+    /**
+     * @throws \yswery\DNS\UnsupportedTypeException
+     */
+    public function testDecodeResourceRecords()
     {
         $name = 'example.com.';
         $nameEncoded = Encoder::encodeLabel($name);
@@ -103,41 +105,36 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
         $rdata = pack('n', $priority) . $exchangeEncoded;
         $rdata2 = inet_pton($ipAddress);
 
-        $decoded1 = [
-            'name' => $name,
-            'class' => $class,
-            'ttl' => $ttl,
-            'type' => $type,
-            'data' => [
-                'value' => [
-                    'priority' => $priority,
-                    'host' => $exchange,
-                ],
-            ],
-            'dlength' => 20,
-        ];
+        $decoded1[]  = (new ResourceRecord())
+            ->setName($name)
+            ->setClass($class)
+            ->setTtl($ttl)
+            ->setType($type)
+            ->setRdata([
+                'preference' => $priority,
+                'exchange' => $exchange,
+            ]);
 
-        $decoded2 = [
-            'name' => $name,
-            'class' => $class,
-            'ttl' => $ttl,
-            'type' => RecordTypeEnum::TYPE_A,
-            'data' => [
-                'value' => $ipAddress,
-            ],
-            'dlength' => 4,
-        ];
+        $decoded2[]  = (new ResourceRecord())
+            ->setName($name)
+            ->setClass($class)
+            ->setTtl($ttl)
+            ->setType(RecordTypeEnum::TYPE_A)
+            ->setRdata($ipAddress);
 
         $encoded1 = $nameEncoded . pack('nnNn', $type, $class, $ttl, strlen($rdata)) . $rdata;
         $encoded2 = $nameEncoded . pack('nnNn', 1, $class, $ttl, strlen($rdata2)) . $rdata2;
 
         $offset = 0;
-        $this->assertEquals([$decoded1], Decoder::decodeResourceRecord($encoded1, $offset, 1));
+        $this->assertEquals($decoded1, Decoder::decodeResourceRecords($encoded1, $offset, 1));
 
         $offset = 0;
-        $this->assertEquals([$decoded2], Decoder::decodeResourceRecord($encoded2, $offset, 1));
+        $this->assertEquals($decoded2, Decoder::decodeResourceRecords($encoded2, $offset, 1));
     }
 
+    /**
+     * @throws \yswery\DNS\UnsupportedTypeException
+     */
     public function testDecodeType()
     {
         $decoded_1 = '192.168.0.1';
@@ -166,19 +163,19 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
 
         $encoded_7 = pack('n', 10) . chr(4) . 'mail' . chr(7) . 'example' . chr(3) . 'com' . "\0";
         $decoded_7_prime = [
-            'priority' => 10,
-            'host' => 'mail.example.com.',
+            'preference' => 10,
+            'exchange' => 'mail.example.com.',
         ];
 
         $decoded_8 = 'This is a comment.';
         $encoded_8 = chr(strlen($decoded_8)) . $decoded_8;
 
-        $this->assertEquals($decoded_1, Decoder::decodeType(RecordTypeEnum::TYPE_A, $encoded_1)['value']);
-        $this->assertEquals($decoded_2, Decoder::decodeType(RecordTypeEnum::TYPE_AAAA, $encoded_2)['value']);
-        $this->assertEquals($decoded_5, Decoder::decodeType(RecordTypeEnum::TYPE_NS, $encoded_5)['value']);
-        $this->assertEquals($decoded_6_prime, Decoder::decodeType(RecordTypeEnum::TYPE_SOA, $encoded_6)['value']);
-        $this->assertEquals($decoded_7_prime, Decoder::decodeType(RecordTypeEnum::TYPE_MX, $encoded_7)['value']);
-        $this->assertEquals($decoded_8, Decoder::decodeType(RecordTypeEnum::TYPE_TXT, $encoded_8)['value']);
+        $this->assertEquals($decoded_1, Decoder::decodeType(RecordTypeEnum::TYPE_A, $encoded_1));
+        $this->assertEquals($decoded_2, Decoder::decodeType(RecordTypeEnum::TYPE_AAAA, $encoded_2));
+        $this->assertEquals($decoded_5, Decoder::decodeType(RecordTypeEnum::TYPE_NS, $encoded_5));
+        $this->assertEquals($decoded_6_prime, Decoder::decodeType(RecordTypeEnum::TYPE_SOA, $encoded_6));
+        $this->assertEquals($decoded_7_prime, Decoder::decodeType(RecordTypeEnum::TYPE_MX, $encoded_7));
+        $this->assertEquals($decoded_8, Decoder::decodeType(RecordTypeEnum::TYPE_TXT, $encoded_8));
     }
 
     public function testDecodeHeader()

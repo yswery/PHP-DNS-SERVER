@@ -10,8 +10,11 @@
 
 namespace yswery\DNS\Tests;
 
+use yswery\DNS\ClassEnum;
 use yswery\DNS\Encoder;
 use yswery\DNS\Header;
+use yswery\DNS\RecordTypeEnum;
+use yswery\DNS\ResourceRecord;
 
 class EncoderTest extends \PHPUnit_Framework_TestCase
 {
@@ -51,21 +54,23 @@ class EncoderTest extends \PHPUnit_Framework_TestCase
     
     public function testEncodeQuestionResourceRecord()
     {
-        $input_1 = [[
-            'qname' => 'www.example.com.',
-            'qtype' => 1, //A Record
-            'qclass' => 1, //IN
-            ]];
+        $input_1 = [];
+        $input_1[] = (new ResourceRecord)
+            ->setName('www.example.com.')
+            ->setType(RecordTypeEnum::TYPE_A)
+            ->setClass(ClassEnum::INTERNET)
+            ->setQuestion(true);
 
         $expectation_1 =
             chr(3) . 'www' . chr(7) . 'example' . chr(3) . 'com' . "\0" .
             pack('nn', 1, 1);
 
-        $input_2 = [[
-            'qname' => 'domain.com.au.',
-            'qtype' => 15, //MX Record
-            'qclass' => 1, //IN
-        ]];
+        $input_2 = [];
+        $input_2[] = (new ResourceRecord)
+            ->setName('domain.com.au.')
+            ->setType(RecordTypeEnum::TYPE_MX)
+            ->setClass(ClassEnum::INTERNET)
+            ->setQuestion(2);
 
         $expectation_2 =
             chr(6) . 'domain' . chr(3) . 'com' . chr(2) . 'au' . "\0" .
@@ -74,9 +79,9 @@ class EncoderTest extends \PHPUnit_Framework_TestCase
         $input_3 = [$input_1[0], $input_2[0]];
         $expectation_3 = $expectation_1 . $expectation_2;
 
-        $this->assertEquals($expectation_1, Encoder::encodeResourceRecord($input_1, true));
-        $this->assertEquals($expectation_2, Encoder::encodeResourceRecord($input_2, true));
-        $this->assertEquals($expectation_3, Encoder::encodeResourceRecord($input_3, true));
+        $this->assertEquals($expectation_1, Encoder::encodeResourceRecords($input_1));
+        $this->assertEquals($expectation_2, Encoder::encodeResourceRecords($input_2));
+        $this->assertEquals($expectation_3, Encoder::encodeResourceRecords($input_3));
     }
     
     public function testEncodeResourceRecord()
@@ -85,38 +90,35 @@ class EncoderTest extends \PHPUnit_Framework_TestCase
         $nameEncoded = Encoder::encodeLabel($name);
         $exchange = 'mail.example.com.';
         $exchangeEncoded = Encoder::encodeLabel($exchange);
-        $priority = 10;
+        $preference = 10;
         $ttl = 1337;
-        $class = 1; //INTERNET
-        $type = 15; //MX
+        $class = ClassEnum::INTERNET;
+        $type = RecordTypeEnum::TYPE_MX;
         $ipAddress = '192.163.5.2';
 
-        $rdata = pack('n', $priority) . $exchangeEncoded;
+        $rdata = pack('n', $preference) . $exchangeEncoded;
         $rdata2 = inet_pton($ipAddress);
 
-        $decoded1 = $decoded2 = [
-            'name' => $name,
-            'class' => $class,
-            'ttl' => $ttl,
-            'data' => [
-                'type' => $type,
-                'value' => [
-                    'priority' => $priority,
-                    'target' => $exchange,
-                ],
-            ],
-        ];
+        $decoded1 = (new ResourceRecord)
+            ->setName($name)
+            ->setTtl($ttl)
+            ->setType(RecordTypeEnum::TYPE_MX)
+            ->setRdata([
+                'preference' => $preference,
+                'exchange' => $exchange,
+            ]);
 
-        $decoded2['data'] = [
-            'type' => 1,
-            'value' => $ipAddress,
-        ];
+        $decoded2 = (new ResourceRecord)
+            ->setName($name)
+            ->setTtl($ttl)
+            ->setType(RecordTypeEnum::TYPE_A)
+            ->setRdata($ipAddress);
 
         $encoded1 = $nameEncoded . pack('nnNn', $type, $class, $ttl, strlen($rdata)) . $rdata;
         $encoded2 = $nameEncoded . pack('nnNn', 1, $class, $ttl, strlen($rdata2)) . $rdata2;
 
-        $this->assertEquals($encoded1, Encoder::encodeResourceRecord([$decoded1]));
-        $this->assertEquals($encoded2, Encoder::encodeResourceRecord([$decoded2]));
+        $this->assertEquals($encoded1, Encoder::encodeResourceRecords([$decoded1]));
+        $this->assertEquals($encoded2, Encoder::encodeResourceRecords([$decoded2]));
     }
     
     public function testEncodeType()
@@ -143,7 +145,7 @@ class EncoderTest extends \PHPUnit_Framework_TestCase
             'refresh' => 1800,
             'retry' => 7200,
             'expire' => 10800,
-            'minimum-ttl' => 3600,
+            'minimum' => 3600,
         ];
 
         $encoded_6 =
@@ -151,8 +153,12 @@ class EncoderTest extends \PHPUnit_Framework_TestCase
             chr(10) . 'postmaster' . chr(7) . 'example' . chr(3) . 'com' . "\0" .
             pack('NNNNN', 1970010188, 1800, 7200, 10800, 3600);
 
-        $decoded_7 = 'mail.example.com.';
-        $encoded_7 = pack('n', 10) . chr(4) . 'mail' . chr(7) . 'example' . chr(3) . 'com' . "\0";
+        $decoded_7 = [
+            'preference' => 15,
+            'exchange' => 'mail.example.com.'
+        ];
+
+        $encoded_7 = pack('n', 15) . chr(4) . 'mail' . chr(7) . 'example' . chr(3) . 'com' . "\0";
 
         $decoded_8 = 'This is a comment.';
         $encoded_8 = chr(18) . $decoded_8;
