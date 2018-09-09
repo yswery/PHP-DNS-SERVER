@@ -1,7 +1,7 @@
 <?php
 
-class RecordTypeEnumTest extends PHPUnit_Framework_TestCase {
-
+class RecordTypeEnumTest extends PHPUnit_Framework_TestCase
+{
     public function testGetsHostRecordIndex()
     {
         $hostIndex = \yswery\DNS\RecordTypeEnum::get_type_index('A');

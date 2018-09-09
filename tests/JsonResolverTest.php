@@ -154,5 +154,4 @@ class JsonResolverTest extends PHPUnit_Framework_TestCase
         $this->storage = new JsonResolver(__DIR__ . '/test_records.json');
         $this->assertTrue($this->storage !== false);
     }
-    
 }
