@@ -180,4 +180,32 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($decoded_7_prime, Decoder::decodeType(RecordTypeEnum::TYPE_MX, $encoded_7)['value']);
         $this->assertEquals($decoded_8, Decoder::decodeType(RecordTypeEnum::TYPE_TXT, $encoded_8)['value']);
     }
+
+    public function testDecodeHeader()
+    {
+        $id = 1337;
+        $flags = 0b1000010000000000;
+        $qdcount = 1;
+        $ancount = 2;
+        $nscount = 0;
+        $arcount = 0;
+
+        $encoded = pack('nnnnnn', $id, $flags, $qdcount, $ancount, $nscount, $arcount);
+        $header = Decoder::decodeHeader($encoded);
+
+        $this->assertEquals($id, $header->getId());
+        $this->assertEquals($qdcount, $header->getQuestionCount());
+        $this->assertEquals($ancount, $header->getAnswerCount());
+        $this->assertEquals($nscount, $header->getNameServerCount());
+        $this->assertEquals($arcount, $header->getAdditionalRecordsCount());
+
+        $this->assertTrue($header->isResponse());
+        $this->assertEquals(0, $header->getOpcode());
+        $this->assertTrue($header->isAuthoritative());
+        $this->assertFalse($header->isTruncated());
+        $this->assertFalse($header->isRecursionDesired());
+        $this->assertFalse($header->isRecursionAvailable());
+        $this->assertEquals(0, $header->getZ());
+        $this->assertEquals(0, $header->getRcode());
+    }
 }

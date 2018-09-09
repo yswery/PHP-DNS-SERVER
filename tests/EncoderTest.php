@@ -11,6 +11,7 @@
 namespace yswery\DNS\Tests;
 
 use yswery\DNS\Encoder;
+use yswery\DNS\Header;
 
 class EncoderTest extends \PHPUnit_Framework_TestCase
 {
@@ -164,5 +165,35 @@ class EncoderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($encoded_6, Encoder::encodeType(6, $decoded_6));
         $this->assertEquals($encoded_7, Encoder::encodeType(15, $decoded_7));
         $this->assertEquals($encoded_8, Encoder::encodeType(16, $decoded_8));
+    }
+
+    public function testEncodeHeader()
+    {
+        $id = 1337;
+        $flags = 0b1000010000000000;
+        $qdcount = 1;
+        $ancount = 2;
+        $nscount = 0;
+        $arcount = 0;
+
+        $encoded = pack('nnnnnn', $id, $flags, $qdcount, $ancount, $nscount, $arcount);
+
+        $header = new Header;
+        $header
+            ->setId($id)
+            ->setResponse(true)
+            ->setOpcode(Header::OPCODE_STANDARD_QUERY)
+            ->setAuthoritative(true)
+            ->setTruncated(false)
+            ->setRecursionDesired(false)
+            ->setRecursionAvailable(false)
+            ->setRcode(Header::RCODE_NO_ERROR)
+            ->setQuestionCount($qdcount)
+            ->setAnswerCount($ancount)
+            ->setNameServerCount($nscount)
+            ->setAdditionalRecordsCount($arcount)
+        ;
+
+        $this->assertEquals($encoded, Encoder::encodeHeader($header));
     }
 }

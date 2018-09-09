@@ -137,4 +137,21 @@ class Encoder
 
         return $res;
     }
+
+    /**
+     * @param Header $header
+     * @return string
+     */
+    public static function encodeHeader(Header $header)
+    {
+        return pack(
+            'nnnnnn',
+            $header->getId(),
+            self::encodeFlags($header->asArray()),
+            $header->getQuestionCount(),
+            $header->getAnswerCount(),
+            $header->getNameServerCount(),
+            $header->getAdditionalRecordsCount()
+        );
+    }
 }

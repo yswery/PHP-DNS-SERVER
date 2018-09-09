@@ -159,4 +159,33 @@ class Decoder
 
         return $data;
     }
+
+    /**
+     * @param $pkt
+     * @param int $offset
+     * @return Header
+     */
+    public static function decodeHeader($pkt, &$offset = 0)
+    {
+        $data = unpack('nid/nflags/nqdcount/nancount/nnscount/narcount', $pkt);
+        $flags = Decoder::decodeFlags($data['flags']);
+        $offset += 12;
+
+        $header = new Header;
+
+        return $header
+            ->setId($data['id'])
+            ->setResponse($flags['qr'])
+            ->setOpcode($flags['opcode'])
+            ->setAuthoritative($flags['aa'])
+            ->setTruncated($flags['tc'])
+            ->setRecursionDesired($flags['rd'])
+            ->setRecursionAvailable($flags['ra'])
+            ->setZ($flags['z'])
+            ->setRcode($flags['rcode'])
+            ->setQuestionCount($data['qdcount'])
+            ->setAnswerCount($data['ancount'])
+            ->setNameServerCount($data['nscount'])
+            ->setAdditionalRecordsCount($data['arcount']);
+    }
 }

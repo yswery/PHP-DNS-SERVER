@@ -76,25 +76,21 @@ class Server
 
     private function ds_handle_query($buffer)
     {
-        $data = unpack('npacket_id/nflags/nqdcount/nancount/nnscount/narcount', $buffer);
-        $flags = Decoder::decodeFlags($data['flags']);
-        $offset = 12;
+        $offset = 0;
+        $header = Decoder::decodeHeader($buffer, $offset);
 
-        $question = Decoder::decodeQuestionResourceRecord($buffer, $offset, $data['qdcount']);
-        $authority = Decoder::decodeResourceRecord($buffer, $offset, $data['nscount']);
-        $additional = Decoder::decodeResourceRecord($buffer, $offset, $data['arcount']);
+        $question = Decoder::decodeQuestionResourceRecord($buffer, $offset, $header->getQuestionCount());
+        $authority = Decoder::decodeResourceRecord($buffer, $offset, $header->getAnswerCount());
+        $additional = Decoder::decodeResourceRecord($buffer, $offset, $header->getAdditionalRecordsCount());
         $answer = $this->resolver->getAnswer($question);
 
-        $flags['qr'] = 1;
-        $flags['ra'] = $this->resolver->allowsRecursion() ? 1 : 0;
-        $flags['aa'] = $this->resolver->isAuthority($question[0]['qname']) ? 1 : 0;
+        $header->setResponse(true);
+        $header->setRecursionAvailable($this->resolver->allowsRecursion());
+        $header->setAuthoritative($this->resolver->isAuthority($question[0]['qname']));
 
-        $qdcount = count($question);
-        $ancount = count($answer);
-        $nscount = count($authority);
-        $arcount = count($additional);
+        $header->setAnswerCount(count($answer));
 
-        $response = pack('nnnnnn', $data['packet_id'], Encoder::encodeFlags($flags), $qdcount, $ancount, $nscount, $arcount);
+        $response = Encoder::encodeHeader($header);
         $response .= Encoder::encodeQuestionResourceRecord($question);
         $response .= Encoder::encodeResourceRecord($answer);
         $response .= Encoder::encodeResourceRecord($authority);
