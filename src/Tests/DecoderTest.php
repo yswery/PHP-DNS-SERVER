@@ -14,8 +14,9 @@ use yswery\DNS\Decoder;
 use yswery\DNS\Encoder;
 use yswery\DNS\RecordTypeEnum;
 use yswery\DNS\ResourceRecord;
+use PHPUnit\Framework\TestCase;
 
-class DecoderTest extends \PHPUnit_Framework_TestCase
+class DecoderTest extends TestCase
 {
     public function testDecodeFlags()
     {
@@ -56,6 +57,9 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($decoded_3, Decoder::decodeLabel($encoded_3, $offset));
     }
 
+    /**
+     * @throws \yswery\DNS\UnsupportedTypeException
+     */
     public function testDecodeQuestionResourceRecord()
     {
         $decoded_1[] = (new ResourceRecord)

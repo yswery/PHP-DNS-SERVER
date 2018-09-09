@@ -1,19 +1,29 @@
 <?php
+/*
+ * This file is part of PHP DNS Server.
+ *
+ * (c) Yif Swery <yiftachswr@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace yswery\DNS\Tests;
 
 use yswery\DNS\JsonResolver;
-
 use yswery\DNS\ResourceRecord;
 use yswery\DNS\RecordTypeEnum;
+use PHPUnit\Framework\TestCase;
 
-class JsonResolverTest extends PHPUnit_Framework_TestCase
+class JsonResolverTest extends TestCase
 {
     /**
-     * @var yswery\DNS\JsonResolver
+     * @var \yswery\DNS\JsonResolver
      */
     protected $storage;
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function setUp()
     {
@@ -129,7 +139,7 @@ class JsonResolverTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function testConstructorThrowsExceptions()
     {
@@ -147,7 +157,7 @@ class JsonResolverTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function testConstructorLoadsRecords()
     {

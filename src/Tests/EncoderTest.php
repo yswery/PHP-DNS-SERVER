@@ -15,8 +15,9 @@ use yswery\DNS\Encoder;
 use yswery\DNS\Header;
 use yswery\DNS\RecordTypeEnum;
 use yswery\DNS\ResourceRecord;
+use PHPUnit\Framework\TestCase;
 
-class EncoderTest extends \PHPUnit_Framework_TestCase
+class EncoderTest extends TestCase
 {
     public function testEncodeFlags()
     {
@@ -51,7 +52,10 @@ class EncoderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectation_2, Encoder::encodeLabel($input_2));
         $this->assertEquals($expectation_3, Encoder::encodeLabel($input_3));
     }
-    
+
+    /**
+     * @throws \yswery\DNS\UnsupportedTypeException
+     */
     public function testEncodeQuestionResourceRecord()
     {
         $input_1 = [];
@@ -83,7 +87,10 @@ class EncoderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectation_2, Encoder::encodeResourceRecords($input_2));
         $this->assertEquals($expectation_3, Encoder::encodeResourceRecords($input_3));
     }
-    
+
+    /**
+     * @throws \yswery\DNS\UnsupportedTypeException
+     */
     public function testEncodeResourceRecord()
     {
         $name = 'example.com.';
@@ -120,7 +127,10 @@ class EncoderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($encoded1, Encoder::encodeResourceRecords([$decoded1]));
         $this->assertEquals($encoded2, Encoder::encodeResourceRecords([$decoded2]));
     }
-    
+
+    /**
+     * @throws \yswery\DNS\UnsupportedTypeException
+     */
     public function testEncodeType()
     {
         $decoded_1 = '192.168.0.1';

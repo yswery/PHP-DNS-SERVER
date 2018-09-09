@@ -1,28 +1,41 @@
 <?php
+/*
+ * This file is part of PHP DNS Server.
+ *
+ * (c) Yif Swery <yiftachswr@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-class RecordTypeEnumTest extends PHPUnit_Framework_TestCase
+namespace yswery\DNS\Tests;
+
+use PHPUnit\Framework\TestCase;
+use yswery\DNS\RecordTypeEnum;
+
+class RecordTypeEnumTest extends TestCase
 {
     public function testGetsHostRecordIndex()
     {
-        $hostIndex = \yswery\DNS\RecordTypeEnum::get_type_index('A');
-        $this->assertTrue($hostIndex === \yswery\DNS\RecordTypeEnum::TYPE_A);
+        $hostIndex = RecordTypeEnum::get_type_index('A');
+        $this->assertTrue($hostIndex === RecordTypeEnum::TYPE_A);
     }
 
     public function testDoesNotGetInvalidRecordTypeIndex()
     {
-        $hostIndex = \yswery\DNS\RecordTypeEnum::get_type_index('BLAH');
+        $hostIndex = RecordTypeEnum::get_type_index('BLAH');
         $this->assertTrue($hostIndex === false);
     }
 
     public function testGetsNameFromType()
     {
-        $typeName = \yswery\DNS\RecordTypeEnum::get_name(\yswery\DNS\RecordTypeEnum::TYPE_A);
+        $typeName = RecordTypeEnum::get_name(RecordTypeEnum::TYPE_A);
         $this->assertTrue('A' === $typeName);
     }
 
     public function testDoesNotGetInvalidNameFromType()
     {
-        $typeName = \yswery\DNS\RecordTypeEnum::get_name(932);
+        $typeName = RecordTypeEnum::get_name(932);
         $this->assertTrue(false === $typeName);
     }
 
@@ -71,6 +84,6 @@ class RecordTypeEnumTest extends PHPUnit_Framework_TestCase
             'DNAME' => 39,
         ];
 
-        $this->assertTrue(\yswery\DNS\RecordTypeEnum::get_types() === $expected);
+        $this->assertEquals($expected, RecordTypeEnum::get_types());
     }
 }
