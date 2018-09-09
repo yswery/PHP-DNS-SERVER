@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of PHP DNS Server.
+ *
+ * (c) Yif Swery <yiftachswr@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace yswery\DNS;
 
@@ -385,19 +393,19 @@ class Header
     public function asArray()
     {
         return [
-            'id' => $this->id,
+            'id' => (int) $this->id,
             'qr' => (int) $this->response,
-            'opcode' => $this->opcode,
+            'opcode' => (int) $this->opcode,
             'aa' => (int) $this->authoritative,
             'tc' => (int) $this->truncated,
             'rd' => (int) $this->recursionDesired,
             'ra' => (int) $this->recursionAvailable,
-            'z' => $this->z,
-            'rcode' => $this->rcode,
-            'qdcount' => $this->questionCount,
-            'ancount' => $this->answerCount,
-            'nscount' => $this->nameServerCount,
-            'arcount' => $this->additionalRecordsCount,
+            'z' => (int) $this->z,
+            'rcode' => (int) $this->rcode,
+            'qdcount' => (int) $this->questionCount,
+            'ancount' => (int) $this->answerCount,
+            'nscount' => (int) $this->nameServerCount,
+            'arcount' => (int) $this->additionalRecordsCount,
         ];
     }
 }

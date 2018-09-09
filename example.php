@@ -14,5 +14,8 @@ $stackableResolver = new yswery\DNS\StackableResolver(array($jsonResolver, $recu
 // Creating a new instance of our class
 $dns = new yswery\DNS\Server($stackableResolver);
 
+//You can set any PSR logger, the echo logger outputs to the console.
+$dns->setLogger(new \yswery\DNS\EchoLogger());
+
 // Starting our DNS server
 $dns->start();

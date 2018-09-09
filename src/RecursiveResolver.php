@@ -1,82 +1,131 @@
 <?php
+/*
+ * This file is part of PHP DNS Server.
+ *
+ * (c) Yif Swery <yiftachswr@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace yswery\DNS;
-
-use \Exception;
 
 class RecursiveResolver implements ResolverInterface
 {
     private $recursion_available = true;
 
-    private $dns_answer_names = [
-        'DNS_A' => 'ip',
-        'DNS_AAAA' => 'ipv6',
-        'DNS_CNAME' => 'target',
-        'DNS_TXT' => 'txt',
-        'DNS_MX' => ['exchange', 'preference'],
-        'DNS_NS' => 'target',
-        'DNS_SOA' => ['mname', 'rname', 'serial', 'retry', 'refresh', 'expire', 'minimum'],
-        'DNS_PTR' => 'target',
-    ];
-
+    /**
+     * @param ResourceRecord[] $question
+     * @return ResourceRecord[]
+     * @throws UnsupportedTypeException
+     */
     public function getAnswer(array $question): array
     {
         $answer = [];
+        $query = $question[0];
 
-        $domain = $question[0]['name'];
-
-        $type = RecordTypeEnum::get_name($question[0]['qtype']);
-
-        $records = $this->get_records_recursivly($domain, $type);
+        $records = $this->get_records_recursively($query->getName(), $query->getType());
         foreach ($records as $record) {
-            $answer[] = [
-                'name' => $question[0]['name'],
-                'class' => $question[0]['class'],
-                'ttl' => $record['ttl'],
-                'data' => [
-                    'type' => $question[0]['type'],
-                    'value' => $record['answer'],
-                ],
-            ];
+            $answer[] = (new ResourceRecord)
+                ->setName($query->getName())
+                ->setClass($query->getClass())
+                ->setTtl($record['ttl'])
+                ->setRdata($record['rdata'])
+                ->setType($query->getType());
         }
 
         return $answer;
     }
 
-    private function get_records_recursivly($domain, $type)
+    /**
+     * @param $domain
+     * @param $type
+     * @return array
+     * @throws UnsupportedTypeException
+     */
+    private function get_records_recursively($domain, $type)
     {
-        $result = [];
-        $dns_const_name = $this->get_dns_cost_name($type);
-
-        if (!$dns_const_name) {
-            throw new Exception('Unsupported dns type to query.');
+        if (false === $php_dns_type = $this->IANA_to_PHP($type)) {
+            throw new UnsupportedTypeException(sprintf('Record type "%s" is not a supported type.', $type));
         }
 
-        $dns_answer_name = $this->dns_answer_names[$dns_const_name];
-        $records = dns_get_record($domain, constant($dns_const_name));
+        $records = dns_get_record($domain, $php_dns_type);
+        $result = [];
 
         foreach ($records as $record) {
-            if (is_array($dns_answer_name)) {
-                foreach ($dns_answer_name as $name) {
-                    $answer[$name] = $record[$name];
-                }
-            } else {
-                $answer = $record[$dns_answer_name];
-            }
-            $result[] = ['answer' => $answer, 'ttl' => $record['ttl']];
+            $result[] = [
+                'rdata' => $this->extractRdata($record),
+                'ttl' => $record['ttl']
+            ];
         }
 
         return $result;
     }
 
-    private function get_dns_cost_name($type)
+    /**
+     * @param array $array
+     * @return array|mixed
+     * @throws UnsupportedTypeException
+     */
+    private function extractRdata(array $array)
     {
-        $const_name = "DNS_" . strtoupper($type);
-        $name = defined($const_name) ? $const_name : false;
+        $type = RecordTypeEnum::get_type_index($array['type']);
 
-        return $name;
+        switch ($type) {
+            case RecordTypeEnum::TYPE_A:
+                $rdata = $array['ip'];
+                break;
+            case RecordTypeEnum::TYPE_AAAA:
+                $rdata = $array['ipv6'];
+                break;
+            case RecordTypeEnum::TYPE_NS:
+            case RecordTypeEnum::TYPE_CNAME:
+            case RecordTypeEnum::TYPE_PTR:
+                $rdata = $array['target'];
+                break;
+            case RecordTypeEnum::TYPE_SOA:
+                $rdata = [
+                        'mname' => $array['mname'],
+                        'rname' => $array['rname'],
+                        'serial' => $array['serial'],
+                        'refresh' => $array['refresh'],
+                        'retry' => $array['retry'],
+                        'expire' => $array['expire'],
+                        'minimum' => $array['minimum-ttl'],
+                    ];
+                break;
+            case RecordTypeEnum::TYPE_MX:
+                $rdata = [
+                    'preference' => $array['pri'],
+                    'exchange' => $array['host'],
+                ];
+                break;
+            case RecordTypeEnum::TYPE_TXT:
+                $rdata = $array['txt'];
+                break;
+            default:
+                throw new UnsupportedTypeException(
+                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::get_name($type))
+                );
+        }
+
+        return $rdata;
     }
 
+
+    /**
+     * Maps an IANA Rdata type to the built-in PHP DNS constant.
+     * @example $this->IANA_to_PHP(5) //Returns DNS_CNAME int(16)
+     *
+     * @param int $type The IANA RTYPE.
+     * @return int|bool The built in PHP DNS_<type> constant.
+     */
+    private function IANA_to_PHP(int $type): int
+    {
+        $constantName = 'DNS_' . RecordTypeEnum::get_name($type);
+
+        return defined($constantName) ? constant($constantName) : false;
+    }
 
     /**
      * Getter method for $recursion_available property

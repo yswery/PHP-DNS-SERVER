@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of PHP DNS Server.
+ *
+ * (c) Yif Swery <yiftachswr@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace yswery\DNS;
 
@@ -140,5 +148,30 @@ class ResourceRecord
     {
         $this->question = (bool) $question;
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        if (is_array($this->rdata)) {
+            $rdata = '(';
+            foreach ($this->rdata as $key => $value) {
+                $rdata .= $key . ': ' . $value . ', ';
+            }
+            $rdata = rtrim($rdata, ', ') . ')';
+        } else {
+            $rdata = $this->rdata;
+        }
+
+        return sprintf(
+            '%s %s %s %s %s',
+            $this->name,
+            RecordTypeEnum::get_name($this->type),
+            ClassEnum::getName($this->class),
+            $this->ttl,
+            $rdata
+        );
     }
 }
