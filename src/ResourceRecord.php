@@ -141,18 +141,4 @@ class ResourceRecord
         $this->question = (bool) $question;
         return $this;
     }
-
-    /**
-     * @return array
-     */
-    public function asArray(): array
-    {
-        return [
-            'name' => $this->name,
-            'type' => $this->type,
-            'ttl' => $this->ttl,
-            'class' => $this->class,
-            'rdata' => $this->rdata,
-        ];
-    }
 }

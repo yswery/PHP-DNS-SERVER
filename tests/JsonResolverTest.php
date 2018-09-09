@@ -26,25 +26,56 @@ class JsonResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testGetDnsRecords()
     {
-        $expected = array(
-            'test.com' => array(
+        $expected = [
+            'test.com' => [
                 'A' => '111.111.111.111',
-                'MX' => '112.112.112.112',
-                'NS' => 'ns1.test.com',
+                'MX' => [
+                    [
+                        'exchange' => 'mail-gw1.test.com',
+                        'preference' => 10,
+                    ],
+                    [
+                        'exchange' => 'mail-gw2.test.com',
+                        'preference' => 20,
+                    ]
+                ],
+                'NS' => [
+                    'ns1.test.com',
+                    'ns2.test.com',
+                ],
                 'TXT' => 'Some text.',
                 'AAAA' => 'DEAD:01::BEEF',
-            ),
-            'test2.com' => array(
-                'A' => array(
+                'CNAME' => 'www2.test.com',
+                "SOA" => [
+                    [
+                        "mname" => "ns1.test.com",
+                        "rname" => "admin.test.com",
+                        "serial" => "2014111100",
+                        "retry" => "7200",
+                        "refresh" => "1800",
+                        "expire" => "8600",
+                        "minimum" => "300"
+                    ],
+                ],
+            ],
+            'test2.com' => [
+                'A' => [
                     '111.111.111.111',
                     '112.112.112.112',
-                ),
-                'MX' => array(
-                    'priority' => 25,
-                    'target' => 'mail-gw1.test2.com.'
-                ),
-            ),
-        );
+                ],
+                'MX' => [
+                    [
+                        'preference' => 20,
+                        'exchange' => 'mail-gw1.test2.com.',
+                    ],
+                    [
+                        'preference' => 30,
+                        'exchange' => 'mail-gw2.test2.com.',
+                    ]
+
+                ],
+            ],
+        ];
 
         $this->assertEquals($expected, $this->storage->getDnsRecords());
     }

@@ -151,7 +151,9 @@ class Decoder
                 $data = null;
                 break;
             default:
-                throw new UnsupportedTypeException(sprintf('The type "%s" is not supported.', $type));
+                throw new UnsupportedTypeException(
+                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::get_name($type))
+                );
         }
 
         return $data;
@@ -168,9 +170,7 @@ class Decoder
         $flags = Decoder::decodeFlags($data['flags']);
         $offset += 12;
 
-        $header = new Header;
-
-        return $header
+        return (new Header)
             ->setId($data['id'])
             ->setResponse($flags['qr'])
             ->setOpcode($flags['opcode'])

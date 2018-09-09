@@ -37,9 +37,14 @@ class Encoder
         return $res;
     }
 
-    public static function encodeType($type, $val = null)
+    /**
+     * @param int $type
+     * @param string|array $val
+     * @return string
+     * @throws UnsupportedTypeException
+     */
+    public static function encodeType($type, $val): string
     {
-        $enc = '';
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
             case RecordTypeEnum::TYPE_AAAA:
@@ -52,9 +57,7 @@ class Encoder
                 $enc = self::encodeLabel($val);
                 break;
             case RecordTypeEnum::TYPE_SOA:
-                $enc .= self::encodeLabel($val['mname']);
-                $enc .= self::encodeLabel($val['rname']);
-                $enc .= pack('NNNNN', $val['serial'], $val['refresh'], $val['retry'], $val['expire'], $val['minimum']);
+                $enc = self::encodeSOA($val);
                 break;
             case RecordTypeEnum::TYPE_MX:
                 $enc = pack('n', (int) $val['preference']);
@@ -68,27 +71,38 @@ class Encoder
             case RecordTypeEnum::TYPE_ANY:
                 $enc = '';
                 break;
-            case RecordTypeEnum::TYPE_OPT:
-                $enc = array(
-                    'class' =>  $val['udp_payload_size'],
-                    'ttl' =>    (($val['ext_code'] & 0xff) << 24) |
-                        (($val['version'] & 0xff) << 16) |
-                        (self::encodeFlags($val['flags']) & 0xffff),
-                    'data' =>   '', // TODO: encode data
-                );
-                break;
             default:
-                $enc = $val;
+                throw new UnsupportedTypeException(
+                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::get_name($type))
+                );
         }
 
         return $enc;
     }
 
     /**
-     * @param ResourceRecord[] $resourceRecords
+     * @param array $soa
      * @return string
      */
-    public static function encodeResourceRecords(array $resourceRecords)
+    public static function encodeSOA(array $soa)
+    {
+        return
+            self::encodeLabel($soa['mname']) .
+            self::encodeLabel($soa['rname']) .
+            pack('NNNNN',
+                $soa['serial'],
+                $soa['refresh'],
+                $soa['retry'],
+                $soa['expire'],
+                $soa['minimum']);
+    }
+
+    /**
+     * @param ResourceRecord[] $resourceRecords
+     * @return string
+     * @throws UnsupportedTypeException
+     */
+    public static function encodeResourceRecords(array $resourceRecords): string
     {
         $res = '';
 
