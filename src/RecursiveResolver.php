@@ -8,20 +8,20 @@ class RecursiveResolver implements ResolverInterface
 {
     private $recursion_available = true;
 
-    private $dns_answer_names = array(
+    private $dns_answer_names = [
         'DNS_A' => 'ip',
         'DNS_AAAA' => 'ipv6',
         'DNS_CNAME' => 'target',
         'DNS_TXT' => 'txt',
-        'DNS_MX' => 'target',
+        'DNS_MX' => ['exchange', 'preference'],
         'DNS_NS' => 'target',
-        'DNS_SOA' => array('mname', 'rname', 'serial', 'retry', 'refresh', 'expire', 'minimum-ttl'),
+        'DNS_SOA' => ['mname', 'rname', 'serial', 'retry', 'refresh', 'expire', 'minimum'],
         'DNS_PTR' => 'target',
-    );
+    ];
 
     public function getAnswer(array $question): array
     {
-        $answer = array();
+        $answer = [];
 
         $domain = $question[0]['name'];
 
@@ -29,7 +29,15 @@ class RecursiveResolver implements ResolverInterface
 
         $records = $this->get_records_recursivly($domain, $type);
         foreach ($records as $record) {
-            $answer[] = array('name' => $question[0]['name'], 'class' => $question[0]['class'], 'ttl' => $record['ttl'], 'data' => array('type' => $question[0]['type'], 'value' => $record['answer']));
+            $answer[] = [
+                'name' => $question[0]['name'],
+                'class' => $question[0]['class'],
+                'ttl' => $record['ttl'],
+                'data' => [
+                    'type' => $question[0]['type'],
+                    'value' => $record['answer'],
+                ],
+            ];
         }
 
         return $answer;
@@ -37,7 +45,7 @@ class RecursiveResolver implements ResolverInterface
 
     private function get_records_recursivly($domain, $type)
     {
-        $result = array();
+        $result = [];
         $dns_const_name = $this->get_dns_cost_name($type);
 
         if (!$dns_const_name) {
@@ -55,7 +63,7 @@ class RecursiveResolver implements ResolverInterface
             } else {
                 $answer = $record[$dns_answer_name];
             }
-            $result[] = array('answer' => $answer, 'ttl' => $record['ttl']);
+            $result[] = ['answer' => $answer, 'ttl' => $record['ttl']];
         }
 
         return $result;

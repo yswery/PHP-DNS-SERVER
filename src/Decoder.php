@@ -10,7 +10,7 @@ class Decoder
      */
     public static function decodeFlags($flags)
     {
-        $res = array();
+        $res = [];
 
         $res['qr'] = $flags >> 15 & 0x1;
         $res['opcode'] = $flags >> 11 & 0xf;
@@ -76,7 +76,7 @@ class Decoder
      */
     public static function decodeResourceRecords($pkt, &$offset, $count, $isQuestion = false): array
     {
-        $resourceRecords = array();
+        $resourceRecords = [];
 
         for ($i = 0; $i < $count; ++$i) {
             ($rr = new ResourceRecord)

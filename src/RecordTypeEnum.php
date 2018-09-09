@@ -8,7 +8,7 @@ class RecordTypeEnum
     /**
      * @var array
      */
-    private static $types = array(
+    private static $types = [
         'A' => 1,
         'NS' => 2,
         'CNAME' => 5,
@@ -49,7 +49,7 @@ class RecordTypeEnum
         'TSIG' => 250,
         'URI' => 256,
         'DNAME' => 39,
-    );
+    ];
 
     const TYPE_A = 1;
     const TYPE_NS = 2;

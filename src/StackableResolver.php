@@ -10,25 +10,29 @@ class StackableResolver implements ResolverInterface
      */
     protected $resolvers;
 
-    public function __construct(array $resolvers = array())
+    public function __construct(array $resolvers = [])
     {
         $this->resolvers = $resolvers;
     }
 
+    /**
+     * @param ResourceRecord[] $question
+     * @return array
+     */
     public function getAnswer(array $question): array
     {
         foreach ($this->resolvers as $resolver) {
             $answer = $resolver->getAnswer($question);
-            if ($answer) {
+            if (!empty($answer)) {
                 return $answer;
             }
         }
 
-        return array();
+        return [];
     }
 
     /**
-     * Check if any of the resoolvers supports recursion
+     * Check if any of the resolvers supports recursion
      *
      * @return boolean true if any resolver supports recursion
      */
@@ -39,6 +43,8 @@ class StackableResolver implements ResolverInterface
                 return true;
             }
         }
+
+        return false;
     }
 
     /*

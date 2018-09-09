@@ -67,10 +67,10 @@ class JsonResolver implements ResolverInterface
 
         // If there is no resource record or the record does not have the type, return an empty array.
         if (!array_key_exists($domain, $this->dns_records) || !isset($this->dns_records[$domain][$type])) {
-            return array();
+            return [];
         }
 
-        $answer = array();
+        $answer = [];
         $data = (array) $this->dns_records[$domain][$type];
 
         foreach ($data as $rdata) {
