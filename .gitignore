@@ -3,6 +3,6 @@ composer.lock
 /vendor/
 .README.md.html
 /.idea
-/tests/clover.xml
+clover.xml
 /nbproject
 phpunit.xml

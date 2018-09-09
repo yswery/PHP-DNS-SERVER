@@ -15,15 +15,18 @@
     >
     <testsuites>
         <testsuite name="YSWERY PHP DNS Server">
-            <directory>./tests</directory>
+            <directory>./src/Tests</directory>
         </testsuite>
     </testsuites>
     <logging>
-        <log type="coverage-clover" target="tests/clover.xml"/>
+        <log type="coverage-clover" target="clover.xml"/>
     </logging>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">./src/</directory>
+            <exclude>
+                <directory>./src/tests/</directory>
+            </exclude>
         </whitelist>
     </filter>
 </phpunit>

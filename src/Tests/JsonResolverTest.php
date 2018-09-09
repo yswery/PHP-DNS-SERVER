@@ -17,7 +17,7 @@ class JsonResolverTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->storage = new JsonResolver(__DIR__ . '/test_records.json');
+        $this->storage = new JsonResolver(__DIR__ . '/Resources/test_records.json');
     }
 
     /**
@@ -139,11 +139,11 @@ class JsonResolverTest extends PHPUnit_Framework_TestCase
 
         //Cannot parse JSON
         $this->expectException('\Exception');
-        new JsonResolver('invalid_dns_records.json');
+        new JsonResolver(__DIR__ . '/Resources/invalid_dns_records.json');
 
         //TTL is not an integer
         $this->expectException('\Exception');
-        new JsonResolver(__DIR__ . 'test_records.json', '300');
+        new JsonResolver(__DIR__ . '/Resources/test_records.json', '300');
     }
 
     /**
@@ -151,7 +151,7 @@ class JsonResolverTest extends PHPUnit_Framework_TestCase
      */
     public function testConstructorLoadsRecords()
     {
-        $this->storage = new JsonResolver(__DIR__ . '/test_records.json');
+        $this->storage = new JsonResolver(__DIR__ . '/Resources/test_records.json');
         $this->assertTrue($this->storage !== false);
     }
 }

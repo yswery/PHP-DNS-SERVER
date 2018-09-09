@@ -18,7 +18,7 @@ use yswery\DNS\Server;
 class ServerTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var TestServerProxy
+     * @var Server
      */
     private $server;
 
@@ -27,7 +27,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $storage = new JsonResolver(__DIR__ . '/test_records.json');
+        $storage = new JsonResolver(__DIR__ . '/Resources/test_records.json');
         $this->server = new Server($storage);
     }
 
