@@ -8,7 +8,6 @@
 
 namespace yswery\DNS;
 
-
 class ClassEnum
 {
     const INTERNET = 1;

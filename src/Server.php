@@ -29,7 +29,7 @@ class Server
     /**
      * @var int
      */
-    private  $packetMaxLength;
+    private $packetMaxLength;
 
     /**
      * Server constructor.
@@ -62,7 +62,7 @@ class Server
         $factory = new \React\Datagram\Factory($loop);
 
         $factory->createServer($this->ip.':'.$this->port)->then(function (Socket $server) {
-            $server->on('message', function($message, $address, $server) {
+            $server->on('message', function ($message, $address, $server) {
                 $response = $this->handleQueryFromStream($message);
                 $server->send($response, $address);
             });

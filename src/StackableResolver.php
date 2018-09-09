@@ -36,7 +36,7 @@ class StackableResolver implements ResolverInterface
     {
         foreach ($this->resolvers as $resolver) {
             if ($resolver->allowsRecursion()) {
-              return true;
+                return true;
             }
         }
     }

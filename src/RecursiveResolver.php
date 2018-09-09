@@ -6,7 +6,6 @@ use \Exception;
 
 class RecursiveResolver implements ResolverInterface
 {
-
     private $recursion_available = true;
 
     private $dns_answer_names = array(
@@ -78,15 +77,15 @@ class RecursiveResolver implements ResolverInterface
      */
     public function allowsRecursion(): bool
     {
-       return $this->recursion_available;
+        return $this->recursion_available;
     }
       
-     /**
-     * Check if the resolver knows about a domain
-     *
-     * @param  string  $domain the domain to check for
-     * @return boolean         true if the resolver holds info about $domain
-     */
+    /**
+    * Check if the resolver knows about a domain
+    *
+    * @param  string  $domain the domain to check for
+    * @return boolean         true if the resolver holds info about $domain
+    */
     public function isAuthority($domain): bool
     {
         return false;

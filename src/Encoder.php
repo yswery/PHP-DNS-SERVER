@@ -2,7 +2,6 @@
 
 namespace yswery\DNS;
 
-
 class Encoder
 {
     public static function encodeFlags($flags)
@@ -89,12 +88,14 @@ class Encoder
         return
             self::encodeLabel($soa['mname']) .
             self::encodeLabel($soa['rname']) .
-            pack('NNNNN',
+            pack(
+                'NNNNN',
                 $soa['serial'],
                 $soa['refresh'],
                 $soa['retry'],
                 $soa['expire'],
-                $soa['minimum']);
+                $soa['minimum']
+            );
     }
 
     /**

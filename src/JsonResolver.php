@@ -106,12 +106,12 @@ class JsonResolver implements ResolverInterface
         return $this->recursion_available;
     }
   
-     /*
-     * Check if the resolver knows about a domain
-     *
-     * @param  string  $domain the domain to check for
-     * @return boolean         true if the resolver holds info about $domain
-     */
+    /*
+    * Check if the resolver knows about a domain
+    *
+    * @param  string  $domain the domain to check for
+    * @return boolean         true if the resolver holds info about $domain
+    */
     public function isAuthority($domain): bool
     {
         $domain = trim($domain, '.');

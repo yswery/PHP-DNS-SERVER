@@ -2,7 +2,6 @@
 
 namespace yswery\DNS;
 
-
 class Decoder
 {
     /**
@@ -39,6 +38,7 @@ class Decoder
                     $new_offset = unpack('noffset', substr($pkt, $offset, 2));
                     $end_offset = $offset + 2;
                     $offset = $new_offset['offset'] & 0x3fff;
+                    // no break
                 case 0x1:
                     continue;
                     break;
