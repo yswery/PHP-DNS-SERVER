@@ -74,9 +74,9 @@ class EncoderTest extends \PHPUnit_Framework_TestCase
         $input_3 = [$input_1[0], $input_2[0]];
         $expectation_3 = $expectation_1 . $expectation_2;
 
-        $this->assertEquals($expectation_1, Encoder::encodeQuestionResourceRecord($input_1));
-        $this->assertEquals($expectation_2, Encoder::encodeQuestionResourceRecord($input_2));
-        $this->assertEquals($expectation_3, Encoder::encodeQuestionResourceRecord($input_3));
+        $this->assertEquals($expectation_1, Encoder::encodeResourceRecord($input_1, true));
+        $this->assertEquals($expectation_2, Encoder::encodeResourceRecord($input_2, true));
+        $this->assertEquals($expectation_3, Encoder::encodeResourceRecord($input_3, true));
     }
     
     public function testEncodeResourceRecord()

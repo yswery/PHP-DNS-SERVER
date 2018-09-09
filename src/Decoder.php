@@ -24,30 +24,6 @@ class Decoder
 
         return $res;
     }
-
-    /**
-     * @param string $pkt
-     * @param integer $offset
-     * @param integer $count
-     * @return array|bool
-     */
-    public static function decodeQuestionResourceRecord($pkt, &$offset, $count)
-    {
-        $res = array();
-
-        for ($i = 0; $i < $count; ++$i) {
-            if ($offset > strlen($pkt)) {
-                return false;
-            }
-            $qname = self::decodeLabel($pkt, $offset);
-            $tmp = unpack('nqtype/nqclass', substr($pkt, $offset, 4));
-            $offset += 4;
-            $tmp['qname'] = $qname;
-            $res[] = $tmp;
-        }
-        
-        return $res;
-    }
     
     public static function decodeLabel($pkt, &$offset)
     {
@@ -90,23 +66,29 @@ class Decoder
         return $qname;
     }
 
-    public static function decodeResourceRecord($pkt, &$offset, $count)
+    public static function decodeResourceRecord($pkt, &$offset, $count, $isQuestion = false)
     {
-        $res = array();
+        $resourceRecords = array();
 
         for ($i = 0; $i < $count; ++$i) {
-            // read qname
-            $qname = self::decodeLabel($pkt, $offset);
-            // read qtype & qclass
-            $tmp = unpack('ntype/nclass/Nttl/ndlength', substr($pkt, $offset, 10));
-            $tmp['name'] = $qname;
-            $offset += 10;
-            $tmp['data'] = self::decodeType($tmp['type'], substr($pkt, $offset, $tmp['dlength']));
-            $offset += $tmp['dlength'];
-            $res[] = $tmp;
+            $name = self::decodeLabel($pkt, $offset);
+
+            if ($isQuestion) {
+                $resourceRecord = unpack('nqtype/nqclass', substr($pkt, $offset, 4));
+                $resourceRecord['qname'] = $name;
+                $offset += 4;
+            } else {
+                $resourceRecord = unpack('ntype/nclass/Nttl/ndlength', substr($pkt, $offset, 10));
+                $resourceRecord['name'] = $name;
+                $offset += 10;
+                $resourceRecord['data'] = self::decodeType($resourceRecord['type'], substr($pkt, $offset, $resourceRecord['dlength']));
+                $offset += $resourceRecord['dlength'];
+            }
+
+            $resourceRecords[] = $resourceRecord;
         }
 
-        return $res;
+        return $resourceRecords;
     }
 
     public static function decodeType($type, $val)

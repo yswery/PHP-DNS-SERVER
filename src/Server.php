@@ -79,7 +79,7 @@ class Server
         $offset = 0;
         $header = Decoder::decodeHeader($buffer, $offset);
 
-        $question = Decoder::decodeQuestionResourceRecord($buffer, $offset, $header->getQuestionCount());
+        $question = Decoder::decodeResourceRecord($buffer, $offset, $header->getQuestionCount(), true);
         $authority = Decoder::decodeResourceRecord($buffer, $offset, $header->getAnswerCount());
         $additional = Decoder::decodeResourceRecord($buffer, $offset, $header->getAdditionalRecordsCount());
         $answer = $this->resolver->getAnswer($question);
@@ -91,7 +91,7 @@ class Server
         $header->setAnswerCount(count($answer));
 
         $response = Encoder::encodeHeader($header);
-        $response .= Encoder::encodeQuestionResourceRecord($question);
+        $response .= Encoder::encodeResourceRecord($question, true);
         $response .= Encoder::encodeResourceRecord($answer);
         $response .= Encoder::encodeResourceRecord($authority);
         $response .= Encoder::encodeResourceRecord($additional);

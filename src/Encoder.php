@@ -37,18 +37,6 @@ class Encoder
         return $res;
     }
 
-    public static function encodeQuestionResourceRecord(array $list)
-    {
-        $res = '';
-
-        foreach ($list as $rr) {
-            $res .= self::encodeLabel($rr['qname']);
-            $res .= pack('nn', $rr['qtype'], $rr['qclass']);
-        }
-
-        return $res;
-    }
-
     public static function encodeType($type, $val = null)
     {
         $enc = '';
@@ -103,11 +91,24 @@ class Encoder
         return $enc;
     }
 
-    public static function encodeResourceRecord(array $resourceRecords)
+    /**
+     * Encodes resource records from array.
+     *
+     * @param array $resourceRecords
+     * @param bool $isQuestion Specify if this is a resource record for the question section
+     * @return string
+     */
+    public static function encodeResourceRecord(array $resourceRecords, $isQuestion = false)
     {
         $res = '';
 
         foreach ($resourceRecords as $rr) {
+            if ($isQuestion) {
+                $res .= self::encodeLabel($rr['qname']);
+                $res .= pack('nn', $rr['qtype'], $rr['qclass']);
+                continue;
+            }
+
             $res .= self::encodeLabel($rr['name']);
 
             if (!is_array($rr['data'])) {

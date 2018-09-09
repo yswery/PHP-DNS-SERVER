@@ -81,11 +81,11 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
         $encoded_3 = $encoded_1 . $encoded_2;
 
         $offset = 0;
-        $this->assertEquals($decoded_1, Decoder::decodeQuestionResourceRecord($encoded_1, $offset, 1));
+        $this->assertEquals($decoded_1, Decoder::decodeResourceRecord($encoded_1, $offset, 1, true));
         $offset = 0;
-        $this->assertEquals($decoded_2, Decoder::decodeQuestionResourceRecord($encoded_2, $offset, 1));
+        $this->assertEquals($decoded_2, Decoder::decodeResourceRecord($encoded_2, $offset, 1, true));
         $offset = 0;
-        $this->assertEquals($decoded_3, Decoder::decodeQuestionResourceRecord($encoded_3, $offset, 2));
+        $this->assertEquals($decoded_3, Decoder::decodeResourceRecord($encoded_3, $offset, 2, true));
     }
     
     public function testDecodeResourceRecord()
