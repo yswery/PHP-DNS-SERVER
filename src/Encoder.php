@@ -27,7 +27,7 @@ class Encoder
 
         return $val;
     }
-    
+
     public static function encodeLabel($domain)
     {
         if ('.' === $domain) {
@@ -48,9 +48,8 @@ class Encoder
      * @param int $type
      * @param string|array $val
      * @return string
-     * @throws UnsupportedTypeException
      */
-    public static function encodeType($type, $val): string
+    public static function encodeType($type, $val): ?string
     {
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
@@ -79,9 +78,7 @@ class Encoder
                 $enc = '';
                 break;
             default:
-                throw new UnsupportedTypeException(
-                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::get_name($type))
-                );
+                $enc = null;
         }
 
         return $enc;

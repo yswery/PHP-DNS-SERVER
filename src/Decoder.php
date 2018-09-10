@@ -31,7 +31,7 @@ class Decoder
 
         return $res;
     }
-    
+
     public static function decodeLabel($pkt, &$offset)
     {
         $end_offset = null;
@@ -113,7 +113,6 @@ class Decoder
      * @param int $type
      * @param string $val
      * @return array|string
-     * @throws UnsupportedTypeException
      */
     public static function decodeType($type, $val)
     {
@@ -159,9 +158,7 @@ class Decoder
                 $data = null;
                 break;
             default:
-                throw new UnsupportedTypeException(
-                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::get_name($type))
-                );
+                $data = null;
         }
 
         return $data;
