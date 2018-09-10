@@ -34,6 +34,10 @@ class Server
         set_error_handler(array($this, 'ds_error'), E_ALL);
         set_time_limit(0);
 
+        if (0 !== posix_getuid()) {
+            throw new \RuntimeException('Missing required privileges. DNS server requires root access.');
+        }
+
         if (!extension_loaded('sockets') || !function_exists('socket_create')) {
             $this->ds_error(E_USER_ERROR, 'Socket extension or function not found.', __FILE__, __LINE__);
         }
