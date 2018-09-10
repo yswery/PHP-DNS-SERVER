@@ -1,14 +1,17 @@
 <?php
 
+namespace yswery\DNS\Tests;
+
+use PHPUnit\Framework\TestCase;
 use yswery\DNS\JsonResolver;
 
-class JsonResolverTest extends PHPUnit_Framework_TestCase
+class JsonResolverTest extends TestCase
 {
     /**
-     * @var yswery\DNS\JsonResolver
+     * @var JsonResolver
      */
     protected $storage;
-    
+
     public function setUp()
     {
         $this->storage = new JsonResolver(__DIR__ . '/test_records.json');
@@ -42,7 +45,7 @@ class JsonResolverTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals($expected, $this->storage->getDnsRecords());
     }
-    
+
     public function testHostRecordResolves()
     {
         $question = array(array(
@@ -107,13 +110,13 @@ class JsonResolverTest extends PHPUnit_Framework_TestCase
 
     public function testConstructorThrowsExceptions()
     {
-        $this->setExpectedException('\Exception', 'The file "blah.json" does not exist.');
+        $this->expectExceptionObject(new \Exception('The file "blah.json" does not exist.'));
         $jsonAdapter = new JsonResolver('blah.json');
 
-        $this->setExpectedException('\Exception', 'Unable to parse JSON file: "invalid_dns_records.json".');
+        $this->expectExceptionObject(new \Exception('Unable to parse JSON file: "invalid_dns_records.json".'));
         $jsonAdapter = new JsonResolver('invalid_dns_records.json');
-        
-        $this->setExpectedException('\InvalidArgumentException', 'Default TTL must be an integer.');
+
+        $this->expectExceptionObject(new \InvalidArgumentException('Default TTL must be an integer.'));
         $jsonAdapter = new JsonResolver(__DIR__ . 'test_records.json', '300');
     }
 
@@ -122,5 +125,5 @@ class JsonResolverTest extends PHPUnit_Framework_TestCase
         $this->storage = new JsonResolver(__DIR__ . '/test_records.json');
         $this->assertTrue($this->storage !== false);
     }
-    
+
 }

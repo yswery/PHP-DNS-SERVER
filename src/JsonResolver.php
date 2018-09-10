@@ -10,17 +10,17 @@ class JsonResolver implements ResolverInterface
     /**
      * @var array
      */
-    private $dns_records;
+    protected $dns_records;
 
     /**
      * @var int
      */
-    private $DS_TTL;
+    protected $DS_TTL;
 
     /**
      * @var boolean
      */
-    private $recursion_available;
+    protected $recursion_available;
 
     /**
      * JsonResolver constructor.
@@ -97,7 +97,7 @@ class JsonResolver implements ResolverInterface
         return $this->dns_records;
     }
 
-    
+
     /**
      * Getter method for $recursion_available property
      *
@@ -106,7 +106,7 @@ class JsonResolver implements ResolverInterface
     public function allowsRecursion() {
         return $this->recursion_available;
     }
-  
+
      /*
      * Check if the resolver knows about a domain
      *

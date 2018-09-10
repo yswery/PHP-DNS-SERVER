@@ -10,10 +10,11 @@
 
 namespace yswery\DNS\Tests;
 
+use PHPUnit\Framework\TestCase;
 use yswery\DNS\JsonResolver;
 use yswery\DNS\RecordTypeEnum;
 
-class ServerTest extends \PHPUnit_Framework_TestCase
+class ServerTest extends TestCase
 {
     /**
      * @var TestServerProxy
@@ -102,7 +103,7 @@ class ServerTest extends \PHPUnit_Framework_TestCase
             'qname' => 'www.example.com.',
             'qtype' => 1, //A Record
             'qclass' => 1, //IN
-            ]];
+        ]];
 
         $expectation_1 =
             chr(3) . 'www' . chr(7) . 'example' . chr(3) . 'com' . "\0" .
