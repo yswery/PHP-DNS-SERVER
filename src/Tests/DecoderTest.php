@@ -97,9 +97,9 @@ class DecoderTest extends TestCase
     public function testDecodeResourceRecords()
     {
         $name = 'example.com.';
-        $nameEncoded = Encoder::encodeLabel($name);
+        $nameEncoded = Encoder::encodeDomainName($name);
         $exchange = 'mail.example.com.';
-        $exchangeEncoded = Encoder::encodeLabel($exchange);
+        $exchangeEncoded = Encoder::encodeDomainName($exchange);
         $priority = 10;
         $ttl = 1337;
         $class = 1; //INTERNET

@@ -21,23 +21,22 @@ class EncoderTest extends TestCase
 {
     public function testEncodeFlags()
     {
-        $flags = [
-            'qr' => 1,      //1 bit
-            'opcode' => 0,  //4 bits
-            'aa' => 1,      //1 bit
-            'tc' => 0,      //1 bit
-            'rd' => 0,      //1 bit
-            'ra' => 0,      //1 bit
-            'z' => 0,       //3 bits
-            'rcode' => 0,   //4 bits
-        ];
-
         $encoded = 0b1000010000000000;
 
-        $this->assertEquals($encoded, Encoder::encodeFlags($flags));
+        $header = (new Header)
+            ->setResponse(true)
+            ->setOpcode(0)
+            ->setAuthoritative(true)
+            ->setTruncated(false)
+            ->setRecursionDesired(false)
+            ->setRecursionAvailable(false)
+            ->setZ(0)
+            ->setRcode(Header::RCODE_NO_ERROR);
+
+        $this->assertEquals($encoded, Encoder::encodeFlags($header));
     }
     
-    public function testEncodeLabel()
+    public function testEncodeDomainName()
     {
         $input_1 = 'www.example.com.';
         $expectation_1 = chr(3) . 'www' . chr(7) . 'example' . chr(3) . 'com' . "\0";
@@ -48,9 +47,9 @@ class EncoderTest extends TestCase
         $input_3 = 'tld.';
         $expectation_3 = chr(3) . 'tld' . "\0";
 
-        $this->assertEquals($expectation_1, Encoder::encodeLabel($input_1));
-        $this->assertEquals($expectation_2, Encoder::encodeLabel($input_2));
-        $this->assertEquals($expectation_3, Encoder::encodeLabel($input_3));
+        $this->assertEquals($expectation_1, Encoder::encodeDomainName($input_1));
+        $this->assertEquals($expectation_2, Encoder::encodeDomainName($input_2));
+        $this->assertEquals($expectation_3, Encoder::encodeDomainName($input_3));
     }
 
     /**
@@ -94,9 +93,9 @@ class EncoderTest extends TestCase
     public function testEncodeResourceRecord()
     {
         $name = 'example.com.';
-        $nameEncoded = Encoder::encodeLabel($name);
+        $nameEncoded = Encoder::encodeDomainName($name);
         $exchange = 'mail.example.com.';
-        $exchangeEncoded = Encoder::encodeLabel($exchange);
+        $exchangeEncoded = Encoder::encodeDomainName($exchange);
         $preference = 10;
         $ttl = 1337;
         $class = ClassEnum::INTERNET;
