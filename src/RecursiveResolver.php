@@ -12,7 +12,7 @@ namespace yswery\DNS;
 
 class RecursiveResolver implements ResolverInterface
 {
-    private $recursion_available = true;
+    private $recursionAvailable = true;
 
     /**
      * @param ResourceRecord[] $question
@@ -24,7 +24,7 @@ class RecursiveResolver implements ResolverInterface
         $answer = [];
         $query = $question[0];
 
-        $records = $this->get_records_recursively($query->getName(), $query->getType());
+        $records = $this->getRecordsRecursively($query->getName(), $query->getType());
         foreach ($records as $record) {
             $answer[] = (new ResourceRecord)
                 ->setName($query->getName())
@@ -43,9 +43,9 @@ class RecursiveResolver implements ResolverInterface
      * @return array
      * @throws UnsupportedTypeException
      */
-    private function get_records_recursively($domain, $type)
+    private function getRecordsRecursively($domain, $type): array
     {
-        if (false === $php_dns_type = $this->IANA_to_PHP($type)) {
+        if (false === $php_dns_type = $this->IANA2PHP($type)) {
             throw new UnsupportedTypeException(sprintf('Record type "%s" is not a supported type.', $type));
         }
 
@@ -112,7 +112,6 @@ class RecursiveResolver implements ResolverInterface
         return $rdata;
     }
 
-
     /**
      * Maps an IANA Rdata type to the built-in PHP DNS constant.
      * @example $this->IANA_to_PHP(5) //Returns DNS_CNAME int(16)
@@ -120,11 +119,11 @@ class RecursiveResolver implements ResolverInterface
      * @param int $type The IANA RTYPE.
      * @return int|bool The built in PHP DNS_<type> constant.
      */
-    private function IANA_to_PHP(int $type): int
+    private function IANA2PHP(int $type): int
     {
         $constantName = 'DNS_' . RecordTypeEnum::getName($type);
 
-        return defined($constantName) ? constant($constantName) : false;
+        return \defined($constantName) ? \constant($constantName) : false;
     }
 
     /**
@@ -134,7 +133,7 @@ class RecursiveResolver implements ResolverInterface
      */
     public function allowsRecursion(): bool
     {
-        return $this->recursion_available;
+        return $this->recursionAvailable;
     }
 
     /**
