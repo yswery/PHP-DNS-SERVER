@@ -45,7 +45,7 @@ class ServerTest extends TestCase
      */
     private function encodeQuery($name, $type, $id)
     {
-        $qname = Encoder::encodeLabel($name);
+        $qname = Encoder::encodeDomainName($name);
         $flags = 0b0000000000000000;
         $header = pack('nnnnnn', $id, $flags, 1, 0, 0, 0);
         $question = $qname . pack('nn', $type, 1);
@@ -62,7 +62,7 @@ class ServerTest extends TestCase
         $packet = $queryHeader . $question;
 
         $flags = 0b1000010000000000;
-        $qname = Encoder::encodeLabel($name);
+        $qname = Encoder::encodeDomainName($name);
         $header = pack('nnnnnn', $id, $flags, 1, 1, 0, 0);
 
         $rdata = inet_pton('111.111.111.111');

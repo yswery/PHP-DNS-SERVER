@@ -28,24 +28,13 @@ class Encoder
         return $response;
     }
 
-
-    public static function encodeFlags($flags)
-    {
-        $val = 0;
-
-        $val |= ($flags['qr'] & 0x1) << 15;
-        $val |= ($flags['opcode'] & 0xf) << 11;
-        $val |= ($flags['aa'] & 0x1) << 10;
-        $val |= ($flags['tc'] & 0x1) << 9;
-        $val |= ($flags['rd'] & 0x1) << 8;
-        $val |= ($flags['ra'] & 0x1) << 7;
-        $val |= ($flags['z'] & 0x7) << 4;
-        $val |= ($flags['rcode'] & 0xf);
-
-        return $val;
-    }
-    
-    public static function encodeLabel($domain)
+    /**
+     * Encode a domain name as a sequence of labels.
+     *
+     * @param $domain
+     * @return string
+     */
+    public static function encodeDomainName($domain)
     {
         if ('.' === $domain) {
             return "\0";
@@ -78,14 +67,14 @@ class Encoder
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
-                $enc = self::encodeLabel($val);
+                $enc = self::encodeDomainName($val);
                 break;
             case RecordTypeEnum::TYPE_SOA:
                 $enc = self::encodeSOA($val);
                 break;
             case RecordTypeEnum::TYPE_MX:
                 $enc = pack('n', (int) $val['preference']);
-                $enc .= self::encodeLabel($val['exchange']);
+                $enc .= self::encodeDomainName($val['exchange']);
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 $val = substr($val, 0, 255);
@@ -111,8 +100,8 @@ class Encoder
     public static function encodeSOA(array $soa)
     {
         return
-            self::encodeLabel($soa['mname']) .
-            self::encodeLabel($soa['rname']) .
+            self::encodeDomainName($soa['mname']) .
+            self::encodeDomainName($soa['rname']) .
             pack(
                 'NNNNN',
                 $soa['serial'],
@@ -133,7 +122,7 @@ class Encoder
         $res = '';
 
         foreach ($resourceRecords as $rr) {
-            $res .= self::encodeLabel($rr->getName());
+            $res .= self::encodeDomainName($rr->getName());
             if ($rr->isQuestion()) {
                 $res .= pack('nn', $rr->getType(), $rr->getClass());
                 continue;
@@ -156,11 +145,34 @@ class Encoder
         return pack(
             'nnnnnn',
             $header->getId(),
-            self::encodeFlags($header->asArray()),
+            self::encodeFlags($header),
             $header->getQuestionCount(),
             $header->getAnswerCount(),
             $header->getNameServerCount(),
             $header->getAdditionalRecordsCount()
         );
+    }
+
+
+    /**
+     * Encode the bit field of the Header between "ID" and "QDCOUNT".
+     *
+     * @param Header $header
+     * @return int
+     */
+    public static function encodeFlags(Header $header)
+    {
+        $val = 0;
+
+        $val |= ((int) $header->isResponse() & 0x1) << 15;
+        $val |= ($header->getOpcode() & 0xf) << 11;
+        $val |= ((int) $header->isAuthoritative() & 0x1) << 10;
+        $val |= ((int) $header->isTruncated() & 0x1) << 9;
+        $val |= ((int) $header->isRecursionDesired() & 0x1) << 8;
+        $val |= ((int) $header->isRecursionAvailable() & 0x1) << 7;
+        $val |= ($header->getZ() & 0x7) << 4;
+        $val |= ($header->getRcode() & 0xf);
+
+        return $val;
     }
 }

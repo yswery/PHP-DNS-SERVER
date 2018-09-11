@@ -386,26 +386,4 @@ class Header
 
         return $this;
     }
-
-    /**
-     * @return array
-     */
-    public function asArray()
-    {
-        return [
-            'id' => (int) $this->id,
-            'qr' => (int) $this->response,
-            'opcode' => (int) $this->opcode,
-            'aa' => (int) $this->authoritative,
-            'tc' => (int) $this->truncated,
-            'rd' => (int) $this->recursionDesired,
-            'ra' => (int) $this->recursionAvailable,
-            'z' => (int) $this->z,
-            'rcode' => (int) $this->rcode,
-            'qdcount' => (int) $this->questionCount,
-            'ancount' => (int) $this->answerCount,
-            'nscount' => (int) $this->nameServerCount,
-            'arcount' => (int) $this->additionalRecordsCount,
-        ];
-    }
 }
