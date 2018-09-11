@@ -10,54 +10,52 @@
 
 namespace yswery\DNS;
 
-use \Exception;
-use \InvalidArgumentException;
-
 class JsonResolver implements ResolverInterface
 {
     /**
      * @var array
      */
-    private $dns_records;
+    private $records;
 
     /**
      * @var int
      */
-    private $DS_TTL;
+    private $ttl;
 
     /**
      * @var boolean
      */
-    private $recursion_available;
+    private $recursionAvailable;
 
     /**
      * JsonResolver constructor.
      *
-     * @param string $record_file The filepath of the JSON-formatted DNS Zone file.
-     * @param int $default_ttl The TTL to be used for all Resource Records omitting a TTL.
-     * @throws Exception | InvalidArgumentException
+     * @param string $filename The path of the JSON-formatted DNS Zone file.
+     * @param int    $ttl      The default TTL to be used for all Resource Records omitting a TTL.
+     *
+     * @throws \Exception | \InvalidArgumentException
      */
-    public function __construct($record_file, $default_ttl = 300)
+    public function __construct($filename, $ttl = 300)
     {
-        if (!file_exists($record_file)) {
-            throw new Exception(sprintf('The file "%s" does not exist.', $record_file));
+        if (!file_exists($filename)) {
+            throw new \Exception(sprintf('The file "%s" does not exist.', $filename));
         }
 
-        if (false === $dns_json = file_get_contents($record_file)) {
-            throw new Exception(sprintf('Unable to open JSON file: "%s".', $record_file));
+        if (false === $dns_json = file_get_contents($filename)) {
+            throw new \Exception(sprintf('Unable to open JSON file: "%s".', $filename));
         }
 
         if (null === $dns_records = json_decode($dns_json, true)) {
-            throw new Exception(sprintf('Unable to parse JSON file: "%s".', $record_file));
+            throw new \Exception(sprintf('Unable to parse JSON file: "%s".', $filename));
         }
 
-        if (!is_int($default_ttl)) {
-            throw new InvalidArgumentException('Default TTL must be an integer.');
+        if (!\is_int($ttl)) {
+            throw new \InvalidArgumentException('Default TTL must be an integer.');
         }
 
-        $this->DS_TTL = $default_ttl;
-        $this->dns_records = $dns_records;
-        $this->recursion_available = false;
+        $this->ttl = $ttl;
+        $this->records = $dns_records;
+        $this->recursionAvailable = false;
     }
 
     /**
@@ -74,19 +72,19 @@ class JsonResolver implements ResolverInterface
         $type = RecordTypeEnum::get_name($q_type);
 
         // If there is no resource record or the record does not have the type, return an empty array.
-        if (!array_key_exists($domain, $this->dns_records) || !isset($this->dns_records[$domain][$type])) {
+        if (!array_key_exists($domain, $this->records) || !isset($this->records[$domain][$type])) {
             return [];
         }
 
         $answer = [];
-        $data = (array) $this->dns_records[$domain][$type];
+        $data = (array) $this->records[$domain][$type];
 
         foreach ($data as $rdata) {
             $answer[] = (new ResourceRecord())
                 ->setName($q_name)
                 ->setType($q_type)
                 ->setClass($q_class)
-                ->setTtl($this->DS_TTL)
+                ->setTtl($this->ttl)
                 ->setRdata($rdata);
         }
 
@@ -98,12 +96,12 @@ class JsonResolver implements ResolverInterface
      *
      * @return array
      */
-    public function getDnsRecords()
+    public function getRecords(): array
     {
-        return $this->dns_records;
+        return $this->records;
     }
 
-    
+
     /**
      * Getter method for $recursion_available property
      *
@@ -111,9 +109,9 @@ class JsonResolver implements ResolverInterface
      */
     public function allowsRecursion(): bool
     {
-        return $this->recursion_available;
+        return $this->recursionAvailable;
     }
-  
+
     /*
     * Check if the resolver knows about a domain
     *
@@ -123,6 +121,6 @@ class JsonResolver implements ResolverInterface
     public function isAuthority($domain): bool
     {
         $domain = trim($domain, '.');
-        return array_key_exists($domain, $this->dns_records);
+        return array_key_exists($domain, $this->records);
     }
 }
