@@ -168,7 +168,7 @@ class ResourceRecord
         return sprintf(
             '%s %s %s %s %s',
             $this->name,
-            RecordTypeEnum::get_name($this->type),
+            RecordTypeEnum::getName($this->type),
             ClassEnum::getName($this->class),
             $this->ttl,
             $rdata

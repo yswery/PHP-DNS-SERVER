@@ -177,7 +177,7 @@ class Decoder
                 break;
             default:
                 throw new UnsupportedTypeException(
-                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::get_name($type))
+                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
                 );
         }
 

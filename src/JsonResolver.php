@@ -69,7 +69,7 @@ class JsonResolver implements ResolverInterface
         $q_class = ($question[0])->getClass();
 
         $domain = trim($q_name, '.');
-        $type = RecordTypeEnum::get_name($q_type);
+        $type = RecordTypeEnum::getName($q_type);
 
         // If there is no resource record or the record does not have the type, return an empty array.
         if (!array_key_exists($domain, $this->records) || !isset($this->records[$domain][$type])) {

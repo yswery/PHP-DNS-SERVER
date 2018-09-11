@@ -69,7 +69,7 @@ class RecursiveResolver implements ResolverInterface
      */
     private function extractRdata(array $array)
     {
-        $type = RecordTypeEnum::get_type_index($array['type']);
+        $type = RecordTypeEnum::getTypeIndex($array['type']);
 
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
@@ -105,7 +105,7 @@ class RecursiveResolver implements ResolverInterface
                 break;
             default:
                 throw new UnsupportedTypeException(
-                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::get_name($type))
+                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
                 );
         }
 
@@ -122,7 +122,7 @@ class RecursiveResolver implements ResolverInterface
      */
     private function IANA_to_PHP(int $type): int
     {
-        $constantName = 'DNS_' . RecordTypeEnum::get_name($type);
+        $constantName = 'DNS_' . RecordTypeEnum::getName($type);
 
         return defined($constantName) ? constant($constantName) : false;
     }
@@ -136,7 +136,7 @@ class RecursiveResolver implements ResolverInterface
     {
         return $this->recursion_available;
     }
-      
+
     /**
     * Check if the resolver knows about a domain
     *
