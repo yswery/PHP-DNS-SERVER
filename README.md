@@ -17,8 +17,6 @@ This class can be used to give DNS responses dynamically based on your pre-exist
 
 Here is an example of DNS server usage:
 ```php
-<?php
-
 require 'vendor/autoload.php';
 
 // JsonResolver created and provided path to file with json dns records
@@ -41,7 +39,7 @@ $server->start();
 * Run `php example/example.php` to run the server
 
 Query server using `dig` command to ensure proper functioning
-```
+```bash
 $ dig @127.0.0.1 test.com A +short
 111.111.111.111
 

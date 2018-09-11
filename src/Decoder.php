@@ -24,7 +24,7 @@ class Decoder
 
         return (new Message($header))
             ->setQuestions(self::decodeResourceRecords($message, $offset, $header->getQuestionCount(), true))
-            ->setAnswers(self::decodeResourceRecords($message,$offset, $header->getAnswerCount()))
+            ->setAnswers(self::decodeResourceRecords($message, $offset, $header->getAnswerCount()))
             ->setAuthoritatives(self::decodeResourceRecords($message, $offset, $header->getNameServerCount()))
             ->setAdditionals(self::decodeResourceRecords($message, $offset, $header->getAdditionalRecordsCount()));
     }
@@ -132,7 +132,7 @@ class Decoder
      * @return array|string
      * @throws UnsupportedTypeException
      */
-    public static function decodeType($type, $val)
+    public static function decodeType($type, $val): ?int
     {
         $offset = 0;
 
