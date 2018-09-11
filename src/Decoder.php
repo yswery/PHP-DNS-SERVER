@@ -13,6 +13,23 @@ namespace yswery\DNS;
 class Decoder
 {
     /**
+     * @param $message
+     * @return Message
+     * @throws UnsupportedTypeException
+     */
+    public static function decodeMessage($message)
+    {
+        $offset = 0;
+        $header = self::decodeHeader($message, $offset);
+
+        return (new Message($header))
+            ->setQuestions(self::decodeResourceRecords($message, $offset, $header->getQuestionCount(), true))
+            ->setAnswers(self::decodeResourceRecords($message,$offset, $header->getAnswerCount()))
+            ->setAuthoritatives(self::decodeResourceRecords($message, $offset, $header->getNameServerCount()))
+            ->setAdditionals(self::decodeResourceRecords($message, $offset, $header->getAdditionalRecordsCount()));
+    }
+
+    /**
      * @param string $flags
      * @return array
      */

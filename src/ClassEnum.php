@@ -45,6 +45,10 @@ class ClassEnum
      */
     public static function getName(int $class): string
     {
+        if (!static::isValid($class)) {
+            throw new \InvalidArgumentException(sprintf('No class matching integer "%s"', $class));
+        }
+
         return self::$classes[$class];
     }
 

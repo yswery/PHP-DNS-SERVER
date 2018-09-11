@@ -71,6 +71,9 @@ class Server implements LoggerAwareInterface
         }
     }
 
+    /**
+     * Start the server
+     */
     public function start()
     {
         $loop = \React\EventLoop\Factory::create();
@@ -94,47 +97,39 @@ class Server implements LoggerAwareInterface
      */
     public function handleQueryFromStream(string $buffer): string
     {
-        $offset = 0;
-        $header = Decoder::decodeHeader($buffer, $offset);
+        $message = Decoder::decodeMessage($buffer);
+        $responseMessage = clone($message);
+        $responseMessage->getHeader()
+            ->setResponse(true)
+            ->setRecursionAvailable($this->resolver->allowsRecursion())
+            ->setAuthoritative($this->resolver->isAuthority($responseMessage->getQuestions()[0]->getName()));
 
-        $questions = Decoder::decodeResourceRecords($buffer, $offset, $header->getQuestionCount(), true);
-        $authority = Decoder::decodeResourceRecords($buffer, $offset, $header->getAnswerCount());
-        $additional = Decoder::decodeResourceRecords($buffer, $offset, $header->getAdditionalRecordsCount());
-        $answers = $this->resolver->getAnswer($questions);
-
-        foreach ($questions as $question) {
-            $this->logger->log(LogLevel::INFO, 'Query: ' . $question);
+        try {
+            $responseMessage->setAnswers($this->resolver->getAnswer($responseMessage->getQuestions()));
+            $encodedResponse = Encoder::encodeMessage($responseMessage);
+        } catch (UnsupportedTypeException $e) {
+            $responseMessage
+                ->setAnswers([])
+                ->getHeader()->setRcode(Header::RCODE_NOT_IMPLEMENTED);
+            $encodedResponse = Encoder::encodeMessage($responseMessage);
         }
 
-        foreach ($answers as $answer) {
-            $this->logger->log(LogLevel::INFO, 'Response: ' . $answer);
-        }
+        $this->logMessage($responseMessage);
 
-        $header->setResponse(true);
-        $header->setRecursionAvailable($this->resolver->allowsRecursion());
-        $header->setAuthoritative($this->resolver->isAuthority(($questions[0])->getName()));
-
-        $header->setAnswerCount(count($answers));
-
-        $response = Encoder::encodeHeader($header);
-        $response .= Encoder::encodeResourceRecords($questions);
-        $response .= Encoder::encodeResourceRecords($answers);
-        $response .= Encoder::encodeResourceRecords($authority);
-        $response .= Encoder::encodeResourceRecords($additional);
-
-        return $response;
+        return $encodedResponse;
     }
 
     /**
-     * @param Header $header
-     * @return string
+     * @param Message $message
      */
-    private function errorResponse(Header $header): string
+    private function logMessage(Message $message): void
     {
-        $header = (new Header)
-            ->setId($header->getId())
-            ->setRcode(Header::RCODE_SERVER_FAILURE);
+        foreach ($message->getQuestions() as $question) {
+            $this->logger->log(LogLevel::INFO, 'Query: ' . $question);
+        }
 
-        return Encoder::encodeLabel($header);
+        foreach ($message->getAnswers() as $answer) {
+            $this->logger->log(LogLevel::INFO, 'Answer: ' . $answer);
+        }
     }
 }

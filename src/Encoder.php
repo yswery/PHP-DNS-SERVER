@@ -12,6 +12,23 @@ namespace yswery\DNS;
 
 class Encoder
 {
+    /**
+     * @param Message $message
+     * @return string
+     * @throws UnsupportedTypeException
+     */
+    public static function encodeMessage(Message $message): string
+    {
+        $response = Encoder::encodeHeader($message->getHeader());
+        $response .= Encoder::encodeResourceRecords($message->getQuestions());
+        $response .= Encoder::encodeResourceRecords($message->getAnswers());
+        $response .= Encoder::encodeResourceRecords($message->getAuthoritatives());
+        $response .= Encoder::encodeResourceRecords($message->getAdditionals());
+
+        return $response;
+    }
+
+
     public static function encodeFlags($flags)
     {
         $val = 0;
