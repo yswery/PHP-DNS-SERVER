@@ -2,7 +2,6 @@ language: php
 php:
   - "7.1"
   - "7.2"
-  - "hhvm"
 before_script:
   - composer install
 after_script:
