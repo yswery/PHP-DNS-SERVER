@@ -10,11 +10,11 @@
 
 namespace yswery\DNS;
 
-use Psr\Log\LogLevel;
-use React\Datagram\Socket;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LogLevel;
 use Psr\Log\NullLogger;
+use React\Datagram\Socket;
 
 class Server implements LoggerAwareInterface
 {
@@ -36,37 +36,24 @@ class Server implements LoggerAwareInterface
     private $ip;
 
     /**
-     * @var int
-     */
-    private $defaultTtl;
-
-    /**
-     * @var int
-     */
-    private $packetMaxLength;
-
-    /**
      * Server constructor.
      *
-     * @param ResolverInterface $ds_storage
-     * @param string $bind_ip
-     * @param int $bind_port
-     * @param int $default_ttl
-     * @param int $max_packet_len
+     * @param ResolverInterface $resolver
+     * @param string            $ip
+     * @param int               $port
+     *
      * @throws \Exception
      */
-    public function __construct(ResolverInterface $ds_storage, $bind_ip = '0.0.0.0', $bind_port = 53, $default_ttl = 300, $max_packet_len = 512)
+    public function __construct(ResolverInterface $resolver, string $ip = '0.0.0.0', int $port = 53)
     {
-        $this->resolver = $ds_storage;
-        $this->port = $bind_port;
-        $this->ip = $bind_ip;
-        $this->defaultTtl = $default_ttl;
-        $this->packetMaxLength = $max_packet_len;
+        $this->resolver = $resolver;
+        $this->port = $port;
+        $this->ip = $ip;
         $this->logger = new NullLogger();
 
         set_time_limit(0);
 
-        if (!extension_loaded('sockets') || !function_exists('socket_create')) {
+        if (!\function_exists('socket_create') || !\extension_loaded('sockets')) {
             throw new \Exception('Socket extension or socket_create() function not found.');
         }
     }
@@ -74,14 +61,15 @@ class Server implements LoggerAwareInterface
     /**
      * Start the server
      */
-    public function start()
+    public function start(): void
     {
         $loop = \React\EventLoop\Factory::create();
         $factory = new \React\Datagram\Factory($loop);
 
         $factory->createServer($this->ip.':'.$this->port)->then(function (Socket $server) {
             $this->logger->log(LogLevel::INFO, 'Server started.');
-            $server->on('message', function ($message, $address, $server) {
+
+            $server->on('message', function (string $message, string $address, Socket $server) {
                 $response = $this->handleQueryFromStream($message);
                 $server->send($response, $address);
             });
@@ -98,7 +86,7 @@ class Server implements LoggerAwareInterface
     public function handleQueryFromStream(string $buffer): string
     {
         $message = Decoder::decodeMessage($buffer);
-        $responseMessage = clone($message);
+        $responseMessage = clone $message;
         $responseMessage->getHeader()
             ->setResponse(true)
             ->setRecursionAvailable($this->resolver->allowsRecursion())
