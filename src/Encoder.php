@@ -19,17 +19,17 @@ class Encoder
      */
     public static function encodeMessage(Message $message): string
     {
-        $response = Encoder::encodeHeader($message->getHeader());
-        $response .= Encoder::encodeResourceRecords($message->getQuestions());
-        $response .= Encoder::encodeResourceRecords($message->getAnswers());
-        $response .= Encoder::encodeResourceRecords($message->getAuthoritatives());
-        $response .= Encoder::encodeResourceRecords($message->getAdditionals());
+        $response = self::encodeHeader($message->getHeader());
+        $response .= self::encodeResourceRecords($message->getQuestions());
+        $response .= self::encodeResourceRecords($message->getAnswers());
+        $response .= self::encodeResourceRecords($message->getAuthoritatives());
+        $response .= self::encodeResourceRecords($message->getAdditionals());
 
         return $response;
     }
 
 
-    public static function encodeFlags($flags)
+    public static function encodeFlags($flags): int
     {
         $val = 0;
 
@@ -44,8 +44,8 @@ class Encoder
 
         return $val;
     }
-    
-    public static function encodeLabel($domain)
+
+    public static function encodeLabel($domain): string
     {
         if ('.' === $domain) {
             return "\0";
@@ -55,7 +55,7 @@ class Encoder
         $res = '';
 
         foreach (explode('.', $domain) as $label) {
-            $res .= chr(strlen($label)) . $label;
+            $res .= \chr(\strlen($label)).$label;
         }
 
         return $res;
@@ -89,7 +89,7 @@ class Encoder
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 $val = substr($val, 0, 255);
-                $enc = chr(strlen($val)) . $val;
+                $enc = \chr(\strlen($val)).$val;
                 break;
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:
@@ -108,7 +108,7 @@ class Encoder
      * @param array $soa
      * @return string
      */
-    public static function encodeSOA(array $soa)
+    public static function encodeSOA(array $soa): string
     {
         return
             self::encodeLabel($soa['mname']) .
@@ -139,8 +139,8 @@ class Encoder
                 continue;
             }
 
-            $data = self::EncodeType($rr->getType(), $rr->getRdata());
-            $res .= pack('nnNn', $rr->getType(), $rr->getClass(), $rr->getTtl(), strlen($data));
+            $data = self::encodeType($rr->getType(), $rr->getRdata());
+            $res .= pack('nnNn', $rr->getType(), $rr->getClass(), $rr->getTtl(), \strlen($data));
             $res .= $data;
         }
 
@@ -151,7 +151,7 @@ class Encoder
      * @param Header $header
      * @return string
      */
-    public static function encodeHeader(Header $header)
+    public static function encodeHeader(Header $header): string
     {
         return pack(
             'nnnnnn',
