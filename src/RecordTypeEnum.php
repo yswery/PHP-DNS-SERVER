@@ -104,16 +104,16 @@ class RecordTypeEnum
      *
      * @return string|false
      */
-    public static function getName($index): string
+    public static function getName(int $index)
     {
-        return array_search($index, self::$types, true);
+        return array_search($index, self::$types);
     }
 
     /**
      * @param string $name The name of the record type, e.g. = 'A' or 'MX' or 'SOA'
      * @return int|false
      */
-    public static function getTypeIndex(string $name): int
+    public static function getTypeIndex(string $name)
     {
         $key = strtoupper(trim($name));
         if (!array_key_exists($key, self::$types)) {
