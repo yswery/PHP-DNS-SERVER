@@ -1,17 +1,21 @@
 <?php
 
-require __DIR__.'/../vendor/autoload.php';
+require_once __DIR__.'/../vendor/autoload.php';
 
-// JSON resolver
-$jsonResolver = new yswery\DNS\JsonResolver(__DIR__.'/record.json');
+// JsonResolver created and provided with path to file with json dns records
+$jsonResolver = new yswery\DNS\Resolver\JsonResolver(__DIR__.'/record.json');
 
-// Recursive resolver acting as a fallback to the JsonResolver
-$recursiveResolver = new yswery\DNS\RecursiveResolver;
+// System resolver acting as a fallback to the JsonResolver
+$systemResolver = new yswery\DNS\Resolver\SystemResolver();
 
-$stackableResolver = new yswery\DNS\StackableResolver([$jsonResolver, $recursiveResolver]);
+// StackableResolver will try each resolver in order and return the first match
+$stackableResolver = new yswery\DNS\Resolver\StackableResolver([$jsonResolver, $systemResolver]);
 
 // Create a new instance of Server class
 $server = new yswery\DNS\Server($stackableResolver);
+
+// Log to the console, you can use any PSR logger such as Monolog
+$server->setLogger(new \yswery\DNS\EchoLogger());
 
 // Start DNS server
 $server->start();

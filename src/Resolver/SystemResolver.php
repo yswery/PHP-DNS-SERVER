@@ -14,9 +14,32 @@ use yswery\DNS\UnsupportedTypeException;
 use yswery\DNS\ResourceRecord;
 use yswery\DNS\RecordTypeEnum;
 
-class RecursiveResolver implements ResolverInterface
+/**
+ * Use the host system's configured DNS.
+ */
+class SystemResolver implements ResolverInterface
 {
+    /**
+     * @var bool
+     */
     private $recursionAvailable = true;
+
+    /**
+     * @var bool
+     */
+    private $authoritative = false;
+
+    /**
+     * SystemResolver constructor.
+     *
+     * @param bool $recursionAvailable
+     * @param bool $authoritative
+     */
+    public function __construct($recursionAvailable = true, $authoritative = false)
+    {
+        $this->recursionAvailable = (bool) $recursionAvailable;
+        $this->authoritative = (bool) $authoritative;
+    }
 
     /**
      * @param ResourceRecord[] $question
