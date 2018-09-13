@@ -11,7 +11,7 @@
 namespace yswery\DNS;
 
 /**
- * Class ResolverInterface
+ * Class ResolverInterface.
  */
 interface ResolverInterface
 {
@@ -27,17 +27,17 @@ interface ResolverInterface
     /**
      * Returns true if resolver supports recursion.
      *
-     * @return boolean
+     * @return bool
      */
     public function allowsRecursion(): bool;
 
     /**
      * Check if the resolver knows about a domain.
-     * Returns true if the resolver holds info about $domain
+     * Returns true if the resolver holds info about $domain.
      *
      * @param string $domain The domain to check for
      *
-     * @return boolean
+     * @return bool
      */
     public function isAuthority($domain): bool;
 }

@@ -23,7 +23,7 @@ class EncoderTest extends TestCase
     {
         $encoded = 0b1000010000000000;
 
-        $header = (new Header)
+        $header = (new Header())
             ->setResponse(true)
             ->setOpcode(0)
             ->setAuthoritative(true)
@@ -35,17 +35,17 @@ class EncoderTest extends TestCase
 
         $this->assertEquals($encoded, Encoder::encodeFlags($header));
     }
-    
+
     public function testEncodeDomainName()
     {
         $input_1 = 'www.example.com.';
-        $expectation_1 = chr(3) . 'www' . chr(7) . 'example' . chr(3) . 'com' . "\0";
+        $expectation_1 = chr(3).'www'.chr(7).'example'.chr(3).'com'."\0";
 
         $input_2 = '.';
         $expectation_2 = "\0";
 
         $input_3 = 'tld.';
-        $expectation_3 = chr(3) . 'tld' . "\0";
+        $expectation_3 = chr(3).'tld'."\0";
 
         $this->assertEquals($expectation_1, Encoder::encodeDomainName($input_1));
         $this->assertEquals($expectation_2, Encoder::encodeDomainName($input_2));
@@ -58,29 +58,29 @@ class EncoderTest extends TestCase
     public function testEncodeQuestionResourceRecord()
     {
         $input_1 = [];
-        $input_1[] = (new ResourceRecord)
+        $input_1[] = (new ResourceRecord())
             ->setName('www.example.com.')
             ->setType(RecordTypeEnum::TYPE_A)
             ->setClass(ClassEnum::INTERNET)
             ->setQuestion(true);
 
         $expectation_1 =
-            chr(3) . 'www' . chr(7) . 'example' . chr(3) . 'com' . "\0" .
+            chr(3).'www'.chr(7).'example'.chr(3).'com'."\0".
             pack('nn', 1, 1);
 
         $input_2 = [];
-        $input_2[] = (new ResourceRecord)
+        $input_2[] = (new ResourceRecord())
             ->setName('domain.com.au.')
             ->setType(RecordTypeEnum::TYPE_MX)
             ->setClass(ClassEnum::INTERNET)
             ->setQuestion(2);
 
         $expectation_2 =
-            chr(6) . 'domain' . chr(3) . 'com' . chr(2) . 'au' . "\0" .
+            chr(6).'domain'.chr(3).'com'.chr(2).'au'."\0".
             pack('nn', 15, 1);
 
         $input_3 = [$input_1[0], $input_2[0]];
-        $expectation_3 = $expectation_1 . $expectation_2;
+        $expectation_3 = $expectation_1.$expectation_2;
 
         $this->assertEquals($expectation_1, Encoder::encodeResourceRecords($input_1));
         $this->assertEquals($expectation_2, Encoder::encodeResourceRecords($input_2));
@@ -102,10 +102,10 @@ class EncoderTest extends TestCase
         $type = RecordTypeEnum::TYPE_MX;
         $ipAddress = '192.163.5.2';
 
-        $rdata = pack('n', $preference) . $exchangeEncoded;
+        $rdata = pack('n', $preference).$exchangeEncoded;
         $rdata2 = inet_pton($ipAddress);
 
-        $decoded1 = (new ResourceRecord)
+        $decoded1 = (new ResourceRecord())
             ->setName($name)
             ->setTtl($ttl)
             ->setType(RecordTypeEnum::TYPE_MX)
@@ -114,14 +114,14 @@ class EncoderTest extends TestCase
                 'exchange' => $exchange,
             ]);
 
-        $decoded2 = (new ResourceRecord)
+        $decoded2 = (new ResourceRecord())
             ->setName($name)
             ->setTtl($ttl)
             ->setType(RecordTypeEnum::TYPE_A)
             ->setRdata($ipAddress);
 
-        $encoded1 = $nameEncoded . pack('nnNn', $type, $class, $ttl, strlen($rdata)) . $rdata;
-        $encoded2 = $nameEncoded . pack('nnNn', 1, $class, $ttl, strlen($rdata2)) . $rdata2;
+        $encoded1 = $nameEncoded.pack('nnNn', $type, $class, $ttl, strlen($rdata)).$rdata;
+        $encoded2 = $nameEncoded.pack('nnNn', 1, $class, $ttl, strlen($rdata2)).$rdata2;
 
         $this->assertEquals($encoded1, Encoder::encodeResourceRecords([$decoded1]));
         $this->assertEquals($encoded2, Encoder::encodeResourceRecords([$decoded2]));
@@ -145,12 +145,12 @@ class EncoderTest extends TestCase
         $encoded_4 = str_repeat("\0", 16);
 
         $decoded_5 = 'dns1.example.com.';
-        $encoded_5 = chr(4) . 'dns1' . chr(7) . 'example' . chr(3) . 'com' . "\0";
+        $encoded_5 = chr(4).'dns1'.chr(7).'example'.chr(3).'com'."\0";
 
         $decoded_6 = [
             'mname' => 'example.com.',
             'rname' => 'postmaster.example.com',
-            'serial'=> 1970010188,
+            'serial' => 1970010188,
             'refresh' => 1800,
             'retry' => 7200,
             'expire' => 10800,
@@ -158,19 +158,19 @@ class EncoderTest extends TestCase
         ];
 
         $encoded_6 =
-            chr(7) . 'example' . chr(3) . 'com' . "\0" .
-            chr(10) . 'postmaster' . chr(7) . 'example' . chr(3) . 'com' . "\0" .
+            chr(7).'example'.chr(3).'com'."\0".
+            chr(10).'postmaster'.chr(7).'example'.chr(3).'com'."\0".
             pack('NNNNN', 1970010188, 1800, 7200, 10800, 3600);
 
         $decoded_7 = [
             'preference' => 15,
-            'exchange' => 'mail.example.com.'
+            'exchange' => 'mail.example.com.',
         ];
 
-        $encoded_7 = pack('n', 15) . chr(4) . 'mail' . chr(7) . 'example' . chr(3) . 'com' . "\0";
+        $encoded_7 = pack('n', 15).chr(4).'mail'.chr(7).'example'.chr(3).'com'."\0";
 
         $decoded_8 = 'This is a comment.';
-        $encoded_8 = chr(18) . $decoded_8;
+        $encoded_8 = chr(18).$decoded_8;
 
         $this->assertEquals($encoded_1, Encoder::encodeType(1, $decoded_1));
         $this->assertEquals($encoded_2, Encoder::encodeType(28, $decoded_2));
@@ -193,7 +193,7 @@ class EncoderTest extends TestCase
 
         $encoded = pack('nnnnnn', $id, $flags, $qdcount, $ancount, $nscount, $arcount);
 
-        $header = new Header;
+        $header = new Header();
         $header
             ->setId($id)
             ->setResponse(true)

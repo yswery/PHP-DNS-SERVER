@@ -39,6 +39,7 @@ class Message
 
     /**
      * Message constructor.
+     *
      * @param Header|null $header
      */
     public function __construct(Header $header = null)
@@ -79,6 +80,7 @@ class Message
 
     /**
      * @param ResourceRecord $resourceRecord
+     *
      * @throws \InvalidArgumentException
      */
     public function addQuestion(ResourceRecord $resourceRecord): void
@@ -144,6 +146,7 @@ class Message
 
     /**
      * @param array $resourceRecords
+     *
      * @return Message
      */
     public function setQuestions(array $resourceRecords): Message
@@ -158,6 +161,7 @@ class Message
 
     /**
      * @param array $resourceRecords
+     *
      * @return Message
      */
     public function setAnswers(array $resourceRecords): Message
@@ -170,6 +174,7 @@ class Message
 
     /**
      * @param array $resourceRecords
+     *
      * @return Message
      */
     public function setAuthoritatives(array $resourceRecords): Message
@@ -182,6 +187,7 @@ class Message
 
     /**
      * @param array $resourceRecords
+     *
      * @return Message
      */
     public function setAdditionals(array $resourceRecords): Message

@@ -111,6 +111,7 @@ class RecordTypeEnum
 
     /**
      * @param string $name The name of the record type, e.g. = 'A' or 'MX' or 'SOA'
+     *
      * @return int|false
      */
     public static function getTypeIndex(string $name)
@@ -119,6 +120,7 @@ class RecordTypeEnum
         if (!array_key_exists($key, self::$types)) {
             return false;
         }
+
         return self::$types[$key];
     }
 

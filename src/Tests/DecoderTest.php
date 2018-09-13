@@ -32,20 +32,20 @@ class DecoderTest extends TestCase
         ];
 
         $encoded = 0b1000010000000000;
-        
+
         $this->assertEquals($flags, Decoder::decodeFlags($encoded));
     }
-    
+
     public function testDecodeLabel()
     {
         $decoded_1 = 'www.example.com.';
-        $encoded_1 = chr(3) . 'www' . chr(7) . 'example' . chr(3) . 'com' . "\0";
+        $encoded_1 = chr(3).'www'.chr(7).'example'.chr(3).'com'."\0";
 
         $decoded_2 = '.';
         $encoded_2 = "\0";
 
         $decoded_3 = 'tld.';
-        $encoded_3 = chr(3) . 'tld' . "\0";
+        $encoded_3 = chr(3).'tld'."\0";
 
         $offset = 0;
         $this->assertEquals($decoded_1, Decoder::decodeLabel($encoded_1, $offset));
@@ -62,26 +62,26 @@ class DecoderTest extends TestCase
      */
     public function testDecodeQuestionResourceRecord()
     {
-        $decoded_1[] = (new ResourceRecord)
+        $decoded_1[] = (new ResourceRecord())
             ->setName('www.example.com.')
             ->setType(RecordTypeEnum::TYPE_A)
             ->setQuestion(true);
 
         $encoded_1 =
-            chr(3) . 'www' . chr(7) . 'example' . chr(3) . 'com' . "\0" .
+            chr(3).'www'.chr(7).'example'.chr(3).'com'."\0".
             pack('nn', 1, 1);
 
-        $decoded_2[] = (new ResourceRecord)
+        $decoded_2[] = (new ResourceRecord())
             ->setName('domain.com.au.')
             ->setType(RecordTypeEnum::TYPE_MX)
             ->setQuestion(true);
 
         $encoded_2 =
-            chr(6) . 'domain' . chr(3) . 'com' . chr(2) . 'au' . "\0" .
+            chr(6).'domain'.chr(3).'com'.chr(2).'au'."\0".
             pack('nn', 15, 1);
 
         $decoded_3 = [$decoded_1[0], $decoded_2[0]];
-        $encoded_3 = $encoded_1 . $encoded_2;
+        $encoded_3 = $encoded_1.$encoded_2;
 
         $offset = 0;
         $this->assertEquals($decoded_1, Decoder::decodeResourceRecords($encoded_1, $offset, 1, true));
@@ -106,10 +106,10 @@ class DecoderTest extends TestCase
         $type = RecordTypeEnum::TYPE_MX;
         $ipAddress = '192.163.5.2';
 
-        $rdata = pack('n', $priority) . $exchangeEncoded;
+        $rdata = pack('n', $priority).$exchangeEncoded;
         $rdata2 = inet_pton($ipAddress);
 
-        $decoded1[]  = (new ResourceRecord())
+        $decoded1[] = (new ResourceRecord())
             ->setName($name)
             ->setClass($class)
             ->setTtl($ttl)
@@ -119,15 +119,15 @@ class DecoderTest extends TestCase
                 'exchange' => $exchange,
             ]);
 
-        $decoded2[]  = (new ResourceRecord())
+        $decoded2[] = (new ResourceRecord())
             ->setName($name)
             ->setClass($class)
             ->setTtl($ttl)
             ->setType(RecordTypeEnum::TYPE_A)
             ->setRdata($ipAddress);
 
-        $encoded1 = $nameEncoded . pack('nnNn', $type, $class, $ttl, strlen($rdata)) . $rdata;
-        $encoded2 = $nameEncoded . pack('nnNn', 1, $class, $ttl, strlen($rdata2)) . $rdata2;
+        $encoded1 = $nameEncoded.pack('nnNn', $type, $class, $ttl, strlen($rdata)).$rdata;
+        $encoded2 = $nameEncoded.pack('nnNn', 1, $class, $ttl, strlen($rdata2)).$rdata2;
 
         $offset = 0;
         $this->assertEquals($decoded1, Decoder::decodeResourceRecords($encoded1, $offset, 1));
@@ -148,12 +148,12 @@ class DecoderTest extends TestCase
         $encoded_2 = inet_pton($decoded_2);
 
         $decoded_5 = 'dns1.example.com.';
-        $encoded_5 = chr(4) . 'dns1' . chr(7) . 'example' . chr(3) . 'com' . "\0";
+        $encoded_5 = chr(4).'dns1'.chr(7).'example'.chr(3).'com'."\0";
 
         $decoded_6_prime = [
             'mname' => 'example.com.',
             'rname' => 'postmaster.example.com.',
-            'serial'=> 1970010188,
+            'serial' => 1970010188,
             'refresh' => 1800,
             'retry' => 7200,
             'expire' => 10800,
@@ -161,18 +161,18 @@ class DecoderTest extends TestCase
         ];
 
         $encoded_6 =
-            chr(7) . 'example' . chr(3) . 'com' . "\0" .
-            chr(10) . 'postmaster' . chr(7) . 'example' . chr(3) . 'com' . "\0" .
+            chr(7).'example'.chr(3).'com'."\0".
+            chr(10).'postmaster'.chr(7).'example'.chr(3).'com'."\0".
             pack('NNNNN', 1970010188, 1800, 7200, 10800, 3600);
 
-        $encoded_7 = pack('n', 10) . chr(4) . 'mail' . chr(7) . 'example' . chr(3) . 'com' . "\0";
+        $encoded_7 = pack('n', 10).chr(4).'mail'.chr(7).'example'.chr(3).'com'."\0";
         $decoded_7_prime = [
             'preference' => 10,
             'exchange' => 'mail.example.com.',
         ];
 
         $decoded_8 = 'This is a comment.';
-        $encoded_8 = chr(strlen($decoded_8)) . $decoded_8;
+        $encoded_8 = chr(strlen($decoded_8)).$decoded_8;
 
         $this->assertEquals($decoded_1, Decoder::decodeType(RecordTypeEnum::TYPE_A, $encoded_1));
         $this->assertEquals($decoded_2, Decoder::decodeType(RecordTypeEnum::TYPE_AAAA, $encoded_2));

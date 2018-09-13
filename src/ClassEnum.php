@@ -41,6 +41,7 @@ class ClassEnum
 
     /**
      * @param int $class
+     *
      * @return mixed
      */
     public static function getName(int $class): string
@@ -54,6 +55,7 @@ class ClassEnum
 
     /**
      * @param string $name
+     *
      * @return int
      */
     public static function getClassFromName(string $name): int

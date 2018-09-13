@@ -52,11 +52,13 @@ class ResourceRecord
 
     /**
      * @param string $name
+     *
      * @return ResourceRecord
      */
     public function setName($name): ResourceRecord
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -70,11 +72,13 @@ class ResourceRecord
 
     /**
      * @param int $type
+     *
      * @return ResourceRecord
      */
     public function setType($type): ResourceRecord
     {
         $this->type = $type;
+
         return $this;
     }
 
@@ -88,11 +92,13 @@ class ResourceRecord
 
     /**
      * @param int $ttl
+     *
      * @return ResourceRecord
      */
     public function setTtl($ttl): ResourceRecord
     {
         $this->ttl = $ttl;
+
         return $this;
     }
 
@@ -106,11 +112,13 @@ class ResourceRecord
 
     /**
      * @param array|string $rdata
+     *
      * @return ResourceRecord
      */
     public function setRdata($rdata): ResourceRecord
     {
         $this->rdata = $rdata;
+
         return $this;
     }
 
@@ -124,11 +132,13 @@ class ResourceRecord
 
     /**
      * @param int $class
+     *
      * @return ResourceRecord
      */
     public function setClass($class): ResourceRecord
     {
         $this->class = $class;
+
         return $this;
     }
 
@@ -142,11 +152,13 @@ class ResourceRecord
 
     /**
      * @param bool $question
+     *
      * @return ResourceRecord
      */
     public function setQuestion($question): ResourceRecord
     {
         $this->question = (bool) $question;
+
         return $this;
     }
 
@@ -158,9 +170,9 @@ class ResourceRecord
         if (is_array($this->rdata)) {
             $rdata = '(';
             foreach ($this->rdata as $key => $value) {
-                $rdata .= $key . ': ' . $value . ', ';
+                $rdata .= $key.': '.$value.', ';
             }
-            $rdata = rtrim($rdata, ', ') . ')';
+            $rdata = rtrim($rdata, ', ').')';
         } else {
             $rdata = $this->rdata;
         }

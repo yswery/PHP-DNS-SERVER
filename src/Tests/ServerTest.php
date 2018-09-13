@@ -11,7 +11,6 @@
 namespace yswery\DNS\Tests;
 
 use yswery\DNS\ClassEnum;
-use yswery\DNS\EchoLogger;
 use yswery\DNS\Header;
 use yswery\DNS\JsonResolver;
 use yswery\DNS\Message;
@@ -33,7 +32,7 @@ class ServerTest extends TestCase
      */
     public function setUp()
     {
-        $storage = new JsonResolver(__DIR__ . '/Resources/test_records.json');
+        $storage = new JsonResolver(__DIR__.'/Resources/test_records.json');
         $this->server = new Server($storage);
     }
 
@@ -41,6 +40,7 @@ class ServerTest extends TestCase
      * @param $name
      * @param $type
      * @param $id
+     *
      * @return array
      */
     private function encodeQuery($name, $type, $id)
@@ -48,7 +48,7 @@ class ServerTest extends TestCase
         $qname = Encoder::encodeDomainName($name);
         $flags = 0b0000000000000000;
         $header = pack('nnnnnn', $id, $flags, 1, 0, 0, 0);
-        $question = $qname . pack('nn', $type, 1);
+        $question = $qname.pack('nn', $type, 1);
 
         return [$header, $question];
     }
@@ -59,28 +59,28 @@ class ServerTest extends TestCase
     public function testHandleQueryFromStream()
     {
         list($queryHeader, $question) = $this->encodeQuery($name = 'test.com.', RecordTypeEnum::TYPE_A, $id = 1337);
-        $packet = $queryHeader . $question;
+        $packet = $queryHeader.$question;
 
         $flags = 0b1000010000000000;
         $qname = Encoder::encodeDomainName($name);
         $header = pack('nnnnnn', $id, $flags, 1, 1, 0, 0);
 
         $rdata = inet_pton('111.111.111.111');
-        $answer = $qname . pack('nnNn', 1, 1, 300, strlen($rdata)) . $rdata;
+        $answer = $qname.pack('nnNn', 1, 1, 300, strlen($rdata)).$rdata;
 
-        $expectation = $header . $question . $answer;
+        $expectation = $header.$question.$answer;
 
         $this->assertEquals($expectation, $this->server->handleQueryFromStream($packet));
     }
 
     /**
-     * Tests that the server sends back a "Not implemented" RCODE for a type that has not been implemented, namely "OPT"
+     * Tests that the server sends back a "Not implemented" RCODE for a type that has not been implemented, namely "OPT".
      *
      * @throws \yswery\DNS\UnsupportedTypeException
      */
     public function testOptType()
     {
-        $q_RR = (new ResourceRecord)
+        $q_RR = (new ResourceRecord())
             ->setName('test.com.')
             ->setType(RecordTypeEnum::TYPE_OPT)
             ->setClass(ClassEnum::INTERNET)
@@ -103,7 +103,7 @@ class ServerTest extends TestCase
         $queryEncoded = Encoder::encodeMessage($query);
         $responseEncoded = Encoder::encodeMessage($response);
 
-        $server = new Server(new DummyResolver);
+        $server = new Server(new DummyResolver());
         $this->assertEquals($responseEncoded, $server->handleQueryFromStream($queryEncoded));
     }
 }

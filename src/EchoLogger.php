@@ -16,6 +16,6 @@ class EchoLogger extends AbstractLogger
 {
     public function log($level, $message, array $context = array())
     {
-        echo sprintf('[%s] %s: %s' . PHP_EOL, date('c'), $level, $message);
+        echo sprintf('[%s] %s: %s'.PHP_EOL, date('c'), $level, $message);
     }
 }

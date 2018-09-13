@@ -31,93 +31,93 @@ class Header
     const RCODE_REFUSED = 5;
 
     /**
-     * ID
+     * ID.
      *
-     * @var integer
+     * @var int
      */
     private $id;
 
     /**
-     * QR
+     * QR.
      *
      * @var bool
      */
     private $response;
 
     /**
-     * OPCODE
+     * OPCODE.
      *
-     * @var integer
+     * @var int
      */
     private $opcode;
 
     /**
-     * AA
+     * AA.
      *
      * @var bool
      */
     private $authoritative;
 
     /**
-     * TC
+     * TC.
      *
      * @var bool
      */
     private $truncated;
 
     /**
-     * RD
+     * RD.
      *
      * @var bool
      */
     private $recursionDesired;
 
     /**
-     * RA
+     * RA.
      *
      * @var bool
      */
     private $recursionAvailable;
 
     /**
-     * A
+     * A.
      *
-     * @var integer
+     * @var int
      */
     private $z = 0;
 
     /**
-     * RCODE
+     * RCODE.
      *
-     * @var integer
+     * @var int
      */
     private $rcode;
 
     /**
-     * QDCOUNT
+     * QDCOUNT.
      *
-     * @var integer
+     * @var int
      */
     private $questionCount;
 
     /**
-     * ANCOUNT
+     * ANCOUNT.
      *
-     * @var integer
+     * @var int
      */
     private $answerCount;
 
     /**
-     * NSCOUNT
+     * NSCOUNT.
      *
-     * @var integer
+     * @var int
      */
     private $nameServerCount;
 
     /**
-     * ARCOUNT
+     * ARCOUNT.
      *
-     * @var integer
+     * @var int
      */
     private $additionalRecordsCount;
 
@@ -131,6 +131,7 @@ class Header
 
     /**
      * @param $id
+     *
      * @return $this
      */
     public function setId($id)
@@ -158,6 +159,7 @@ class Header
 
     /**
      * @param $response
+     *
      * @return $this
      */
     public function setResponse($response)
@@ -169,6 +171,7 @@ class Header
 
     /**
      * @param $query
+     *
      * @return $this
      */
     public function setQuery($query)
@@ -188,6 +191,7 @@ class Header
 
     /**
      * @param $opcode
+     *
      * @return $this
      */
     public function setOpcode($opcode)
@@ -207,6 +211,7 @@ class Header
 
     /**
      * @param $authoritative
+     *
      * @return $this
      */
     public function setAuthoritative($authoritative)
@@ -226,6 +231,7 @@ class Header
 
     /**
      * @param $truncated
+     *
      * @return $this
      */
     public function setTruncated($truncated)
@@ -245,6 +251,7 @@ class Header
 
     /**
      * @param $recursionDesired
+     *
      * @return $this
      */
     public function setRecursionDesired($recursionDesired)
@@ -264,6 +271,7 @@ class Header
 
     /**
      * @param $recursionAvailable
+     *
      * @return $this
      */
     public function setRecursionAvailable($recursionAvailable)
@@ -283,6 +291,7 @@ class Header
 
     /**
      * @param $z
+     *
      * @return $this
      */
     public function setZ($z)
@@ -302,6 +311,7 @@ class Header
 
     /**
      * @param $rcode
+     *
      * @return $this
      */
     public function setRcode($rcode)
@@ -321,6 +331,7 @@ class Header
 
     /**
      * @param $questionCount
+     *
      * @return $this
      */
     public function setQuestionCount($questionCount)
@@ -340,6 +351,7 @@ class Header
 
     /**
      * @param $answerCount
+     *
      * @return $this
      */
     public function setAnswerCount($answerCount)
@@ -359,6 +371,7 @@ class Header
 
     /**
      * @param $nameServerCount
+     *
      * @return $this
      */
     public function setNameServerCount($nameServerCount)
@@ -378,6 +391,7 @@ class Header
 
     /**
      * @param $additionalRecordsCount
+     *
      * @return $this
      */
     public function setAdditionalRecordsCount($additionalRecordsCount)

@@ -12,7 +12,6 @@ namespace yswery\DNS;
 
 class StackableResolver implements ResolverInterface
 {
-
     /**
      * @var ResolverInterface[]
      */
@@ -25,6 +24,7 @@ class StackableResolver implements ResolverInterface
 
     /**
      * @param ResourceRecord[] $question
+     *
      * @return array
      */
     public function getAnswer(array $question): array
@@ -40,9 +40,9 @@ class StackableResolver implements ResolverInterface
     }
 
     /**
-     * Check if any of the resolvers supports recursion
+     * Check if any of the resolvers supports recursion.
      *
-     * @return boolean true if any resolver supports recursion
+     * @return bool true if any resolver supports recursion
      */
     public function allowsRecursion(): bool
     {
@@ -68,6 +68,7 @@ class StackableResolver implements ResolverInterface
                 return true;
             }
         }
+
         return false;
     }
 }

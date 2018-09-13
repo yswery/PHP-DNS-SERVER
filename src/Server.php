@@ -21,7 +21,7 @@ class Server implements LoggerAwareInterface
     use LoggerAwareTrait;
 
     /**
-     * @var ResolverInterface $resolver
+     * @var ResolverInterface
      */
     private $resolver;
 
@@ -59,7 +59,7 @@ class Server implements LoggerAwareInterface
     }
 
     /**
-     * Start the server
+     * Start the server.
      */
     public function start(): void
     {
@@ -80,7 +80,9 @@ class Server implements LoggerAwareInterface
 
     /**
      * @param string $buffer
+     *
      * @return string
+     *
      * @throws UnsupportedTypeException
      */
     public function handleQueryFromStream(string $buffer): string
@@ -113,11 +115,11 @@ class Server implements LoggerAwareInterface
     private function logMessage(Message $message): void
     {
         foreach ($message->getQuestions() as $question) {
-            $this->logger->log(LogLevel::INFO, 'Query: ' . $question);
+            $this->logger->log(LogLevel::INFO, 'Query: '.$question);
         }
 
         foreach ($message->getAnswers() as $answer) {
-            $this->logger->log(LogLevel::INFO, 'Answer: ' . $answer);
+            $this->logger->log(LogLevel::INFO, 'Answer: '.$answer);
         }
     }
 }

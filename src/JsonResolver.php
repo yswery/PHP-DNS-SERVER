@@ -23,15 +23,15 @@ class JsonResolver implements ResolverInterface
     private $ttl;
 
     /**
-     * @var boolean
+     * @var bool
      */
     private $recursionAvailable;
 
     /**
      * JsonResolver constructor.
      *
-     * @param string $filename The path of the JSON-formatted DNS Zone file.
-     * @param int    $ttl      The default TTL to be used for all Resource Records omitting a TTL.
+     * @param string $filename the path of the JSON-formatted DNS Zone file
+     * @param int    $ttl      the default TTL to be used for all Resource Records omitting a TTL
      *
      * @throws \Exception | \InvalidArgumentException
      */
@@ -60,6 +60,7 @@ class JsonResolver implements ResolverInterface
 
     /**
      * @param ResourceRecord[] $question
+     *
      * @return array
      */
     public function getAnswer(array $question): array
@@ -92,7 +93,7 @@ class JsonResolver implements ResolverInterface
     }
 
     /**
-     * Get the currently loaded DNS Records
+     * Get the currently loaded DNS Records.
      *
      * @return array
      */
@@ -101,11 +102,10 @@ class JsonResolver implements ResolverInterface
         return $this->records;
     }
 
-
     /**
-     * Getter method for $recursion_available property
+     * Getter method for $recursion_available property.
      *
-     * @return boolean
+     * @return bool
      */
     public function allowsRecursion(): bool
     {
@@ -121,6 +121,7 @@ class JsonResolver implements ResolverInterface
     public function isAuthority($domain): bool
     {
         $domain = trim($domain, '.');
+
         return array_key_exists($domain, $this->records);
     }
 }

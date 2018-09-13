@@ -28,6 +28,7 @@ class DummyResolver implements ResolverInterface
 
     /**
      * @param ResourceRecord[] $query
+     *
      * @return array
      */
     public function getAnswer(array $query): array
@@ -39,6 +40,6 @@ class DummyResolver implements ResolverInterface
             ->setClass($q->getClass())
             ->setTtl(300)
             ->setType(RecordTypeEnum::TYPE_OPT)
-            ->setRdata('Some data')];
+            ->setRdata('Some data'), ];
     }
 }

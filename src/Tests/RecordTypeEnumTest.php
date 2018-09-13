@@ -18,13 +18,13 @@ class RecordTypeEnumTest extends TestCase
     public function testGetsHostRecordIndex()
     {
         $hostIndex = RecordTypeEnum::getTypeIndex('A');
-        $this->assertTrue($hostIndex === RecordTypeEnum::TYPE_A);
+        $this->assertTrue(RecordTypeEnum::TYPE_A === $hostIndex);
     }
 
     public function testDoesNotGetInvalidRecordTypeIndex()
     {
         $hostIndex = RecordTypeEnum::getTypeIndex('BLAH');
-        $this->assertTrue($hostIndex === false);
+        $this->assertTrue(false === $hostIndex);
     }
 
     public function testGetsNameFromType()

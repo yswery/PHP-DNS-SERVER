@@ -14,7 +14,9 @@ class Encoder
 {
     /**
      * @param Message $message
+     *
      * @return string
+     *
      * @throws UnsupportedTypeException
      */
     public static function encodeMessage(Message $message): string
@@ -41,7 +43,7 @@ class Encoder
             return "\0";
         }
 
-        $domain = rtrim($domain, '.') . '.';
+        $domain = rtrim($domain, '.').'.';
         $res = '';
 
         foreach (explode('.', $domain) as $label) {
@@ -52,9 +54,11 @@ class Encoder
     }
 
     /**
-     * @param int $type
+     * @param int          $type
      * @param string|array $val
+     *
      * @return string
+     *
      * @throws UnsupportedTypeException
      */
     public static function encodeType($type, $val): string
@@ -96,6 +100,7 @@ class Encoder
 
     /**
      * @param array $soa
+     *
      * @return string
      */
     public static function encodeSOA(array $soa): string
@@ -115,7 +120,9 @@ class Encoder
 
     /**
      * @param ResourceRecord[] $resourceRecords
+     *
      * @return string
+     *
      * @throws UnsupportedTypeException
      */
     public static function encodeResourceRecords(array $resourceRecords): string
@@ -139,6 +146,7 @@ class Encoder
 
     /**
      * @param Header $header
+     *
      * @return string
      */
     public static function encodeHeader(Header $header): string
@@ -154,7 +162,6 @@ class Encoder
         );
     }
 
-
     /**
      * Encode the bit field of the Header between "ID" and "QDCOUNT".
      *
@@ -166,12 +173,12 @@ class Encoder
     {
         $val = 0;
 
-        $val |= ((int)$header->isResponse() & 0x1) << 15;
+        $val |= ((int) $header->isResponse() & 0x1) << 15;
         $val |= ($header->getOpcode() & 0xf) << 11;
-        $val |= ((int)$header->isAuthoritative() & 0x1) << 10;
-        $val |= ((int)$header->isTruncated() & 0x1) << 9;
-        $val |= ((int)$header->isRecursionDesired() & 0x1) << 8;
-        $val |= ((int)$header->isRecursionAvailable() & 0x1) << 7;
+        $val |= ((int) $header->isAuthoritative() & 0x1) << 10;
+        $val |= ((int) $header->isTruncated() & 0x1) << 9;
+        $val |= ((int) $header->isRecursionDesired() & 0x1) << 8;
+        $val |= ((int) $header->isRecursionAvailable() & 0x1) << 7;
         $val |= ($header->getZ() & 0x7) << 4;
         $val |= ($header->getRcode() & 0xf);
 

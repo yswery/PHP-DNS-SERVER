@@ -27,7 +27,7 @@ class JsonResolverTest extends TestCase
      */
     public function setUp()
     {
-        $this->storage = new JsonResolver(__DIR__ . '/Resources/test_records.json');
+        $this->storage = new JsonResolver(__DIR__.'/Resources/test_records.json');
     }
 
     /**
@@ -47,7 +47,7 @@ class JsonResolverTest extends TestCase
                     [
                         'exchange' => 'mail-gw2.test.com',
                         'preference' => 20,
-                    ]
+                    ],
                 ],
                 'NS' => [
                     'ns1.test.com',
@@ -56,15 +56,15 @@ class JsonResolverTest extends TestCase
                 'TXT' => 'Some text.',
                 'AAAA' => 'DEAD:01::BEEF',
                 'CNAME' => 'www2.test.com',
-                "SOA" => [
+                'SOA' => [
                     [
-                        "mname" => "ns1.test.com",
-                        "rname" => "admin.test.com",
-                        "serial" => "2014111100",
-                        "retry" => "7200",
-                        "refresh" => "1800",
-                        "expire" => "8600",
-                        "minimum" => "300"
+                        'mname' => 'ns1.test.com',
+                        'rname' => 'admin.test.com',
+                        'serial' => '2014111100',
+                        'retry' => '7200',
+                        'refresh' => '1800',
+                        'expire' => '8600',
+                        'minimum' => '300',
                     ],
                 ],
             ],
@@ -81,8 +81,7 @@ class JsonResolverTest extends TestCase
                     [
                         'preference' => 30,
                         'exchange' => 'mail-gw2.test2.com.',
-                    ]
-
+                    ],
                 ],
             ],
         ];
@@ -149,11 +148,11 @@ class JsonResolverTest extends TestCase
 
         //Cannot parse JSON
         $this->expectException(\Exception::class);
-        new JsonResolver(__DIR__ . '/Resources/invalid_dns_records.json');
+        new JsonResolver(__DIR__.'/Resources/invalid_dns_records.json');
 
         //TTL is not an integer
         $this->expectException(\Exception::class);
-        new JsonResolver(__DIR__ . '/Resources/test_records.json', '300');
+        new JsonResolver(__DIR__.'/Resources/test_records.json', '300');
     }
 
     /**
@@ -161,7 +160,7 @@ class JsonResolverTest extends TestCase
      */
     public function testConstructorLoadsRecords()
     {
-        $this->storage = new JsonResolver(__DIR__ . '/Resources/test_records.json');
-        $this->assertTrue($this->storage !== false);
+        $this->storage = new JsonResolver(__DIR__.'/Resources/test_records.json');
+        $this->assertTrue(false !== $this->storage);
     }
 }

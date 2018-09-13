@@ -14,7 +14,9 @@ class Decoder
 {
     /**
      * @param $message
+     *
      * @return Message
+     *
      * @throws UnsupportedTypeException
      */
     public static function decodeMessage($message): Message
@@ -31,6 +33,7 @@ class Decoder
 
     /**
      * @param string $flags
+     *
      * @return array
      */
     public static function decodeFlags($flags): array
@@ -73,18 +76,18 @@ class Decoder
                 return null;
             }
 
-            if ($len === 0) {
-                if ($qname === '') {
+            if (0 === $len) {
+                if ('' === $qname) {
                     $qname = '.';
                 }
                 ++$offset;
                 break;
             }
-            $qname .= substr($pkt, $offset + 1, $len) . '.';
+            $qname .= substr($pkt, $offset + 1, $len).'.';
             $offset += $len + 1;
         }
 
-        if ($endOffset !== null) {
+        if (null !== $endOffset) {
             $offset = $endOffset;
         }
 
@@ -93,10 +96,12 @@ class Decoder
 
     /**
      * @param string $pkt
-     * @param int $offset
-     * @param int $count
-     * @param bool $isQuestion
+     * @param int    $offset
+     * @param int    $count
+     * @param bool   $isQuestion
+     *
      * @return ResourceRecord[]
+     *
      * @throws UnsupportedTypeException
      */
     public static function decodeResourceRecords($pkt, &$offset, $count, $isQuestion = false): array
@@ -104,7 +109,7 @@ class Decoder
         $resourceRecords = [];
 
         for ($i = 0; $i < $count; ++$i) {
-            ($rr = new ResourceRecord)
+            ($rr = new ResourceRecord())
                 ->setQuestion($isQuestion)
                 ->setName(self::decodeLabel($pkt, $offset));
 
@@ -127,9 +132,11 @@ class Decoder
     }
 
     /**
-     * @param int $type
+     * @param int    $type
      * @param string $val
+     *
      * @return array|string|null
+     *
      * @throws UnsupportedTypeException
      */
     public static function decodeType($type, $val)
@@ -187,6 +194,7 @@ class Decoder
     /**
      * @param $pkt
      * @param int $offset
+     *
      * @return Header
      */
     public static function decodeHeader($pkt, &$offset = 0): Header
@@ -195,7 +203,7 @@ class Decoder
         $flags = self::decodeFlags($data['flags']);
         $offset += 12;
 
-        return (new Header)
+        return (new Header())
             ->setId($data['id'])
             ->setResponse($flags['qr'])
             ->setOpcode($flags['opcode'])

@@ -16,7 +16,9 @@ class RecursiveResolver implements ResolverInterface
 
     /**
      * @param ResourceRecord[] $question
+     *
      * @return ResourceRecord[]
+     *
      * @throws UnsupportedTypeException
      */
     public function getAnswer(array $question): array
@@ -26,7 +28,7 @@ class RecursiveResolver implements ResolverInterface
 
         $records = $this->getRecordsRecursively($query->getName(), $query->getType());
         foreach ($records as $record) {
-            $answer[] = (new ResourceRecord)
+            $answer[] = (new ResourceRecord())
                 ->setName($query->getName())
                 ->setClass($query->getClass())
                 ->setTtl($record['ttl'])
@@ -40,7 +42,9 @@ class RecursiveResolver implements ResolverInterface
     /**
      * @param $domain
      * @param $type
+     *
      * @return array
+     *
      * @throws UnsupportedTypeException
      */
     private function getRecordsRecursively($domain, $type): array
@@ -55,7 +59,7 @@ class RecursiveResolver implements ResolverInterface
         foreach ($records as $record) {
             $result[] = [
                 'rdata' => $this->extractRdata($record),
-                'ttl' => $record['ttl']
+                'ttl' => $record['ttl'],
             ];
         }
 
@@ -64,7 +68,9 @@ class RecursiveResolver implements ResolverInterface
 
     /**
      * @param array $array
+     *
      * @return array|mixed
+     *
      * @throws UnsupportedTypeException
      */
     private function extractRdata(array $array)
@@ -114,22 +120,24 @@ class RecursiveResolver implements ResolverInterface
 
     /**
      * Maps an IANA Rdata type to the built-in PHP DNS constant.
+     *
      * @example $this->IANA_to_PHP(5) //Returns DNS_CNAME int(16)
      *
-     * @param int $type The IANA RTYPE.
-     * @return int|bool The built in PHP DNS_<type> constant.
+     * @param int $type the IANA RTYPE
+     *
+     * @return int|bool the built in PHP DNS_<type> constant
      */
     private function IANA2PHP(int $type): int
     {
-        $constantName = 'DNS_' . RecordTypeEnum::getName($type);
+        $constantName = 'DNS_'.RecordTypeEnum::getName($type);
 
         return defined($constantName) ? constant($constantName) : false;
     }
 
     /**
-     * Getter method for $recursion_available property
+     * Getter method for $recursion_available property.
      *
-     * @return boolean
+     * @return bool
      */
     public function allowsRecursion(): bool
     {
@@ -137,11 +145,12 @@ class RecursiveResolver implements ResolverInterface
     }
 
     /**
-    * Check if the resolver knows about a domain
-    *
-    * @param  string  $domain the domain to check for
-    * @return boolean         true if the resolver holds info about $domain
-    */
+     * Check if the resolver knows about a domain.
+     *
+     * @param string $domain the domain to check for
+     *
+     * @return bool true if the resolver holds info about $domain
+     */
     public function isAuthority($domain): bool
     {
         return false;
