@@ -123,7 +123,7 @@ class RecursiveResolver implements ResolverInterface
     {
         $constantName = 'DNS_' . RecordTypeEnum::getName($type);
 
-        return \defined($constantName) ? \constant($constantName) : false;
+        return defined($constantName) ? constant($constantName) : false;
     }
 
     /**

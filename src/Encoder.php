@@ -45,7 +45,7 @@ class Encoder
         $res = '';
 
         foreach (explode('.', $domain) as $label) {
-            $res .= \chr(\strlen($label)).$label;
+            $res .= chr(strlen($label)).$label;
         }
 
         return $res;
@@ -79,7 +79,7 @@ class Encoder
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 $val = substr($val, 0, 255);
-                $enc = \chr(\strlen($val)).$val;
+                $enc = chr(strlen($val)).$val;
                 break;
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:
@@ -130,7 +130,7 @@ class Encoder
             }
 
             $data = self::encodeType($rr->getType(), $rr->getRdata());
-            $res .= pack('nnNn', $rr->getType(), $rr->getClass(), $rr->getTtl(), \strlen($data));
+            $res .= pack('nnNn', $rr->getType(), $rr->getClass(), $rr->getTtl(), strlen($data));
             $res .= $data;
         }
 

@@ -53,7 +53,7 @@ class Server implements LoggerAwareInterface
 
         set_time_limit(0);
 
-        if (!\function_exists('socket_create') || !\extension_loaded('sockets')) {
+        if (!function_exists('socket_create') || !extension_loaded('sockets')) {
             throw new \Exception('Socket extension or socket_create() function not found.');
         }
     }

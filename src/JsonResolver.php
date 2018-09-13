@@ -49,7 +49,7 @@ class JsonResolver implements ResolverInterface
             throw new \Exception(sprintf('Unable to parse JSON file: "%s".', $filename));
         }
 
-        if (!\is_int($ttl)) {
+        if (!is_int($ttl)) {
             throw new \InvalidArgumentException('Default TTL must be an integer.');
         }
 

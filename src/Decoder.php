@@ -55,7 +55,7 @@ class Decoder
         $qname = '';
 
         while (1) {
-            $len = \ord($pkt[$offset]);
+            $len = ord($pkt[$offset]);
             $type = $len >> 6 & 0x2;
 
             switch ($type) {
@@ -69,7 +69,7 @@ class Decoder
                     break;
             }
 
-            if ($len > (\strlen($pkt) - $offset)) {
+            if ($len > (strlen($pkt) - $offset)) {
                 return null;
             }
 
@@ -162,9 +162,9 @@ class Decoder
                 ];
                 break;
             case RecordTypeEnum::TYPE_TXT:
-                $len = \ord($val[0]);
+                $len = ord($val[0]);
 
-                if ((\strlen($val) + 1) < $len) {
+                if ((strlen($val) + 1) < $len) {
                     $data = null;
                     break;
                 }

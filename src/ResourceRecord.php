@@ -155,7 +155,7 @@ class ResourceRecord
      */
     public function __toString()
     {
-        if (\is_array($this->rdata)) {
+        if (is_array($this->rdata)) {
             $rdata = '(';
             foreach ($this->rdata as $key => $value) {
                 $rdata .= $key . ': ' . $value . ', ';

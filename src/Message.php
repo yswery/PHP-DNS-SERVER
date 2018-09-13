@@ -88,7 +88,7 @@ class Message
         }
 
         $this->questions[] = $resourceRecord;
-        $this->header->setQuestionCount(\count($this->questions));
+        $this->header->setQuestionCount(count($this->questions));
     }
 
     /**
@@ -105,7 +105,7 @@ class Message
     public function addAnswer(ResourceRecord $resourceRecord): void
     {
         $this->answers[] = $resourceRecord;
-        $this->header->setAnswerCount(\count($this->answers));
+        $this->header->setAnswerCount(count($this->answers));
     }
 
     /**
@@ -122,7 +122,7 @@ class Message
     public function addAuthoritative(ResourceRecord $resourceRecord): void
     {
         $this->authoritatives[] = $resourceRecord;
-        $this->header->setNameServerCount(\count($this->authoritatives));
+        $this->header->setNameServerCount(count($this->authoritatives));
     }
 
     /**
@@ -139,7 +139,7 @@ class Message
     public function addAdditional(ResourceRecord $resourceRecord): void
     {
         $this->additionals[] = $resourceRecord;
-        $this->header->setAdditionalRecordsCount(\count($this->additionals));
+        $this->header->setAdditionalRecordsCount(count($this->additionals));
     }
 
     /**
@@ -163,7 +163,7 @@ class Message
     public function setAnswers(array $resourceRecords): Message
     {
         $this->answers = $resourceRecords;
-        $this->header->setAnswerCount(\count($this->answers));
+        $this->header->setAnswerCount(count($this->answers));
 
         return $this;
     }
@@ -175,7 +175,7 @@ class Message
     public function setAuthoritatives(array $resourceRecords): Message
     {
         $this->authoritatives = $resourceRecords;
-        $this->header->setNameServerCount(\count($this->authoritatives));
+        $this->header->setNameServerCount(count($this->authoritatives));
 
         return $this;
     }
@@ -187,7 +187,7 @@ class Message
     public function setAdditionals(array $resourceRecords): Message
     {
         $this->additionals = $resourceRecords;
-        $this->header->setAdditionalRecordsCount(\count($this->additionals));
+        $this->header->setAdditionalRecordsCount(count($this->additionals));
 
         return $this;
     }
