@@ -10,7 +10,7 @@
 
 namespace yswery\DNS\Tests;
 
-use yswery\DNS\JsonResolver;
+use yswery\DNS\Resolver\JsonResolver;
 use yswery\DNS\ResourceRecord;
 use yswery\DNS\RecordTypeEnum;
 use PHPUnit\Framework\TestCase;
@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 class JsonResolverTest extends TestCase
 {
     /**
-     * @var \yswery\DNS\JsonResolver
+     * @var JsonResolver
      */
     protected $storage;
 

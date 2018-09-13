@@ -10,6 +10,7 @@
 
 namespace yswery\DNS;
 
+use yswery\DNS\Resolver\ResolverInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LogLevel;

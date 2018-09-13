@@ -12,12 +12,12 @@ namespace yswery\DNS\Tests;
 
 use yswery\DNS\ClassEnum;
 use yswery\DNS\Header;
-use yswery\DNS\JsonResolver;
 use yswery\DNS\Message;
 use yswery\DNS\RecordTypeEnum;
 use yswery\DNS\Encoder;
 use yswery\DNS\ResourceRecord;
 use yswery\DNS\Server;
+use yswery\DNS\Resolver\JsonResolver;
 use PHPUnit\Framework\TestCase;
 
 class ServerTest extends TestCase

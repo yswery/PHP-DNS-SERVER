@@ -8,7 +8,11 @@
  * file that was distributed with this source code.
  */
 
-namespace yswery\DNS;
+namespace yswery\DNS\Resolver;
+
+use yswery\DNS\UnsupportedTypeException;
+use yswery\DNS\ResourceRecord;
+use yswery\DNS\RecordTypeEnum;
 
 class RecursiveResolver implements ResolverInterface
 {

@@ -8,7 +8,9 @@
  * file that was distributed with this source code.
  */
 
-namespace yswery\DNS;
+namespace yswery\DNS\Resolver;
+
+use yswery\DNS\ResourceRecord;
 
 /**
  * Class ResolverInterface.
