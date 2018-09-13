@@ -21,13 +21,12 @@ class Encoder
      */
     public static function encodeMessage(Message $message): string
     {
-        $response = self::encodeHeader($message->getHeader());
-        $response .= self::encodeResourceRecords($message->getQuestions());
-        $response .= self::encodeResourceRecords($message->getAnswers());
-        $response .= self::encodeResourceRecords($message->getAuthoritatives());
-        $response .= self::encodeResourceRecords($message->getAdditionals());
-
-        return $response;
+        return
+            self::encodeHeader($message->getHeader()).
+            self::encodeResourceRecords($message->getQuestions()).
+            self::encodeResourceRecords($message->getAnswers()).
+            self::encodeResourceRecords($message->getAuthoritatives()).
+            self::encodeResourceRecords($message->getAdditionals());
     }
 
     /**

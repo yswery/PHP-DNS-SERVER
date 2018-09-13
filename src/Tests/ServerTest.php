@@ -32,8 +32,8 @@ class ServerTest extends TestCase
      */
     public function setUp()
     {
-        $storage = new JsonResolver(__DIR__.'/Resources/test_records.json');
-        $this->server = new Server($storage);
+        $resolver = new JsonResolver(__DIR__.'/Resources/test_records.json');
+        $this->server = new Server($resolver);
     }
 
     /**

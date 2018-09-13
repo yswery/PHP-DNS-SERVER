@@ -43,6 +43,8 @@ class ClassEnum
      * @param int $class
      *
      * @return mixed
+     *
+     * @throws \InvalidArgumentException
      */
     public static function getName(int $class): string
     {
