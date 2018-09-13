@@ -87,9 +87,9 @@ class JsonResolverTest extends TestCase
             ],
         ];
 
-        $this->assertEquals($expected, $this->storage->getDnsRecords());
+        $this->assertEquals($expected, $this->storage->getRecords());
     }
-    
+
     public function testHostRecordResolves()
     {
         $question[] = (new ResourceRecord())
@@ -144,15 +144,15 @@ class JsonResolverTest extends TestCase
     public function testConstructorThrowsExceptions()
     {
         //Non-existent file
-        $this->expectException('\Exception');
+        $this->expectException(\Exception::class);
         new JsonResolver('blah.json');
 
         //Cannot parse JSON
-        $this->expectException('\Exception');
+        $this->expectException(\Exception::class);
         new JsonResolver(__DIR__ . '/Resources/invalid_dns_records.json');
 
         //TTL is not an integer
-        $this->expectException('\Exception');
+        $this->expectException(\Exception::class);
         new JsonResolver(__DIR__ . '/Resources/test_records.json', '300');
     }
 

@@ -12,10 +12,10 @@ namespace yswery\DNS;
 
 class ClassEnum
 {
-    const INTERNET = 1;
-    const CSNET = 2;
-    const CHAOS = 3;
-    const HESIOD = 4;
+    public const INTERNET = 1;
+    public const CSNET = 2;
+    public const CHAOS = 3;
+    public const HESIOD = 4;
 
     /**
      * @var array
@@ -58,6 +58,6 @@ class ClassEnum
      */
     public static function getClassFromName(string $name): int
     {
-        return array_search($name, self::$classes);
+        return array_search($name, self::$classes, true);
     }
 }

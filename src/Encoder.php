@@ -19,11 +19,11 @@ class Encoder
      */
     public static function encodeMessage(Message $message): string
     {
-        $response = Encoder::encodeHeader($message->getHeader());
-        $response .= Encoder::encodeResourceRecords($message->getQuestions());
-        $response .= Encoder::encodeResourceRecords($message->getAnswers());
-        $response .= Encoder::encodeResourceRecords($message->getAuthoritatives());
-        $response .= Encoder::encodeResourceRecords($message->getAdditionals());
+        $response = self::encodeHeader($message->getHeader());
+        $response .= self::encodeResourceRecords($message->getQuestions());
+        $response .= self::encodeResourceRecords($message->getAnswers());
+        $response .= self::encodeResourceRecords($message->getAuthoritatives());
+        $response .= self::encodeResourceRecords($message->getAdditionals());
 
         return $response;
     }
@@ -32,9 +32,10 @@ class Encoder
      * Encode a domain name as a sequence of labels.
      *
      * @param $domain
+     *
      * @return string
      */
-    public static function encodeDomainName($domain)
+    public static function encodeDomainName($domain): string
     {
         if ('.' === $domain) {
             return "\0";
@@ -44,7 +45,7 @@ class Encoder
         $res = '';
 
         foreach (explode('.', $domain) as $label) {
-            $res .= chr(strlen($label)) . $label;
+            $res .= \chr(\strlen($label)).$label;
         }
 
         return $res;
@@ -78,7 +79,7 @@ class Encoder
                 break;
             case RecordTypeEnum::TYPE_TXT:
                 $val = substr($val, 0, 255);
-                $enc = chr(strlen($val)) . $val;
+                $enc = \chr(\strlen($val)).$val;
                 break;
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:
@@ -86,7 +87,7 @@ class Encoder
                 break;
             default:
                 throw new UnsupportedTypeException(
-                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::get_name($type))
+                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
                 );
         }
 
@@ -97,11 +98,11 @@ class Encoder
      * @param array $soa
      * @return string
      */
-    public static function encodeSOA(array $soa)
+    public static function encodeSOA(array $soa): string
     {
         return
-            self::encodeDomainName($soa['mname']) .
-            self::encodeDomainName($soa['rname']) .
+            self::encodeDomainName($soa['mname']).
+            self::encodeDomainName($soa['rname']).
             pack(
                 'NNNNN',
                 $soa['serial'],
@@ -128,8 +129,8 @@ class Encoder
                 continue;
             }
 
-            $data = self::EncodeType($rr->getType(), $rr->getRdata());
-            $res .= pack('nnNn', $rr->getType(), $rr->getClass(), $rr->getTtl(), strlen($data));
+            $data = self::encodeType($rr->getType(), $rr->getRdata());
+            $res .= pack('nnNn', $rr->getType(), $rr->getClass(), $rr->getTtl(), \strlen($data));
             $res .= $data;
         }
 
@@ -140,7 +141,7 @@ class Encoder
      * @param Header $header
      * @return string
      */
-    public static function encodeHeader(Header $header)
+    public static function encodeHeader(Header $header): string
     {
         return pack(
             'nnnnnn',
@@ -158,18 +159,19 @@ class Encoder
      * Encode the bit field of the Header between "ID" and "QDCOUNT".
      *
      * @param Header $header
+     *
      * @return int
      */
-    public static function encodeFlags(Header $header)
+    public static function encodeFlags(Header $header): int
     {
         $val = 0;
 
-        $val |= ((int) $header->isResponse() & 0x1) << 15;
+        $val |= ((int)$header->isResponse() & 0x1) << 15;
         $val |= ($header->getOpcode() & 0xf) << 11;
-        $val |= ((int) $header->isAuthoritative() & 0x1) << 10;
-        $val |= ((int) $header->isTruncated() & 0x1) << 9;
-        $val |= ((int) $header->isRecursionDesired() & 0x1) << 8;
-        $val |= ((int) $header->isRecursionAvailable() & 0x1) << 7;
+        $val |= ((int)$header->isAuthoritative() & 0x1) << 10;
+        $val |= ((int)$header->isTruncated() & 0x1) << 9;
+        $val |= ((int)$header->isRecursionDesired() & 0x1) << 8;
+        $val |= ((int)$header->isRecursionAvailable() & 0x1) << 7;
         $val |= ($header->getZ() & 0x7) << 4;
         $val |= ($header->getRcode() & 0xf);
 

@@ -45,7 +45,7 @@ class ResourceRecord
     /**
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -54,7 +54,7 @@ class ResourceRecord
      * @param string $name
      * @return ResourceRecord
      */
-    public function setName($name)
+    public function setName($name): ResourceRecord
     {
         $this->name = $name;
         return $this;
@@ -63,7 +63,7 @@ class ResourceRecord
     /**
      * @return int
      */
-    public function getType()
+    public function getType(): int
     {
         return $this->type;
     }
@@ -72,7 +72,7 @@ class ResourceRecord
      * @param int $type
      * @return ResourceRecord
      */
-    public function setType($type)
+    public function setType($type): ResourceRecord
     {
         $this->type = $type;
         return $this;
@@ -81,7 +81,7 @@ class ResourceRecord
     /**
      * @return int
      */
-    public function getTtl()
+    public function getTtl(): int
     {
         return $this->ttl;
     }
@@ -90,7 +90,7 @@ class ResourceRecord
      * @param int $ttl
      * @return ResourceRecord
      */
-    public function setTtl($ttl)
+    public function setTtl($ttl): ResourceRecord
     {
         $this->ttl = $ttl;
         return $this;
@@ -108,7 +108,7 @@ class ResourceRecord
      * @param array|string $rdata
      * @return ResourceRecord
      */
-    public function setRdata($rdata)
+    public function setRdata($rdata): ResourceRecord
     {
         $this->rdata = $rdata;
         return $this;
@@ -117,7 +117,7 @@ class ResourceRecord
     /**
      * @return int
      */
-    public function getClass()
+    public function getClass(): int
     {
         return $this->class;
     }
@@ -126,7 +126,7 @@ class ResourceRecord
      * @param int $class
      * @return ResourceRecord
      */
-    public function setClass($class)
+    public function setClass($class): ResourceRecord
     {
         $this->class = $class;
         return $this;
@@ -135,7 +135,7 @@ class ResourceRecord
     /**
      * @return bool
      */
-    public function isQuestion()
+    public function isQuestion(): bool
     {
         return $this->question;
     }
@@ -144,7 +144,7 @@ class ResourceRecord
      * @param bool $question
      * @return ResourceRecord
      */
-    public function setQuestion($question)
+    public function setQuestion($question): ResourceRecord
     {
         $this->question = (bool) $question;
         return $this;
@@ -155,7 +155,7 @@ class ResourceRecord
      */
     public function __toString()
     {
-        if (is_array($this->rdata)) {
+        if (\is_array($this->rdata)) {
             $rdata = '(';
             foreach ($this->rdata as $key => $value) {
                 $rdata .= $key . ': ' . $value . ', ';
@@ -168,7 +168,7 @@ class ResourceRecord
         return sprintf(
             '%s %s %s %s %s',
             $this->name,
-            RecordTypeEnum::get_name($this->type),
+            RecordTypeEnum::getName($this->type),
             ClassEnum::getName($this->class),
             $this->ttl,
             $rdata

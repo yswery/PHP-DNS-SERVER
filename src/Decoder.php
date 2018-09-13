@@ -17,14 +17,14 @@ class Decoder
      * @return Message
      * @throws UnsupportedTypeException
      */
-    public static function decodeMessage($message)
+    public static function decodeMessage($message): Message
     {
         $offset = 0;
         $header = self::decodeHeader($message, $offset);
 
         return (new Message($header))
             ->setQuestions(self::decodeResourceRecords($message, $offset, $header->getQuestionCount(), true))
-            ->setAnswers(self::decodeResourceRecords($message,$offset, $header->getAnswerCount()))
+            ->setAnswers(self::decodeResourceRecords($message, $offset, $header->getAnswerCount()))
             ->setAuthoritatives(self::decodeResourceRecords($message, $offset, $header->getNameServerCount()))
             ->setAdditionals(self::decodeResourceRecords($message, $offset, $header->getAdditionalRecordsCount()));
     }
@@ -33,7 +33,7 @@ class Decoder
      * @param string $flags
      * @return array
      */
-    public static function decodeFlags($flags)
+    public static function decodeFlags($flags): array
     {
         $res = [];
 
@@ -48,20 +48,20 @@ class Decoder
 
         return $res;
     }
-    
-    public static function decodeLabel($pkt, &$offset)
+
+    public static function decodeLabel($pkt, &$offset): ?string
     {
-        $end_offset = null;
+        $endOffset = null;
         $qname = '';
 
         while (1) {
-            $len = ord($pkt[$offset]);
+            $len = \ord($pkt[$offset]);
             $type = $len >> 6 & 0x2;
 
             switch ($type) {
                 case 0x2:
                     $new_offset = unpack('noffset', substr($pkt, $offset, 2));
-                    $end_offset = $offset + 2;
+                    $endOffset = $offset + 2;
                     $offset = $new_offset['offset'] & 0x3fff;
                     // no break
                 case 0x1:
@@ -69,12 +69,12 @@ class Decoder
                     break;
             }
 
-            if ($len > (strlen($pkt) - $offset)) {
+            if ($len > (\strlen($pkt) - $offset)) {
                 return null;
             }
 
-            if ($len == 0) {
-                if ($qname == '') {
+            if ($len === 0) {
+                if ($qname === '') {
                     $qname = '.';
                 }
                 ++$offset;
@@ -84,8 +84,8 @@ class Decoder
             $offset += $len + 1;
         }
 
-        if (!is_null($end_offset)) {
-            $offset = $end_offset;
+        if ($endOffset !== null) {
+            $offset = $endOffset;
         }
 
         return $qname;
@@ -132,7 +132,7 @@ class Decoder
      * @return array|string
      * @throws UnsupportedTypeException
      */
-    public static function decodeType($type, $val)
+    public static function decodeType($type, $val): ?int
     {
         $offset = 0;
 
@@ -162,9 +162,9 @@ class Decoder
                 ];
                 break;
             case RecordTypeEnum::TYPE_TXT:
-                $len = ord($val[0]);
+                $len = \ord($val[0]);
 
-                if ((strlen($val) + 1) < $len) {
+                if ((\strlen($val) + 1) < $len) {
                     $data = null;
                     break;
                 }
@@ -177,7 +177,7 @@ class Decoder
                 break;
             default:
                 throw new UnsupportedTypeException(
-                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::get_name($type))
+                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
                 );
         }
 
@@ -189,10 +189,10 @@ class Decoder
      * @param int $offset
      * @return Header
      */
-    public static function decodeHeader($pkt, &$offset = 0)
+    public static function decodeHeader($pkt, &$offset = 0): Header
     {
         $data = unpack('nid/nflags/nqdcount/nancount/nnscount/narcount', $pkt);
-        $flags = Decoder::decodeFlags($data['flags']);
+        $flags = self::decodeFlags($data['flags']);
         $offset += 12;
 
         return (new Header)

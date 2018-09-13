@@ -4,7 +4,6 @@
 
 # PHP DNS Server
 
-
 This is an Authoritative DNS Server written in pure PHP.
 It will listen to DNS request on the default port (Default: port 53) and give answers about any domain that it has DNS records for.
 This class can be used to give DNS responses dynamically based on your pre-existing PHP code.
@@ -18,8 +17,6 @@ This class can be used to give DNS responses dynamically based on your pre-exist
 
 Here is an example of DNS server usage:
 ```php
-<?php
-
 require 'vendor/autoload.php';
 
 // JsonResolver created and provided path to file with json dns records
@@ -42,7 +39,7 @@ $server->start();
 * Run `php example/example.php` to run the server
 
 Query server using `dig` command to ensure proper functioning
-```
+```bash
 $ dig @127.0.0.1 test.com A +short
 111.111.111.111
 
@@ -58,8 +55,8 @@ $ dig @127.0.0.1 test2.com A +short
 
 Unit tests using PHPUnit are provided. A simple script is located in the root.
 
-* run `composer install --dev` to install PHPUnit and dependencies
-* run `./phpunit` from the root to run the tests
+* run `composer install` to install PHPUnit and dependencies
+* run `vendor/bin/phpunit` from the root to run the tests
 
 ## Supported Record Types
 

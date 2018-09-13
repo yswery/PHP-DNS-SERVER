@@ -12,7 +12,6 @@ namespace yswery\DNS;
 
 class RecordTypeEnum
 {
-
     /**
      * @var array
      */
@@ -59,63 +58,64 @@ class RecordTypeEnum
         'DNAME' => 39,
     ];
 
-    const TYPE_A = 1;
-    const TYPE_NS = 2;
-    const TYPE_CNAME = 5;
-    const TYPE_SOA = 6;
-    const TYPE_PTR = 12;
-    const TYPE_MX = 15;
-    const TYPE_TXT = 16;
-    const TYPE_AAAA = 28;
-    const TYPE_OPT = 41;
-    const TYPE_AXFR = 252;
-    const TYPE_ANY = 255;
-    const TYPE_AFSDB = 18;
-    const TYPE_APL = 42;
-    const TYPE_CAA = 257;
-    const TYPE_CDNSKEY = 60;
-    const TYPE_CDS = 59;
-    const TYPE_CERT = 37;
-    const TYPE_DHCID = 49;
-    const TYPE_DLV = 32769;
-    const TYPE_DNSKEY = 48;
-    const TYPE_DS = 43;
-    const TYPE_IPSECKEY = 45;
-    const TYPE_KEY = 25;
-    const TYPE_KX = 36;
-    const TYPE_LOC = 29;
-    const TYPE_NAPTR = 35;
-    const TYPE_NSEC = 47;
-    const TYPE_NSEC3 = 50;
-    const TYPE_NSEC3PARAM = 51;
-    const TYPE_RRSIG = 46;
-    const TYPE_RP = 17;
-    const TYPE_SIG = 24;
-    const TYPE_SRV = 33;
-    const TYPE_SSHFP = 44;
-    const TYPE_TA = 32768;
-    const TYPE_TKEY = 249;
-    const TYPE_TLSA = 52;
-    const TYPE_TSIG = 250;
-    const TYPE_URI = 256;
-    const TYPE_DNAME = 39;
+    public const TYPE_A = 1;
+    public const TYPE_NS = 2;
+    public const TYPE_CNAME = 5;
+    public const TYPE_SOA = 6;
+    public const TYPE_PTR = 12;
+    public const TYPE_MX = 15;
+    public const TYPE_TXT = 16;
+    public const TYPE_AAAA = 28;
+    public const TYPE_OPT = 41;
+    public const TYPE_AXFR = 252;
+    public const TYPE_ANY = 255;
+    public const TYPE_AFSDB = 18;
+    public const TYPE_APL = 42;
+    public const TYPE_CAA = 257;
+    public const TYPE_CDNSKEY = 60;
+    public const TYPE_CDS = 59;
+    public const TYPE_CERT = 37;
+    public const TYPE_DHCID = 49;
+    public const TYPE_DLV = 32769;
+    public const TYPE_DNSKEY = 48;
+    public const TYPE_DS = 43;
+    public const TYPE_IPSECKEY = 45;
+    public const TYPE_KEY = 25;
+    public const TYPE_KX = 36;
+    public const TYPE_LOC = 29;
+    public const TYPE_NAPTR = 35;
+    public const TYPE_NSEC = 47;
+    public const TYPE_NSEC3 = 50;
+    public const TYPE_NSEC3PARAM = 51;
+    public const TYPE_RRSIG = 46;
+    public const TYPE_RP = 17;
+    public const TYPE_SIG = 24;
+    public const TYPE_SRV = 33;
+    public const TYPE_SSHFP = 44;
+    public const TYPE_TA = 32768;
+    public const TYPE_TKEY = 249;
+    public const TYPE_TLSA = 52;
+    public const TYPE_TSIG = 250;
+    public const TYPE_URI = 256;
+    public const TYPE_DNAME = 39;
 
     /**
-     * @param int $typeIndex The index of the type contained in the question
+     * @param int $index The index of the type contained in the question
+     *
      * @return string|false
      */
-    public static function get_name($typeIndex)
+    public static function getName(int $index)
     {
-        return array_search($typeIndex, self::$types);
+        return array_search($index, self::$types);
     }
 
     /**
      * @param string $name The name of the record type, e.g. = 'A' or 'MX' or 'SOA'
      * @return int|false
      */
-    public static function get_type_index($name)
+    public static function getTypeIndex(string $name)
     {
-        $key = trim(strtoupper($name));
+        $key = strtoupper(trim($name));
         if (!array_key_exists($key, self::$types)) {
             return false;
         }
@@ -125,7 +125,7 @@ class RecordTypeEnum
     /**
      * @return array
      */
-    public static function get_types()
+    public static function getTypes(): array
     {
         return self::$types;
     }

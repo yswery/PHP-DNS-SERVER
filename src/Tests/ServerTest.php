@@ -86,7 +86,7 @@ class ServerTest extends TestCase
             ->setClass(ClassEnum::INTERNET)
             ->setQuestion(true);
 
-        $query = new Message;
+        $query = new Message()Mi
         $query->setQuestions([$q_RR])
             ->getHeader()
                 ->setQuery(true)
