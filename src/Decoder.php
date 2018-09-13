@@ -129,10 +129,10 @@ class Decoder
     /**
      * @param int $type
      * @param string $val
-     * @return array|string
+     * @return array|string|null
      * @throws UnsupportedTypeException
      */
-    public static function decodeType($type, $val): ?int
+    public static function decodeType($type, $val)
     {
         $offset = 0;
 
