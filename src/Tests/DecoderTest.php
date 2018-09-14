@@ -18,24 +18,6 @@ use PHPUnit\Framework\TestCase;
 
 class DecoderTest extends TestCase
 {
-    public function testDecodeFlags()
-    {
-        $flags = [
-            'qr' => 1,      //1 bit
-            'opcode' => 0,  //4 bits
-            'aa' => 1,      //1 bit
-            'tc' => 0,      //1 bit
-            'rd' => 0,      //1 bit
-            'ra' => 0,      //1 bit
-            'z' => 0,       //3 bits
-            'rcode' => 0,   //4 bits
-        ];
-
-        $encoded = 0b1000010000000000;
-
-        $this->assertEquals($flags, Decoder::decodeFlags($encoded));
-    }
-
     public function testDecodeLabel()
     {
         $decoded_1 = 'www.example.com.';
@@ -48,13 +30,13 @@ class DecoderTest extends TestCase
         $encoded_3 = chr(3).'tld'."\0";
 
         $offset = 0;
-        $this->assertEquals($decoded_1, Decoder::decodeLabel($encoded_1, $offset));
+        $this->assertEquals($decoded_1, Decoder::decodeDomainName($encoded_1, $offset));
 
         $offset = 0;
-        $this->assertEquals($decoded_2, Decoder::decodeLabel($encoded_2, $offset));
+        $this->assertEquals($decoded_2, Decoder::decodeDomainName($encoded_2, $offset));
 
         $offset = 0;
-        $this->assertEquals($decoded_3, Decoder::decodeLabel($encoded_3, $offset));
+        $this->assertEquals($decoded_3, Decoder::decodeDomainName($encoded_3, $offset));
     }
 
     /**
@@ -174,18 +156,18 @@ class DecoderTest extends TestCase
         $decoded_8 = 'This is a comment.';
         $encoded_8 = chr(strlen($decoded_8)).$decoded_8;
 
-        $this->assertEquals($decoded_1, Decoder::decodeType(RecordTypeEnum::TYPE_A, $encoded_1));
-        $this->assertEquals($decoded_2, Decoder::decodeType(RecordTypeEnum::TYPE_AAAA, $encoded_2));
-        $this->assertEquals($decoded_5, Decoder::decodeType(RecordTypeEnum::TYPE_NS, $encoded_5));
-        $this->assertEquals($decoded_6_prime, Decoder::decodeType(RecordTypeEnum::TYPE_SOA, $encoded_6));
-        $this->assertEquals($decoded_7_prime, Decoder::decodeType(RecordTypeEnum::TYPE_MX, $encoded_7));
-        $this->assertEquals($decoded_8, Decoder::decodeType(RecordTypeEnum::TYPE_TXT, $encoded_8));
+        $this->assertEquals($decoded_1, Decoder::decodeRdata(RecordTypeEnum::TYPE_A, $encoded_1));
+        $this->assertEquals($decoded_2, Decoder::decodeRdata(RecordTypeEnum::TYPE_AAAA, $encoded_2));
+        $this->assertEquals($decoded_5, Decoder::decodeRdata(RecordTypeEnum::TYPE_NS, $encoded_5));
+        $this->assertEquals($decoded_6_prime, Decoder::decodeRdata(RecordTypeEnum::TYPE_SOA, $encoded_6));
+        $this->assertEquals($decoded_7_prime, Decoder::decodeRdata(RecordTypeEnum::TYPE_MX, $encoded_7));
+        $this->assertEquals($decoded_8, Decoder::decodeRdata(RecordTypeEnum::TYPE_TXT, $encoded_8));
     }
 
     public function testDecodeHeader()
     {
         $id = 1337;
-        $flags = 0b1000010000000000;
+        $flags = 0b1000010000000000; //Indicates authoritative response.
         $qdcount = 1;
         $ancount = 2;
         $nscount = 0;

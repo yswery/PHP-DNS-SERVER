@@ -13,13 +13,13 @@ namespace yswery\DNS;
 class Decoder
 {
     /**
-     * @param $message
+     * @param string $message
      *
      * @return Message
      *
      * @throws UnsupportedTypeException
      */
-    public static function decodeMessage($message): Message
+    public static function decodeMessage(string $message): Message
     {
         $offset = 0;
         $header = self::decodeHeader($message, $offset);
@@ -32,86 +32,49 @@ class Decoder
     }
 
     /**
-     * @param string $flags
-     *
-     * @return array
+     * @param string $string
+     * @param int $offset
+     * @return string
      */
-    public static function decodeFlags($flags): array
+    public static function decodeDomainName(string $string, int &$offset): string
     {
-        $res = [];
+        $domainName = '';
 
-        $res['qr'] = $flags >> 15 & 0x1;
-        $res['opcode'] = $flags >> 11 & 0xf;
-        $res['aa'] = $flags >> 10 & 0x1;
-        $res['tc'] = $flags >> 9 & 0x1;
-        $res['rd'] = $flags >> 8 & 0x1;
-        $res['ra'] = $flags >> 7 & 0x1;
-        $res['z'] = $flags >> 4 & 0x7;
-        $res['rcode'] = $flags & 0xf;
+        $len = ord($string[$offset]);
+        $offset++;
 
-        return $res;
-    }
-
-    public static function decodeLabel($pkt, &$offset): ?string
-    {
-        $endOffset = null;
-        $qname = '';
-
-        while (1) {
-            $len = ord($pkt[$offset]);
-            $type = $len >> 6 & 0x2;
-
-            switch ($type) {
-                case 0x2:
-                    $new_offset = unpack('noffset', substr($pkt, $offset, 2));
-                    $endOffset = $offset + 2;
-                    $offset = $new_offset['offset'] & 0x3fff;
-                    // no break
-                case 0x1:
-                    continue;
-                    break;
-            }
-
-            if ($len > (strlen($pkt) - $offset)) {
-                return null;
-            }
-
-            if (0 === $len) {
-                if ('' === $qname) {
-                    $qname = '.';
-                }
-                ++$offset;
-                break;
-            }
-            $qname .= substr($pkt, $offset + 1, $len).'.';
-            $offset += $len + 1;
+        if (0 === $len) {
+            return '.';
         }
 
-        if (null !== $endOffset) {
-            $offset = $endOffset;
+        while (0 !== $len) {
+            $domainName .= substr($string, $offset, $len).'.';
+            $offset += $len;
+            $len = ord($string[$offset]);
+            $offset++;
         }
 
-        return $qname;
+        return $domainName;
     }
 
     /**
      * @param string $pkt
      * @param int    $offset
-     * @param int    $count
+     * @param int    $count The number of resource records to decode.
      * @param bool   $isQuestion
      *
      * @return ResourceRecord[]
      *
      * @throws UnsupportedTypeException
      */
-    public static function decodeResourceRecords($pkt, &$offset, $count, $isQuestion = false): array
+    public static function decodeResourceRecords(string $pkt, int &$offset, int $count, bool $isQuestion = false): array
     {
         $resourceRecords = [];
 
         for ($i = 0; $i < $count; ++$i) {
             ($rr = new ResourceRecord())
                 ->setQuestion($isQuestion)
-                ->setName(self::decodeLabel($pkt, $offset));
+                ->setName(self::decodeDomainName($pkt, $offset));
 
             if ($rr->isQuestion()) {
                 $values = unpack('ntype/nclass', substr($pkt, $offset, 4));
@@ -121,7 +84,7 @@ class Decoder
                 $values = unpack('ntype/nclass/Nttl/ndlength', substr($pkt, $offset, 10));
                 $rr->setType($values['type'])->setClass($values['class'])->setTtl($values['ttl']);
                 $offset += 10;
-                $rr->setRdata(self::decodeType($rr->getType(), substr($pkt, $offset, $values['dlength'])));
+                $rr->setRdata(self::decodeRdata($rr->getType(), substr($pkt, $offset, $values['dlength'])));
                 $offset += $values['dlength'];
             }
 
@@ -133,50 +96,50 @@ class Decoder
 
     /**
      * @param int    $type
-     * @param string $val
+     * @param string $rdata
      *
      * @return array|string|null
      *
      * @throws UnsupportedTypeException
      */
-    public static function decodeType($type, $val)
+    public static function decodeRdata(int $type, string $rdata)
     {
         $offset = 0;
 
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
             case RecordTypeEnum::TYPE_AAAA:
-                $data = inet_ntop($val);
+                $data = inet_ntop($rdata);
                 break;
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
-                $data = self::decodeLabel($val, $offset);
+                $data = self::decodeDomainName($rdata, $offset);
                 break;
             case RecordTypeEnum::TYPE_SOA:
                 $data = array_merge(
                     [
-                        'mname' => self::decodeLabel($val, $offset),
-                        'rname' => self::decodeLabel($val, $offset),
+                        'mname' => self::decodeDomainName($rdata, $offset),
+                        'rname' => self::decodeDomainName($rdata, $offset),
                     ],
-                    unpack('Nserial/Nrefresh/Nretry/Nexpire/Nminimum', substr($val, $offset))
+                    unpack('Nserial/Nrefresh/Nretry/Nexpire/Nminimum', substr($rdata, $offset))
                 );
                 break;
             case RecordTypeEnum::TYPE_MX:
                 $data = [
-                    'preference' => unpack('npreference', $val)['preference'],
-                    'exchange' => self::decodeLabel(substr($val, 2), $offset),
+                    'preference' => unpack('npreference', $rdata)['preference'],
+                    'exchange' => self::decodeDomainName(substr($rdata, 2), $offset),
                 ];
                 break;
             case RecordTypeEnum::TYPE_TXT:
-                $len = ord($val[0]);
+                $len = ord($rdata[0]);
 
-                if ((strlen($val) + 1) < $len) {
+                if ((strlen($rdata) + 1) < $len) {
                     $data = null;
                     break;
                 }
 
-                $data = substr($val, 1, $len);
+                $data = substr($rdata, 1, $len);
                 break;
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:
@@ -217,5 +180,26 @@ class Decoder
             ->setAnswerCount($data['ancount'])
             ->setNameServerCount($data['nscount'])
             ->setAdditionalRecordsCount($data['arcount']);
+    }
+
+    /**
+     * @param string $flags
+     *
+     * @return array
+     */
+    private static function decodeFlags($flags): array
+    {
+        $res = [];
+
+        $res['qr'] = $flags >> 15 & 0x1;
+        $res['opcode'] = $flags >> 11 & 0xf;
+        $res['aa'] = $flags >> 10 & 0x1;
+        $res['tc'] = $flags >> 9 & 0x1;
+        $res['rd'] = $flags >> 8 & 0x1;
+        $res['ra'] = $flags >> 7 & 0x1;
+        $res['z'] = $flags >> 4 & 0x7;
+        $res['rcode'] = $flags & 0xf;
+
+        return $res;
     }
 }
