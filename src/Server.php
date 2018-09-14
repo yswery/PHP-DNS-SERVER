@@ -16,6 +16,7 @@ use Psr\Log\LogLevel;
 use Psr\Log\NullLogger;
 use React\Datagram\Socket;
 use yswery\DNS\Event\EventSubscriberTrait;
+use yswery\DNS\Event\ExceptionEvent;
 use yswery\DNS\Event\MessageEvent;
 use yswery\DNS\Event\QueryReceiveEvent;
 use yswery\DNS\Event\QueryResponseEvent;
@@ -78,10 +79,14 @@ class Server implements LoggerAwareInterface
             $this->event(new ServerStartEvent($server));
 
             $server->on('message', function (string $message, string $address, Socket $server) {
-                $this->event(new MessageEvent($server, $address, $message));
+                try {
+                    $this->event(new MessageEvent($server, $address, $message));
 
-                $response = $this->handleQueryFromStream($message);
-                $server->send($response, $address);
+                    $response = $this->handleQueryFromStream($message);
+                    $server->send($response, $address);
+                } catch (\Exception $exception) {
+                    $this->event(new ExceptionEvent($exception));
+                }
             });
         });
 
