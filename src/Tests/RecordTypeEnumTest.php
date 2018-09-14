@@ -15,75 +15,26 @@ use yswery\DNS\RecordTypeEnum;
 
 class RecordTypeEnumTest extends TestCase
 {
-    public function testGetsHostRecordIndex()
+    public function testIsValid()
     {
-        $hostIndex = RecordTypeEnum::getTypeIndex('A');
-        $this->assertTrue(RecordTypeEnum::TYPE_A === $hostIndex);
+        $this->assertTrue(RecordTypeEnum::isValid(1));
+        $this->assertFalse(RecordTypeEnum::isValid(3));
     }
 
-    public function testDoesNotGetInvalidRecordTypeIndex()
+    public function testGetName()
     {
-        $hostIndex = RecordTypeEnum::getTypeIndex('BLAH');
-        $this->assertTrue(false === $hostIndex);
+        $this->assertEquals('MX', RecordTypeEnum::getName(RecordTypeEnum::TYPE_MX));
+        $this->assertFalse(RecordTypeEnum::getName(651));
     }
 
-    public function testGetsNameFromType()
+    public function testGetTypeIndex()
     {
-        $typeName = RecordTypeEnum::getName(RecordTypeEnum::TYPE_A);
-        $this->assertTrue('A' === $typeName);
-    }
-
-    public function testDoesNotGetInvalidNameFromType()
-    {
-        $typeName = RecordTypeEnum::getName(932);
-        $this->assertTrue(false === $typeName);
+        $this->assertEquals(15, RecordTypeEnum::getTypeIndex('MX'));
+        $this->assertFalse(RecordTypeEnum::getTypeIndex('NONE'));
     }
 
     public function testGetTypes()
     {
-        $expected = [
-            'A' => 1,
-            'NS' => 2,
-            'CNAME' => 5,
-            'SOA' => 6,
-            'PTR' => 12,
-            'MX' => 15,
-            'TXT' => 16,
-            'AAAA' => 28,
-            'OPT' => 41,
-            'AXFR' => 252,
-            'ANY' => 255,
-            'AFSDB' => 18,
-            'APL' => 42,
-            'CAA' => 257,
-            'CDNSKEY' => 60,
-            'CDS' => 59,
-            'CERT' => 37,
-            'DHCID' => 49,
-            'DLV' => 32769,
-            'DNSKEY' => 48,
-            'DS' => 43,
-            'IPSECKEY' => 45,
-            'KEY' => 25,
-            'KX' => 36,
-            'LOC' => 29,
-            'NAPTR' => 35,
-            'NSEC' => 47,
-            'NSEC3' => 50,
-            'NSEC3PARAM' => 51,
-            'RRSIG' => 46,
-            'RP' => 17,
-            'SIG' => 24,
-            'SRV' => 33,
-            'SSHFP' => 44,
-            'TA' => 32768,
-            'TKEY' => 249,
-            'TLSA' => 52,
-            'TSIG' => 250,
-            'URI' => 256,
-            'DNAME' => 39,
-        ];
-
-        $this->assertEquals($expected, RecordTypeEnum::getTypes());
+        $this->assertTrue(is_array(RecordTypeEnum::getTypes()));
     }
 }

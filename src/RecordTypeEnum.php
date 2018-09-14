@@ -15,47 +15,47 @@ class RecordTypeEnum
     /**
      * @var array
      */
-    private static $types = [
-        'A' => 1,
-        'NS' => 2,
-        'CNAME' => 5,
-        'SOA' => 6,
-        'PTR' => 12,
-        'MX' => 15,
-        'TXT' => 16,
-        'AAAA' => 28,
-        'OPT' => 41,
-        'AXFR' => 252,
-        'ANY' => 255,
-        'AFSDB' => 18,
-        'APL' => 42,
-        'CAA' => 257,
-        'CDNSKEY' => 60,
-        'CDS' => 59,
-        'CERT' => 37,
-        'DHCID' => 49,
-        'DLV' => 32769,
-        'DNSKEY' => 48,
-        'DS' => 43,
-        'IPSECKEY' => 45,
-        'KEY' => 25,
-        'KX' => 36,
-        'LOC' => 29,
-        'NAPTR' => 35,
-        'NSEC' => 47,
-        'NSEC3' => 50,
-        'NSEC3PARAM' => 51,
-        'RRSIG' => 46,
-        'RP' => 17,
-        'SIG' => 24,
-        'SRV' => 33,
-        'SSHFP' => 44,
-        'TA' => 32768,
-        'TKEY' => 249,
-        'TLSA' => 52,
-        'TSIG' => 250,
-        'URI' => 256,
-        'DNAME' => 39,
+    private static $names = [
+        self::TYPE_A => 'A',
+        self::TYPE_NS => 'NS',
+        self::TYPE_CNAME => 'CNAME',
+        self::TYPE_SOA => 'SOA',
+        self::TYPE_PTR => 'PTR',
+        self::TYPE_MX => 'MX',
+        self::TYPE_TXT => 'TXT',
+        self::TYPE_AAAA => 'AAAA',
+        self::TYPE_OPT => 'OPT',
+        self::TYPE_AXFR => 'AXFR',
+        self::TYPE_ANY => 'ANY',
+        self::TYPE_AFSDB => 'AFSDB',
+        self::TYPE_APL => 'APL',
+        self::TYPE_CAA => 'CAA',
+        self::TYPE_CDNSKEY => 'CDNSKEY',
+        self::TYPE_CDS => 'CDS',
+        self::TYPE_CERT => 'CERT',
+        self::TYPE_DHCID => 'DHCID',
+        self::TYPE_DLV => 'DLV',
+        self::TYPE_DNSKEY => 'DNSKEY',
+        self::TYPE_DS => 'DS',
+        self::TYPE_IPSECKEY => 'IPSECKEY',
+        self::TYPE_KEY => 'KEY',
+        self::TYPE_KX => 'KX',
+        self::TYPE_LOC => 'LOC',
+        self::TYPE_NAPTR => 'NAPTR',
+        self::TYPE_NSEC => 'NSEC',
+        self::TYPE_NSEC3 => 'NSEC3',
+        self::TYPE_NSEC3PARAM => 'NSEC3PARAM',
+        self::TYPE_RRSIG => 'RRSIG',
+        self::TYPE_RP => 'RP',
+        self::TYPE_SIG => 'SIG',
+        self::TYPE_SRV => 'SRV',
+        self::TYPE_SSHFP => 'SSHFP',
+        self::TYPE_TA => 'TA',
+        self::TYPE_TKEY => 'TKEY',
+        self::TYPE_TLSA => 'TLSA',
+        self::TYPE_TSIG => 'TSIG',
+        self::TYPE_URI => 'URI',
+        self::TYPE_DNAME => 'DNAME',
     ];
 
     public const TYPE_A = 1;
@@ -100,13 +100,23 @@ class RecordTypeEnum
     public const TYPE_DNAME = 39;
 
     /**
-     * @param int $index The index of the type contained in the question
+     * @param int $type
      *
-     * @return string|false
+     * @return bool
      */
-    public static function getName(int $index)
+    public static function isValid(int $type): bool
     {
-        return array_search($index, self::$types);
+        return array_key_exists($type, self::$names);
+    }
+
+    /**
+     * @param int $type The index of the type
+     *
+     * @return bool|int
+     */
+    public static function getName(int $type)
+    {
+        return self::isValid($type) ? self::$names[$type] : false;
     }
 
     /**
@@ -116,12 +126,7 @@ class RecordTypeEnum
      */
     public static function getTypeIndex(string $name)
     {
-        $key = strtoupper(trim($name));
-        if (!array_key_exists($key, self::$types)) {
-            return false;
-        }
-
-        return self::$types[$key];
+        return array_search(strtoupper(trim($name)), self::$names);
     }
 
     /**
@@ -129,6 +134,6 @@ class RecordTypeEnum
      */
     public static function getTypes(): array
     {
-        return self::$types;
+        return self::$names;
     }
 }
