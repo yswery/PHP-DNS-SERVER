@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 
 class DecoderTest extends TestCase
 {
-    public function testDecodeLabel()
+    public function testDecodeDomainName()
     {
         $decoded_1 = 'www.example.com.';
         $encoded_1 = chr(3).'www'.chr(7).'example'.chr(3).'com'."\0";
@@ -66,11 +66,11 @@ class DecoderTest extends TestCase
         $encoded_3 = $encoded_1.$encoded_2;
 
         $offset = 0;
-        $this->assertEquals($decoded_1, Decoder::decodeResourceRecords($encoded_1, $offset, 1, true));
+        $this->assertEquals($decoded_1, Decoder::decodeResourceRecords($encoded_1, 1, $offset, true));
         $offset = 0;
-        $this->assertEquals($decoded_2, Decoder::decodeResourceRecords($encoded_2, $offset, 1, true));
+        $this->assertEquals($decoded_2, Decoder::decodeResourceRecords($encoded_2, 1, $offset, true));
         $offset = 0;
-        $this->assertEquals($decoded_3, Decoder::decodeResourceRecords($encoded_3, $offset, 2, true));
+        $this->assertEquals($decoded_3, Decoder::decodeResourceRecords($encoded_3, 2, $offset, true));
     }
 
     /**
@@ -108,20 +108,21 @@ class DecoderTest extends TestCase
             ->setType(RecordTypeEnum::TYPE_A)
             ->setRdata($ipAddress);
 
+        $decoded3 = array_merge($decoded1, $decoded2);
+
         $encoded1 = $nameEncoded.pack('nnNn', $type, $class, $ttl, strlen($rdata)).$rdata;
         $encoded2 = $nameEncoded.pack('nnNn', 1, $class, $ttl, strlen($rdata2)).$rdata2;
+        $encoded3 = $encoded1.$encoded2;
 
-        $offset = 0;
-        $this->assertEquals($decoded1, Decoder::decodeResourceRecords($encoded1, $offset, 1));
-
-        $offset = 0;
-        $this->assertEquals($decoded2, Decoder::decodeResourceRecords($encoded2, $offset, 1));
+        $this->assertEquals($decoded1, Decoder::decodeResourceRecords($encoded1));
+        $this->assertEquals($decoded2, Decoder::decodeResourceRecords($encoded2));
+        $this->assertEquals($decoded3, Decoder::decodeResourceRecords($encoded3, 2));
     }
 
     /**
      * @throws \yswery\DNS\UnsupportedTypeException
      */
-    public function testDecodeType()
+    public function testDecodeRdata()
     {
         $decoded_1 = '192.168.0.1';
         $encoded_1 = inet_pton($decoded_1);

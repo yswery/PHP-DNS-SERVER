@@ -19,23 +19,6 @@ use PHPUnit\Framework\TestCase;
 
 class EncoderTest extends TestCase
 {
-    public function testEncodeFlags()
-    {
-        $encoded = 0b1000010000000000;
-
-        $header = (new Header())
-            ->setResponse(true)
-            ->setOpcode(0)
-            ->setAuthoritative(true)
-            ->setTruncated(false)
-            ->setRecursionDesired(false)
-            ->setRecursionAvailable(false)
-            ->setZ(0)
-            ->setRcode(Header::RCODE_NO_ERROR);
-
-        $this->assertEquals($encoded, Encoder::encodeFlags($header));
-    }
-
     public function testEncodeDomainName()
     {
         $input_1 = 'www.example.com.';
@@ -172,14 +155,14 @@ class EncoderTest extends TestCase
         $decoded_8 = 'This is a comment.';
         $encoded_8 = chr(18).$decoded_8;
 
-        $this->assertEquals($encoded_1, Encoder::encodeType(1, $decoded_1));
-        $this->assertEquals($encoded_2, Encoder::encodeType(28, $decoded_2));
-        $this->assertEquals($encoded_3, Encoder::encodeType(1, $decoded_3));
-        $this->assertEquals($encoded_4, Encoder::encodeType(28, $decoded_4));
-        $this->assertEquals($encoded_5, Encoder::encodeType(2, $decoded_5));
-        $this->assertEquals($encoded_6, Encoder::encodeType(6, $decoded_6));
-        $this->assertEquals($encoded_7, Encoder::encodeType(15, $decoded_7));
-        $this->assertEquals($encoded_8, Encoder::encodeType(16, $decoded_8));
+        $this->assertEquals($encoded_1, Encoder::encodeRdata(1, $decoded_1));
+        $this->assertEquals($encoded_2, Encoder::encodeRdata(28, $decoded_2));
+        $this->assertEquals($encoded_3, Encoder::encodeRdata(1, $decoded_3));
+        $this->assertEquals($encoded_4, Encoder::encodeRdata(28, $decoded_4));
+        $this->assertEquals($encoded_5, Encoder::encodeRdata(2, $decoded_5));
+        $this->assertEquals($encoded_6, Encoder::encodeRdata(6, $decoded_6));
+        $this->assertEquals($encoded_7, Encoder::encodeRdata(15, $decoded_7));
+        $this->assertEquals($encoded_8, Encoder::encodeRdata(16, $decoded_8));
     }
 
     public function testEncodeHeader()

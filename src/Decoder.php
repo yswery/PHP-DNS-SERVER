@@ -25,23 +25,24 @@ class Decoder
         $header = self::decodeHeader($message, $offset);
 
         return (new Message($header))
-            ->setQuestions(self::decodeResourceRecords($message, $offset, $header->getQuestionCount(), true))
-            ->setAnswers(self::decodeResourceRecords($message, $offset, $header->getAnswerCount()))
-            ->setAuthoritatives(self::decodeResourceRecords($message, $offset, $header->getNameServerCount()))
-            ->setAdditionals(self::decodeResourceRecords($message, $offset, $header->getAdditionalRecordsCount()));
+            ->setQuestions(self::decodeResourceRecords($message, $header->getQuestionCount(), $offset, true))
+            ->setAnswers(self::decodeResourceRecords($message, $header->getAnswerCount(), $offset))
+            ->setAuthoritatives(self::decodeResourceRecords($message, $header->getNameServerCount(), $offset))
+            ->setAdditionals(self::decodeResourceRecords($message, $header->getAdditionalRecordsCount(), $offset));
     }
 
     /**
      * @param string $string
-     * @param int $offset
+     * @param int    $offset
+     *
      * @return string
      */
-    public static function decodeDomainName(string $string, int &$offset): string
+    public static function decodeDomainName(string $string, int &$offset = 0): string
     {
         $domainName = '';
 
         $len = ord($string[$offset]);
-        $offset++;
+        ++$offset;
 
         if (0 === $len) {
             return '.';
@@ -51,7 +52,7 @@ class Decoder
             $domainName .= substr($string, $offset, $len).'.';
             $offset += $len;
             $len = ord($string[$offset]);
-            $offset++;
+            ++$offset;
         }
 
         return $domainName;
@@ -60,14 +61,14 @@ class Decoder
     /**
      * @param string $pkt
      * @param int    $offset
-     * @param int    $count The number of resource records to decode.
+     * @param int    $count      the number of resource records to decode
      * @param bool   $isQuestion
      *
      * @return ResourceRecord[]
      *
      * @throws UnsupportedTypeException
      */
-    public static function decodeResourceRecords(string $pkt, int &$offset, int $count, bool $isQuestion = false): array
+    public static function decodeResourceRecords(string $pkt, int $count = 1, int &$offset = 0, bool $isQuestion = false): array
     {
         $resourceRecords = [];
 
@@ -160,7 +161,7 @@ class Decoder
      *
      * @return Header
      */
-    public static function decodeHeader($pkt, &$offset = 0): Header
+    public static function decodeHeader(string $pkt, int &$offset = 0): Header
     {
         $data = unpack('nid/nflags/nqdcount/nancount/nnscount/narcount', $pkt);
         $flags = self::decodeFlags($data['flags']);

@@ -54,35 +54,35 @@ class Encoder
 
     /**
      * @param int          $type
-     * @param string|array $val
+     * @param string|array $rdata
      *
      * @return string
      *
      * @throws UnsupportedTypeException
      */
-    public static function encodeType($type, $val): string
+    public static function encodeRdata(int $type, $rdata): string
     {
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
             case RecordTypeEnum::TYPE_AAAA:
                 $n = (RecordTypeEnum::TYPE_A === $type) ? 4 : 16;
-                $enc = filter_var($val, FILTER_VALIDATE_IP) ? inet_pton($val) : str_repeat("\0", $n);
+                $enc = filter_var($rdata, FILTER_VALIDATE_IP) ? inet_pton($rdata) : str_repeat("\0", $n);
                 break;
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
-                $enc = self::encodeDomainName($val);
+                $enc = self::encodeDomainName($rdata);
                 break;
             case RecordTypeEnum::TYPE_SOA:
-                $enc = self::encodeSOA($val);
+                $enc = self::encodeSOA($rdata);
                 break;
             case RecordTypeEnum::TYPE_MX:
-                $enc = pack('n', (int) $val['preference']);
-                $enc .= self::encodeDomainName($val['exchange']);
+                $enc = pack('n', (int) $rdata['preference']);
+                $enc .= self::encodeDomainName($rdata['exchange']);
                 break;
             case RecordTypeEnum::TYPE_TXT:
-                $val = substr($val, 0, 255);
-                $enc = chr(strlen($val)).$val;
+                $rdata = substr($rdata, 0, 255);
+                $enc = chr(strlen($rdata)).$rdata;
                 break;
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:
@@ -95,26 +95,6 @@ class Encoder
         }
 
         return $enc;
-    }
-
-    /**
-     * @param array $soa
-     *
-     * @return string
-     */
-    public static function encodeSOA(array $soa): string
-    {
-        return
-            self::encodeDomainName($soa['mname']).
-            self::encodeDomainName($soa['rname']).
-            pack(
-                'NNNNN',
-                $soa['serial'],
-                $soa['refresh'],
-                $soa['retry'],
-                $soa['expire'],
-                $soa['minimum']
-            );
     }
 
     /**
@@ -135,7 +115,7 @@ class Encoder
                 continue;
             }
 
-            $data = self::encodeType($rr->getType(), $rr->getRdata());
+            $data = self::encodeRdata($rr->getType(), $rr->getRdata());
             $res .= pack('nnNn', $rr->getType(), $rr->getClass(), $rr->getTtl(), strlen($data));
             $res .= $data;
         }
@@ -168,7 +148,7 @@ class Encoder
      *
      * @return int
      */
-    public static function encodeFlags(Header $header): int
+    private static function encodeFlags(Header $header): int
     {
         $val = 0;
 
@@ -182,5 +162,25 @@ class Encoder
         $val |= ($header->getRcode() & 0xf);
 
         return $val;
+    }
+
+    /**
+     * @param array $soa
+     *
+     * @return string
+     */
+    private static function encodeSOA(array $soa): string
+    {
+        return
+            self::encodeDomainName($soa['mname']).
+            self::encodeDomainName($soa['rname']).
+            pack(
+                'NNNNN',
+                $soa['serial'],
+                $soa['refresh'],
+                $soa['retry'],
+                $soa['expire'],
+                $soa['minimum']
+            );
     }
 }
