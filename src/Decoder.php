@@ -105,8 +105,6 @@ class Decoder
      */
     public static function decodeRdata(int $type, string $rdata)
     {
-        $offset = 0;
-
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
             case RecordTypeEnum::TYPE_AAAA:
@@ -115,9 +113,10 @@ class Decoder
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
-                $data = self::decodeDomainName($rdata, $offset);
+                $data = self::decodeDomainName($rdata);
                 break;
             case RecordTypeEnum::TYPE_SOA:
+                $offset = 0;
                 $data = array_merge(
                     [
                         'mname' => self::decodeDomainName($rdata, $offset),
@@ -129,7 +128,7 @@ class Decoder
             case RecordTypeEnum::TYPE_MX:
                 $data = [
                     'preference' => unpack('npreference', $rdata)['preference'],
-                    'exchange' => self::decodeDomainName(substr($rdata, 2), $offset),
+                    'exchange' => self::decodeDomainName(substr($rdata, 2)),
                 ];
                 break;
             case RecordTypeEnum::TYPE_TXT:
