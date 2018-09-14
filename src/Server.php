@@ -10,10 +10,6 @@
 
 namespace yswery\DNS;
 
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
-use Psr\Log\LogLevel;
-use Psr\Log\NullLogger;
 use React\Datagram\Socket;
 use yswery\DNS\Event\EventSubscriberTrait;
 use yswery\DNS\Event\ExceptionEvent;
@@ -23,9 +19,8 @@ use yswery\DNS\Event\QueryResponseEvent;
 use yswery\DNS\Event\ServerStartEvent;
 use yswery\DNS\Resolver\ResolverInterface;
 
-class Server implements LoggerAwareInterface
+class Server
 {
-    use LoggerAwareTrait;
     use EventSubscriberTrait;
 
     /**
@@ -57,7 +52,6 @@ class Server implements LoggerAwareInterface
         $this->resolver = $resolver;
         $this->port = $port;
         $this->ip = $ip;
-        $this->logger = new NullLogger();
 
         set_time_limit(0);
 
@@ -75,7 +69,6 @@ class Server implements LoggerAwareInterface
         $factory = new \React\Datagram\Factory($loop);
 
         $factory->createServer($this->ip.':'.$this->port)->then(function (Socket $server) {
-            $this->logger->log(LogLevel::INFO, 'Server started.');
             $this->event(new ServerStartEvent($server));
 
             $server->on('message', function (string $message, string $address, Socket $server) {
@@ -123,22 +116,7 @@ class Server implements LoggerAwareInterface
         }
 
         $this->event(new QueryResponseEvent($responseMessage));
-        $this->logMessage($responseMessage);
 
         return $encodedResponse;
-    }
-
-    /**
-     * @param Message $message
-     */
-    private function logMessage(Message $message): void
-    {
-        foreach ($message->getQuestions() as $question) {
-            $this->logger->log(LogLevel::INFO, 'Query: '.$question);
-        }
-
-        foreach ($message->getAnswers() as $answer) {
-            $this->logger->log(LogLevel::INFO, 'Answer: '.$answer);
-        }
     }
 }
