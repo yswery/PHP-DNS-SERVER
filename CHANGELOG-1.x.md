@@ -5,3 +5,5 @@ CHANGELOG for 1.x
 * Updated PHPUnit to latest version (v7.3.*)
 * Implemented PSR Logger
 * The message, header and resource records are now represented by objects.
+* Ability to response to server events via event subscriber component.
+* Optionally store dns records in Yaml format.
