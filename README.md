@@ -45,13 +45,13 @@ $server->start();
 
 Query server using `dig` command to ensure proper functioning
 ```bash
-$ dig @127.0.0.1 test.com A +short
+$ dig @127.0.0.1 test.com A +short +noedns
 111.111.111.111
 
-$ dig @127.0.0.1 test.com TXT +short
+$ dig @127.0.0.1 test.com TXT +short +noedns
 "Some text."
 
-$ dig @127.0.0.1 test2.com A +short
+$ dig @127.0.0.1 test2.com A +short +noedns
 111.111.111.111
 112.112.112.112
 ```
