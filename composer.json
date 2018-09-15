@@ -33,7 +33,11 @@
     },
     "autoload": {
         "psr-4": {
-            "yswery\\DNS\\": "src/",
+            "yswery\\DNS\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
             "yswery\\DNS\\Tests\\": "tests/"
         }
     }
