@@ -61,8 +61,8 @@ class Decoder
     /**
      * @param string $pkt
      * @param int    $offset
-     * @param int    $count      the number of resource records to decode
-     * @param bool   $isQuestion
+     * @param int    $count      The number of resource records to decode
+     * @param bool   $isQuestion Is the resource record from the question section
      *
      * @return ResourceRecord[]
      *
@@ -155,8 +155,8 @@ class Decoder
     }
 
     /**
-     * @param $pkt
-     * @param int $offset
+     * @param string $pkt
+     * @param int    $offset
      *
      * @return Header
      */
