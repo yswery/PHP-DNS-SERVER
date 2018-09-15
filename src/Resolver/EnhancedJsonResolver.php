@@ -16,14 +16,21 @@ class EnhancedJsonResolver extends AbstractResolver
     private $defaultClass = 'IN';
 
     /**
+     * @var int
+     */
+    private $defaultTtl;
+
+    /**
      * EnhancedJsonResolver constructor.
      * @param array $files
+     * @param int $defaultTtl
      * @throws UnsupportedTypeException
      */
-    public function __construct(array $files)
+    public function __construct(array $files, $defaultTtl = 300)
     {
         $this->isAuthoritative = true;
         $this->allowRecursion = false;
+        $this->defaultTtl = $defaultTtl;
 
         foreach ($files as $file) {
             $this->addZone(json_decode(file_get_contents($file), true));
@@ -36,14 +43,15 @@ class EnhancedJsonResolver extends AbstractResolver
      */
     private function addZone(array $zone): void
     {
-        foreach ($this->processZone($zone) as $resourceRecord) {
+        $resourceRecords = $this->isLegacyFormat($zone) ? $this->processLegacyZone($zone) : $this->processZone($zone);
+        foreach ($resourceRecords as $resourceRecord) {
             $this->resourceRecords[$resourceRecord->getName()][$resourceRecord->getType()][$resourceRecord->getClass()][] = $resourceRecord;
         }
     }
 
     /**
      * @param array $zone
-     * @return \Generator
+     * @return \Generator|ResourceRecord[]
      * @throws UnsupportedTypeException
      */
     private function processZone(array $zone)
@@ -61,6 +69,47 @@ class EnhancedJsonResolver extends AbstractResolver
                 ->setType($type = RecordTypeEnum::getTypeIndex($rr['type']))
                 ->setTtl($rr['ttl'] ?? $defaultTtl)
                 ->setRdata($this->extractRdata($rr, $type, $parent));
+        }
+    }
+
+    /**
+     * Determine if a $zone is in the legacy format.
+     *
+     * @param array $zone
+     * @return bool
+     */
+    private function isLegacyFormat(array $zone): bool
+    {
+        $keys = array_map(function($value) {
+            return strtolower($value);
+        }, array_keys($zone));
+
+        return !(
+            (false !== array_search('domain', $keys, true)) &&
+            (false !== array_search('resource-records', $keys, true))
+        );
+    }
+
+    /**
+     * @param array $zones
+     * @return \Generator|ResourceRecord[]
+     */
+    private function processLegacyZone(array $zones)
+    {
+        foreach ($zones as $domain => $types) {
+            $domain = rtrim($domain, '.').'.';
+            foreach ($types as $type => $data) {
+                $data = (array) $data;
+                $type = RecordTypeEnum::getTypeIndex($type);
+                foreach ($data as $rdata) {
+                    yield (new ResourceRecord())
+                        ->setName($domain)
+                        ->setType($type)
+                        ->setClass(ClassEnum::getClassFromName($this->defaultClass))
+                        ->setTtl($this->defaultTtl)
+                        ->setRdata($rdata);
+                }
+            }
         }
     }
 

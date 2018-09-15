@@ -18,8 +18,11 @@ class EnhancedJsonResolverTest extends TestCase
 
     public function setUp()
     {
-        $files = [__DIR__.'/../Resources/example.com.json'];
-        $this->resolver = new EnhancedJsonResolver($files);
+        $files = [
+            __DIR__.'/../Resources/example.com.json',
+            __DIR__.'/../Resources/test_records.json',
+        ];
+        $this->resolver = new EnhancedJsonResolver($files, 300);
     }
 
     public function testGetAnswer()
@@ -62,5 +65,21 @@ class EnhancedJsonResolverTest extends TestCase
         $answer = [$soa, $aaaa];
 
         $this->assertEquals($answer, $this->resolver->getAnswer($query));
+    }
+
+    public function testResolveLegacyRecord()
+    {
+        $question[] = (new ResourceRecord())
+            ->setName('test.com.')
+            ->setType(RecordTypeEnum::TYPE_A)
+            ->setQuestion(true);
+
+        $expectation[] = (new ResourceRecord())
+            ->setName('test.com.')
+            ->setType(RecordTypeEnum::TYPE_A)
+            ->setTtl(300)
+            ->setRdata('111.111.111.111');
+
+        $this->assertEquals($expectation, $this->resolver->getAnswer($question));
     }
 }

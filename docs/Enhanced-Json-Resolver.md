@@ -63,3 +63,60 @@ $files = [__DIR__.'/example.com.json', __DIR__.'/test.com.json'];
 $resolver = new yswery\DNS\Resolver\EnhancedJsonResolver($files);
 $resolver->getAnswer(/*some query*/);
 ```
+
+## Backward Compatibility
+The Enhanced JSON Resolver can handle the older format JSON zone records (example below). These are loaded
+the same way as the new file format.
+
+```json
+{
+  "test.com": {
+    "A": "111.111.111.111",
+    "MX": [
+      {
+        "exchange": "mail-gw1.test.com",
+        "preference": 10
+      },
+      {
+        "exchange": "mail-gw2.test.com",
+        "preference": 20
+      }
+    ],
+    "NS": [
+      "ns1.test.com",
+      "ns2.test.com"
+    ],
+    "TXT": "Some text.",
+    "AAAA": "DEAD:01::BEEF",
+    "CNAME": "www2.test.com",
+    "SOA": [
+      {
+        "mname": "ns1.test.com",
+        "rname": "admin.test.com",
+        "serial": "2014111100",
+        "retry": "7200",
+        "refresh": "1800",
+        "expire": "8600",
+        "minimum": "300"
+      }
+    ]
+  },
+  "test2.com": {
+    "A": [
+      "111.111.111.111",
+      "112.112.112.112"
+    ],
+    "MX": [
+      {
+        "preference": 20,
+        "exchange": "mail-gw1.test2.com."
+      },
+      {
+        "preference": 30,
+        "exchange": "mail-gw2.test2.com."
+      }
+    ]
+  }
+}
+
+```
