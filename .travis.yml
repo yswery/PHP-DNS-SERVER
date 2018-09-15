@@ -4,8 +4,12 @@ php:
   - "7.0"
   - "5.6"
   - "hhvm"
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install hhvm=3.\*
 before_script:
   - composer install
 after_script:
   - php vendor/bin/php-coveralls -v
-dist: trusty
+dist: xenial
+sudo: required
