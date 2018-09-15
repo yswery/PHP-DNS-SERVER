@@ -11,17 +11,21 @@
 namespace yswery\DNS;
 
 use React\Datagram\Socket;
-use yswery\DNS\Event\EventSubscriberTrait;
-use yswery\DNS\Event\ExceptionEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use yswery\DNS\Event\ServerExceptionEvent;
 use yswery\DNS\Event\MessageEvent;
 use yswery\DNS\Event\QueryReceiveEvent;
 use yswery\DNS\Event\QueryResponseEvent;
 use yswery\DNS\Event\ServerStartEvent;
 use yswery\DNS\Resolver\ResolverInterface;
+use yswery\DNS\Event\Events;
 
 class Server
 {
-    use EventSubscriberTrait;
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
 
     /**
      * @var ResolverInterface
@@ -42,13 +46,15 @@ class Server
      * Server constructor.
      *
      * @param ResolverInterface $resolver
+     * @param EventDispatcherInterface $dispatcher
      * @param string            $ip
      * @param int               $port
      *
      * @throws \Exception
      */
-    public function __construct(ResolverInterface $resolver, string $ip = '0.0.0.0', int $port = 53)
+    public function __construct(ResolverInterface $resolver, EventDispatcherInterface $dispatcher, string $ip = '0.0.0.0', int $port = 53)
     {
+        $this->dispatcher = $dispatcher;
         $this->resolver = $resolver;
         $this->port = $port;
         $this->ip = $ip;
@@ -69,16 +75,14 @@ class Server
         $factory = new \React\Datagram\Factory($loop);
 
         $factory->createServer($this->ip.':'.$this->port)->then(function (Socket $server) {
-            $this->event(new ServerStartEvent($server));
+            $this->dispatcher->dispatch(Events::SERVER_START, new ServerStartEvent($server));
 
             $server->on('message', function (string $message, string $address, Socket $server) {
                 try {
-                    $this->event(new MessageEvent($server, $address, $message));
-
-                    $response = $this->handleQueryFromStream($message);
-                    $server->send($response, $address);
+                    $this->dispatcher->dispatch(Events::MESSAGE, new MessageEvent($server, $address, $message));
+                    $server->send($this->handleQueryFromStream($message), $address);
                 } catch (\Exception $exception) {
-                    $this->event(new ExceptionEvent($exception));
+                    $this->dispatcher->dispatch(Events::SERVER_EXCEPTION, new ServerExceptionEvent($exception));
                 }
             });
         });
@@ -97,7 +101,7 @@ class Server
     {
         $message = Decoder::decodeMessage($buffer);
 
-        $this->event(new QueryReceiveEvent($message));
+        $this->dispatcher->dispatch(Events::QUERY_RECEIVE, new QueryReceiveEvent($message));
 
         $responseMessage = clone $message;
         $responseMessage->getHeader()
@@ -115,8 +119,40 @@ class Server
             $encodedResponse = Encoder::encodeMessage($responseMessage);
         }
 
-        $this->event(new QueryResponseEvent($responseMessage));
+        $this->dispatcher->dispatch(Events::QUERY_RESPONSE, new QueryResponseEvent($responseMessage));
 
         return $encodedResponse;
+    }
+
+    /**
+     * @return EventDispatcherInterface
+     */
+    public function getDispatcher(): EventDispatcherInterface
+    {
+        return $this->dispatcher;
+    }
+
+    /**
+     * @return ResolverInterface
+     */
+    public function getResolver(): ResolverInterface
+    {
+        return $this->resolver;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPort(): int
+    {
+        return $this->port;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIp(): string
+    {
+        return $this->ip;
     }
 }

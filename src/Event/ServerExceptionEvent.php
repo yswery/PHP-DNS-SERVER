@@ -10,30 +10,29 @@
 
 namespace yswery\DNS\Event;
 
-use yswery\DNS\Message;
 use Symfony\Component\EventDispatcher\Event;
 
-class QueryReceiveEvent extends Event
+class ServerExceptionEvent extends Event
 {
     /**
-     * @var Message
+     * @var \Exception
      */
-    private $message;
+    private $exception;
 
     /**
-     * QueryReceiveEvent constructor.
-     * @param Message $message
+     * ExceptionEvent constructor.
+     * @param \Exception $exception
      */
-    public function __construct(Message $message)
+    public function __construct(\Exception $exception)
     {
-        $this->message = $message;
+        $this->exception = $exception;
     }
 
     /**
-     * @return Message
+     * @return \Exception
      */
-    public function getMessage(): Message
+    public function getException(): \Exception
     {
-        return $this->message;
+        return $this->exception;
     }
 }

@@ -12,22 +12,22 @@ namespace yswery\DNS;
 
 use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
-use yswery\DNS\Event\Event;
-use yswery\DNS\Event\EventSubscriberInterface;
-use yswery\DNS\Event\ExceptionEvent;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use yswery\DNS\Event\Events;
+use yswery\DNS\Event\ServerExceptionEvent;
 use yswery\DNS\Event\QueryReceiveEvent;
 use yswery\DNS\Event\QueryResponseEvent;
 use yswery\DNS\Event\ServerStartEvent;
 
 class EchoLogger extends AbstractLogger implements EventSubscriberInterface
 {
-    public function getSubscribedEvents(): array
+    public static function getSubscribedEvents(): array
     {
         return [
-            Event::SERVER_START => 'onServerStart',
-            Event::EXCEPTION => 'onException',
-            Event::QUERY_RECEIVE => 'onQueryReceive',
-            Event::QUERY_RESPONSE => 'onQueryResponse',
+            Events::SERVER_START => 'onServerStart',
+            Events::SERVER_EXCEPTION => 'onException',
+            Events::QUERY_RECEIVE => 'onQueryReceive',
+            Events::QUERY_RESPONSE => 'onQueryResponse',
         ];
     }
 
@@ -36,7 +36,7 @@ class EchoLogger extends AbstractLogger implements EventSubscriberInterface
         $this->log(LogLevel::INFO, 'Server started.');
     }
 
-    public function onException(ExceptionEvent $event): void
+    public function onException(ServerExceptionEvent $event): void
     {
         $this->log(LogLevel::ERROR, $event->getException()->getMessage());
     }

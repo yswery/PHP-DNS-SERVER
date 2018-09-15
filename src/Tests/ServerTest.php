@@ -10,6 +10,7 @@
 
 namespace yswery\DNS\Tests;
 
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use yswery\DNS\ClassEnum;
 use yswery\DNS\Header;
 use yswery\DNS\Message;
@@ -32,8 +33,10 @@ class ServerTest extends TestCase
      */
     public function setUp()
     {
-        $resolver = new JsonResolver(__DIR__.'/Resources/test_records.json');
-        $this->server = new Server($resolver);
+        $this->server = new Server(
+            new JsonResolver(__DIR__.'/Resources/test_records.json'),
+            new EventDispatcher()
+        );
     }
 
     /**
@@ -103,7 +106,7 @@ class ServerTest extends TestCase
         $queryEncoded = Encoder::encodeMessage($query);
         $responseEncoded = Encoder::encodeMessage($response);
 
-        $server = new Server(new DummyResolver());
+        $server = new Server(new DummyResolver(), new EventDispatcher());
         $this->assertEquals($responseEncoded, $server->handleQueryFromStream($queryEncoded));
     }
 }
