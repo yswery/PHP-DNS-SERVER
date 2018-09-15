@@ -11,7 +11,6 @@
 namespace yswery\DNS\Event;
 
 use React\Datagram\Socket;
-use Symfony\Component\EventDispatcher\Event;
 
 class MessageEvent extends ServerStartEvent
 {
@@ -27,6 +26,7 @@ class MessageEvent extends ServerStartEvent
 
     /**
      * MessageEvent constructor.
+     *
      * @param Socket $socket
      * @param string $remote
      * @param string $message

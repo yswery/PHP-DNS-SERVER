@@ -22,6 +22,7 @@ class QueryReceiveEvent extends Event
 
     /**
      * QueryReceiveEvent constructor.
+     *
      * @param Message $message
      */
     public function __construct(Message $message)

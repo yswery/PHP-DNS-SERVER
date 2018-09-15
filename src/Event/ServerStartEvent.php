@@ -22,6 +22,7 @@ class ServerStartEvent extends Event
 
     /**
      * ServerStartEvent constructor.
+     *
      * @param Socket $socket
      */
     public function __construct(Socket $socket)

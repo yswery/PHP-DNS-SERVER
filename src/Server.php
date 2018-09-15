@@ -45,10 +45,10 @@ class Server
     /**
      * Server constructor.
      *
-     * @param ResolverInterface $resolver
+     * @param ResolverInterface        $resolver
      * @param EventDispatcherInterface $dispatcher
-     * @param string            $ip
-     * @param int               $port
+     * @param string                   $ip
+     * @param int                      $port
      *
      * @throws \Exception
      */

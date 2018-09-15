@@ -21,6 +21,7 @@ class ServerExceptionEvent extends Event
 
     /**
      * ExceptionEvent constructor.
+     *
      * @param \Exception $exception
      */
     public function __construct(\Exception $exception)

@@ -10,7 +10,6 @@
 
 namespace yswery\DNS\Event;
 
-
 class Events
 {
     /**
