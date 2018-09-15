@@ -18,17 +18,17 @@ class JsonResolver implements ResolverInterface
     /**
      * @var array
      */
-    private $records;
+    protected $records;
 
     /**
      * @var int
      */
-    private $ttl;
+    protected $ttl;
 
     /**
      * @var bool
      */
-    private $recursionAvailable;
+    protected $recursionAvailable;
 
     /**
      * JsonResolver constructor.

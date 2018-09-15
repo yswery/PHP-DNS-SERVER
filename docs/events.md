@@ -38,7 +38,7 @@ $eventDispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
 $eventDispatcher->addSubscriber(new ExampleEventSubscriber());
 $server = new Server(new JsonResolver('./record.json'), $eventDispatcher);
 ```
-##Supported events
+## Supported events
 
 * `Events::SERVER_START` - Server is started and listening for queries.
 * `Events::SERVER_EXCEPTION` - Exception is thrown when processing and responding to query.
