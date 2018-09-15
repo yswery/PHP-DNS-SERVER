@@ -17,18 +17,8 @@ use yswery\DNS\RecordTypeEnum;
 /**
  * Use the host system's configured DNS.
  */
-class SystemResolver implements ResolverInterface
+class SystemResolver extends AbstractResolver
 {
-    /**
-     * @var bool
-     */
-    private $recursionAvailable = true;
-
-    /**
-     * @var bool
-     */
-    private $authoritative = false;
-
     /**
      * SystemResolver constructor.
      *
@@ -37,8 +27,8 @@ class SystemResolver implements ResolverInterface
      */
     public function __construct($recursionAvailable = true, $authoritative = false)
     {
-        $this->recursionAvailable = (bool) $recursionAvailable;
-        $this->authoritative = (bool) $authoritative;
+        $this->allowRecursion = (bool) $recursionAvailable;
+        $this->isAuthoritative = (bool) $authoritative;
     }
 
     /**
@@ -106,18 +96,15 @@ class SystemResolver implements ResolverInterface
 
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
-                $rdata = $array['ip'];
-                break;
+                return $array['ip'];
             case RecordTypeEnum::TYPE_AAAA:
-                $rdata = $array['ipv6'];
-                break;
+                return $array['ipv6'];
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
-                $rdata = $array['target'];
-                break;
+                return $array['target'];
             case RecordTypeEnum::TYPE_SOA:
-                $rdata = [
+                return [
                         'mname' => $array['mname'],
                         'rname' => $array['rname'],
                         'serial' => $array['serial'],
@@ -126,23 +113,18 @@ class SystemResolver implements ResolverInterface
                         'expire' => $array['expire'],
                         'minimum' => $array['minimum-ttl'],
                     ];
-                break;
             case RecordTypeEnum::TYPE_MX:
-                $rdata = [
+                return [
                     'preference' => $array['pri'],
                     'exchange' => $array['host'],
                 ];
-                break;
             case RecordTypeEnum::TYPE_TXT:
-                $rdata = $array['txt'];
-                break;
+                return $array['txt'];
             default:
                 throw new UnsupportedTypeException(
                     sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
                 );
         }
-
-        return $rdata;
     }
 
     /**
@@ -159,27 +141,5 @@ class SystemResolver implements ResolverInterface
         $constantName = 'DNS_'.RecordTypeEnum::getName($type);
 
         return defined($constantName) ? constant($constantName) : false;
-    }
-
-    /**
-     * Getter method for $recursion_available property.
-     *
-     * @return bool
-     */
-    public function allowsRecursion(): bool
-    {
-        return $this->recursionAvailable;
-    }
-
-    /**
-     * Check if the resolver knows about a domain.
-     *
-     * @param string $domain the domain to check for
-     *
-     * @return bool true if the resolver holds info about $domain
-     */
-    public function isAuthority($domain): bool
-    {
-        return false;
     }
 }
