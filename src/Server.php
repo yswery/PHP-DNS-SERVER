@@ -10,16 +10,18 @@
 
 namespace yswery\DNS;
 
-use yswery\DNS\Resolver\ResolverInterface;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
-use Psr\Log\LogLevel;
-use Psr\Log\NullLogger;
 use React\Datagram\Socket;
+use yswery\DNS\Event\EventSubscriberTrait;
+use yswery\DNS\Event\ExceptionEvent;
+use yswery\DNS\Event\MessageEvent;
+use yswery\DNS\Event\QueryReceiveEvent;
+use yswery\DNS\Event\QueryResponseEvent;
+use yswery\DNS\Event\ServerStartEvent;
+use yswery\DNS\Resolver\ResolverInterface;
 
-class Server implements LoggerAwareInterface
+class Server
 {
-    use LoggerAwareTrait;
+    use EventSubscriberTrait;
 
     /**
      * @var ResolverInterface
@@ -50,7 +52,6 @@ class Server implements LoggerAwareInterface
         $this->resolver = $resolver;
         $this->port = $port;
         $this->ip = $ip;
-        $this->logger = new NullLogger();
 
         set_time_limit(0);
 
@@ -68,11 +69,17 @@ class Server implements LoggerAwareInterface
         $factory = new \React\Datagram\Factory($loop);
 
         $factory->createServer($this->ip.':'.$this->port)->then(function (Socket $server) {
-            $this->logger->log(LogLevel::INFO, 'Server started.');
+            $this->event(new ServerStartEvent($server));
 
             $server->on('message', function (string $message, string $address, Socket $server) {
-                $response = $this->handleQueryFromStream($message);
-                $server->send($response, $address);
+                try {
+                    $this->event(new MessageEvent($server, $address, $message));
+
+                    $response = $this->handleQueryFromStream($message);
+                    $server->send($response, $address);
+                } catch (\Exception $exception) {
+                    $this->event(new ExceptionEvent($exception));
+                }
             });
         });
 
@@ -89,6 +96,9 @@ class Server implements LoggerAwareInterface
     public function handleQueryFromStream(string $buffer): string
     {
         $message = Decoder::decodeMessage($buffer);
+
+        $this->event(new QueryReceiveEvent($message));
+
         $responseMessage = clone $message;
         $responseMessage->getHeader()
             ->setResponse(true)
@@ -105,22 +115,8 @@ class Server implements LoggerAwareInterface
             $encodedResponse = Encoder::encodeMessage($responseMessage);
         }
 
-        $this->logMessage($responseMessage);
+        $this->event(new QueryResponseEvent($responseMessage));
 
         return $encodedResponse;
-    }
-
-    /**
-     * @param Message $message
-     */
-    private function logMessage(Message $message): void
-    {
-        foreach ($message->getQuestions() as $question) {
-            $this->logger->log(LogLevel::INFO, 'Query: '.$question);
-        }
-
-        foreach ($message->getAnswers() as $answer) {
-            $this->logger->log(LogLevel::INFO, 'Answer: '.$answer);
-        }
     }
 }

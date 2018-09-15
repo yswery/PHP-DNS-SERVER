@@ -15,7 +15,7 @@ $stackableResolver = new yswery\DNS\Resolver\StackableResolver([$jsonResolver, $
 $server = new yswery\DNS\Server($stackableResolver);
 
 // Log to the console, you can use any PSR logger such as Monolog
-$server->setLogger(new \yswery\DNS\EchoLogger());
+$server->registerEventSubscriber(new \yswery\DNS\EchoLogger());
 
 // Start DNS server
 $server->start();
