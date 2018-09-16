@@ -11,6 +11,7 @@
 namespace yswery\DNS\Resolver;
 
 use Symfony\Component\Yaml\Yaml;
+use yswery\DNS\UnsupportedTypeException;
 
 /**
  * Store dns records in yaml files.
@@ -20,13 +21,17 @@ class YamlResolver extends JsonResolver
     /**
      * YamlResolver constructor.
      *
-     * @param string $file
-     * @param int    $ttl
+     * @param array $files
+     * @param int   $defaultTtl
+     *
+     * @throws UnsupportedTypeException
      */
-    public function __construct(string $file, $ttl = 300)
+    public function __construct(array $files, $defaultTtl = 300)
     {
-        $this->ttl = $ttl;
-        $this->records = Yaml::parseFile($file);
-        $this->recursionAvailable = false;
+        parent::__construct([], $defaultTtl);
+
+        foreach ($files as $file) {
+            $this->addZone(Yaml::parseFile($file));
+        }
     }
 }

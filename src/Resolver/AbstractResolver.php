@@ -23,6 +23,7 @@ abstract class AbstractResolver implements ResolverInterface
 
     /**
      * @param ResourceRecord[] $query
+     *
      * @return array
      */
     public function getAnswer(array $query): array
