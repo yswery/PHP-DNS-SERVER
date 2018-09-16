@@ -12,7 +12,7 @@ class JsonResolver extends AbstractResolver
     /**
      * @var string
      */
-    protected $defaultClass = 'IN';
+    protected $defaultClass = ClassEnum::INTERNET;
 
     /**
      * @var int
@@ -60,19 +60,20 @@ class JsonResolver extends AbstractResolver
      */
     private function processZone(array $zone)
     {
-        $parent = $zone['domain'];
+        $parent = rtrim($zone['domain'], '.').'.';
         $defaultTtl = $zone['default-ttl'];
         $rrs = $zone['resource-records'];
 
         foreach ($rrs as $rr) {
             $name = $rr['name'] ?? $parent;
+            $class = isset($rr['class']) ? ClassEnum::getClassFromName($rr['class']) : $this->defaultClass;
 
             yield (new ResourceRecord())
                 ->setName($this->handleName($name, $parent))
-                ->setClass(ClassEnum::getClassFromName($rr['class'] ?? $this->defaultClass))
-                ->setType($type = RecordTypeEnum::getTypeIndex($rr['type']))
+                ->setClass($class)
+                ->setType(RecordTypeEnum::getTypeIndex($rr['type']))
                 ->setTtl($rr['ttl'] ?? $defaultTtl)
-                ->setRdata($this->extractRdata($rr, $type, $parent));
+                ->setRdata($this->extractRdata($rr, $parent));
         }
     }
 
@@ -89,10 +90,9 @@ class JsonResolver extends AbstractResolver
             return strtolower($value);
         }, array_keys($zone));
 
-        return !(
-            (false !== array_search('domain', $keys, true)) &&
-            (false !== array_search('resource-records', $keys, true))
-        );
+        return
+            (false === array_search('domain', $keys, true)) ||
+            (false === array_search('resource-records', $keys, true));
     }
 
     /**
@@ -111,7 +111,7 @@ class JsonResolver extends AbstractResolver
                     yield (new ResourceRecord())
                         ->setName($domain)
                         ->setType($type)
-                        ->setClass(ClassEnum::getClassFromName($this->defaultClass))
+                        ->setClass($this->defaultClass)
                         ->setTtl($this->defaultTtl)
                         ->setRdata($rdata);
                 }
@@ -144,16 +144,15 @@ class JsonResolver extends AbstractResolver
 
     /**
      * @param array  $resourceRecord
-     * @param int    $type
      * @param string $parent
      *
      * @throws UnsupportedTypeException
      *
      * @return array|string
      */
-    private function extractRdata(array $resourceRecord, int $type, string $parent)
+    private function extractRdata(array $resourceRecord, string $parent)
     {
-        switch ($type) {
+        switch (RecordTypeEnum::getTypeIndex($resourceRecord['type'])) {
             case RecordTypeEnum::TYPE_A:
             case RecordTypeEnum::TYPE_AAAA:
                 return $resourceRecord['address'];
