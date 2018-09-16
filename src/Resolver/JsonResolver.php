@@ -1,130 +1,190 @@
 <?php
-/*
- * This file is part of PHP DNS Server.
- *
- * (c) Yif Swery <yiftachswr@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
 
 namespace yswery\DNS\Resolver;
 
-use yswery\DNS\ResourceRecord;
+use yswery\DNS\ClassEnum;
 use yswery\DNS\RecordTypeEnum;
+use yswery\DNS\ResourceRecord;
+use yswery\DNS\UnsupportedTypeException;
 
-class JsonResolver implements ResolverInterface
+class JsonResolver extends AbstractResolver
 {
     /**
-     * @var array
+     * @var string
      */
-    protected $records;
+    protected $defaultClass = 'IN';
 
     /**
      * @var int
      */
-    protected $ttl;
+    protected $defaultTtl;
 
     /**
-     * @var bool
-     */
-    protected $recursionAvailable;
-
-    /**
-     * JsonResolver constructor.
+     * EnhancedJsonResolver constructor.
      *
-     * @param string $filename the path of the JSON-formatted DNS Zone file
-     * @param int    $ttl      the default TTL to be used for all Resource Records omitting a TTL
+     * @param array $files
+     * @param int   $defaultTtl
      *
-     * @throws \Exception | \InvalidArgumentException
+     * @throws UnsupportedTypeException
      */
-    public function __construct($filename, $ttl = 300)
+    public function __construct(array $files, $defaultTtl = 300)
     {
-        if (!file_exists($filename)) {
-            throw new \Exception(sprintf('The file "%s" does not exist.', $filename));
-        }
+        $this->isAuthoritative = true;
+        $this->allowRecursion = false;
+        $this->defaultTtl = $defaultTtl;
 
-        if (false === $dns_json = file_get_contents($filename)) {
-            throw new \Exception(sprintf('Unable to open JSON file: "%s".', $filename));
+        foreach ($files as $file) {
+            $this->addZone(json_decode(file_get_contents($file), true));
         }
-
-        if (null === $dns_records = json_decode($dns_json, true)) {
-            throw new \Exception(sprintf('Unable to parse JSON file: "%s".', $filename));
-        }
-
-        if (!is_int($ttl)) {
-            throw new \InvalidArgumentException('Default TTL must be an integer.');
-        }
-
-        $this->ttl = $ttl;
-        $this->records = $dns_records;
-        $this->recursionAvailable = false;
     }
 
     /**
-     * @param ResourceRecord[] $question
+     * @param array $zone
      *
-     * @return array
+     * @throws UnsupportedTypeException
      */
-    public function getAnswer(array $question): array
+    protected function addZone(array $zone): void
     {
-        $q_name = ($question[0])->getName();
-        $q_type = ($question[0])->getType();
-        $q_class = ($question[0])->getClass();
-
-        $domain = trim($q_name, '.');
-        $type = RecordTypeEnum::getName($q_type);
-
-        // If there is no resource record or the record does not have the type, return an empty array.
-        if (!array_key_exists($domain, $this->records) || !isset($this->records[$domain][$type])) {
-            return [];
+        $resourceRecords = $this->isLegacyFormat($zone) ? $this->processLegacyZone($zone) : $this->processZone($zone);
+        foreach ($resourceRecords as $resourceRecord) {
+            $this->resourceRecords[$resourceRecord->getName()][$resourceRecord->getType()][$resourceRecord->getClass()][] = $resourceRecord;
         }
-
-        $answer = [];
-        $data = (array) $this->records[$domain][$type];
-
-        foreach ($data as $rdata) {
-            $answer[] = (new ResourceRecord())
-                ->setName($q_name)
-                ->setType($q_type)
-                ->setClass($q_class)
-                ->setTtl($this->ttl)
-                ->setRdata($rdata);
-        }
-
-        return $answer;
     }
 
     /**
-     * Get the currently loaded DNS Records.
+     * @param array $zone
      *
-     * @return array
+     * @return \Generator|ResourceRecord[]
+     *
+     * @throws UnsupportedTypeException
      */
-    public function getRecords(): array
+    private function processZone(array $zone)
     {
-        return $this->records;
+        $parent = $zone['domain'];
+        $defaultTtl = $zone['default-ttl'];
+        $rrs = $zone['resource-records'];
+
+        foreach ($rrs as $rr) {
+            $name = $rr['name'] ?? $parent;
+
+            yield (new ResourceRecord())
+                ->setName($this->handleName($name, $parent))
+                ->setClass(ClassEnum::getClassFromName($rr['class'] ?? $this->defaultClass))
+                ->setType($type = RecordTypeEnum::getTypeIndex($rr['type']))
+                ->setTtl($rr['ttl'] ?? $defaultTtl)
+                ->setRdata($this->extractRdata($rr, $type, $parent));
+        }
     }
 
     /**
-     * Getter method for $recursion_available property.
+     * Determine if a $zone is in the legacy format.
+     *
+     * @param array $zone
      *
      * @return bool
      */
-    public function allowsRecursion(): bool
+    private function isLegacyFormat(array $zone): bool
     {
-        return $this->recursionAvailable;
+        $keys = array_map(function ($value) {
+            return strtolower($value);
+        }, array_keys($zone));
+
+        return !(
+            (false !== array_search('domain', $keys, true)) &&
+            (false !== array_search('resource-records', $keys, true))
+        );
     }
 
-    /*
-    * Check if the resolver knows about a domain
-    *
-    * @param  string  $domain the domain to check for
-    * @return boolean         true if the resolver holds info about $domain
-    */
-    public function isAuthority($domain): bool
+    /**
+     * @param array $zones
+     *
+     * @return \Generator|ResourceRecord[]
+     */
+    private function processLegacyZone(array $zones)
     {
-        $domain = trim($domain, '.');
+        foreach ($zones as $domain => $types) {
+            $domain = rtrim($domain, '.').'.';
+            foreach ($types as $type => $data) {
+                $data = (array) $data;
+                $type = RecordTypeEnum::getTypeIndex($type);
+                foreach ($data as $rdata) {
+                    yield (new ResourceRecord())
+                        ->setName($domain)
+                        ->setType($type)
+                        ->setClass(ClassEnum::getClassFromName($this->defaultClass))
+                        ->setTtl($this->defaultTtl)
+                        ->setRdata($rdata);
+                }
+            }
+        }
+    }
 
-        return array_key_exists($domain, $this->records);
+    /**
+     * Add the parent domain to names that are not fully qualified.
+     *
+     * EnhancedJsonResolver::handleName('www', 'example.com.') //Outputs 'www.example.com.'
+     *
+     * @param $name
+     * @param $parent
+     *
+     * @return string
+     */
+    private function handleName($name, $parent)
+    {
+        if ('@' === $name || '' === $name) {
+            return $parent;
+        }
+
+        if ('.' !== substr($name, -1, 1)) {
+            return $name.'.'.$parent;
+        }
+
+        return $name;
+    }
+
+    /**
+     * @param array  $resourceRecord
+     * @param int    $type
+     * @param string $parent
+     *
+     * @throws UnsupportedTypeException
+     *
+     * @return array|string
+     */
+    private function extractRdata(array $resourceRecord, int $type, string $parent)
+    {
+        switch ($type) {
+            case RecordTypeEnum::TYPE_A:
+            case RecordTypeEnum::TYPE_AAAA:
+                return $resourceRecord['address'];
+            case RecordTypeEnum::TYPE_NS:
+            case RecordTypeEnum::TYPE_CNAME:
+            case RecordTypeEnum::TYPE_PTR:
+                return $this->handleName($resourceRecord['target'], $parent);
+            case RecordTypeEnum::TYPE_SOA:
+                return [
+                    'mname' => $this->handleName($resourceRecord['mname'], $parent),
+                    'rname' => $this->handleName($resourceRecord['rname'], $parent),
+                    'serial' => $resourceRecord['serial'],
+                    'refresh' => $resourceRecord['refresh'],
+                    'retry' => $resourceRecord['retry'],
+                    'expire' => $resourceRecord['expire'],
+                    'minimum' => $resourceRecord['minimum'],
+                ];
+            case RecordTypeEnum::TYPE_MX:
+                return [
+                    'preference' => $resourceRecord['preference'],
+                    'exchange' => $this->handleName($resourceRecord['exchange'], $parent),
+                ];
+            case RecordTypeEnum::TYPE_TXT:
+                return $resourceRecord['text'];
+            case RecordTypeEnum::TYPE_AXFR:
+            case RecordTypeEnum::TYPE_ANY:
+                return '';
+            default:
+                throw new UnsupportedTypeException(
+                    sprintf('Resource Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
+                );
+        }
     }
 }
