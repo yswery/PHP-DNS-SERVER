@@ -13,8 +13,9 @@ namespace yswery\DNS\Tests;
 use yswery\DNS\Decoder;
 use yswery\DNS\Encoder;
 use yswery\DNS\RecordTypeEnum;
+use PHPUnit\Framework\TestCase;
 
-class DecoderTest extends \PHPUnit_Framework_TestCase
+class DecoderTest extends TestCase
 {
     public function testDecodeFlags()
     {
@@ -30,10 +31,10 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
         ];
 
         $encoded = 0b1000010000000000;
-        
+
         $this->assertEquals($flags, Decoder::decodeFlags($encoded));
     }
-    
+
     public function testDecodeLabel()
     {
         $decoded_1 = 'www.example.com.';
@@ -87,7 +88,7 @@ class DecoderTest extends \PHPUnit_Framework_TestCase
         $offset = 0;
         $this->assertEquals($decoded_3, Decoder::decodeQuestionResourceRecord($encoded_3, $offset, 2));
     }
-    
+
     public function testDecodeResourceRecord()
     {
         $name = 'example.com.';

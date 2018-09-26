@@ -1,8 +1,19 @@
 <?php
+/*
+ * This file is part of PHP DNS Server.
+ *
+ * (c) Yif Swery <yiftachswr@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace yswery\DNS\Tests;
 
 use yswery\DNS\JsonResolver;
+use PHPUnit\Framework\TestCase;
 
-class JsonResolverTest extends PHPUnit_Framework_TestCase
+class JsonResolverTest extends TestCase
 {
     /**
      * @var yswery\DNS\JsonResolver
@@ -45,7 +56,7 @@ class JsonResolverTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals($expected, $this->storage->getDnsRecords());
     }
-    
+
     public function testHostRecordResolves()
     {
         $question = array(array(
@@ -134,5 +145,5 @@ class JsonResolverTest extends PHPUnit_Framework_TestCase
         $this->storage = new JsonResolver(__DIR__ . '/test_records.json');
         $this->assertTrue($this->storage !== false);
     }
-    
+
 }

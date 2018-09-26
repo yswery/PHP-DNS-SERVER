@@ -13,8 +13,9 @@ namespace yswery\DNS\Tests;
 use yswery\DNS\JsonResolver;
 use yswery\DNS\RecordTypeEnum;
 use yswery\DNS\Encoder;
+use PHPUnit\Framework\TestCase;
 
-class ServerTest extends \PHPUnit_Framework_TestCase
+class ServerTest extends TestCase
 {
     /**
      * @var TestServerProxy
