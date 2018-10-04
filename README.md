@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/yswery/PHP-DNS-SERVER.svg?branch=master)](https://travis-ci.org/yswery/PHP-DNS-SERVER)
-[![Coverage Status](https://coveralls.io/repos/yswery/PHP-DNS-SERVER/badge.png?branch=master)](https://coveralls.io/r/yswery/PHP-DNS-SERVER?branch=master)
+[![Build Status](https://travis-ci.org/yswery/PHP-DNS-SERVER.svg?branch=version-1)](https://travis-ci.org/yswery/PHP-DNS-SERVER?branch=version-1)
+[![Coverage Status](https://coveralls.io/repos/yswery/PHP-DNS-SERVER/badge.png?branch=version-1)](https://coveralls.io/github/yswery/PHP-DNS-SERVER?branch=version-1)
 
 
 # PHP DNS Server

@@ -6,4 +6,5 @@ CHANGELOG for 1.x
 * Implemented PSR Logger
 * The message, header and resource records are now represented by objects.
 * Ability to response to server events via event subscriber component.
-* Optionally store dns records in Yaml format.
+* Optionally store dns records in Yaml or XML format.
+* Implemented Symfony Event dispatcher
