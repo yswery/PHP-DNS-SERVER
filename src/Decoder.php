@@ -108,50 +108,40 @@ class Decoder
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
             case RecordTypeEnum::TYPE_AAAA:
-                $data = inet_ntop($rdata);
-                break;
+                return inet_ntop($rdata);
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
-                $data = self::decodeDomainName($rdata);
-                break;
+                return self::decodeDomainName($rdata);
             case RecordTypeEnum::TYPE_SOA:
                 $offset = 0;
-                $data = array_merge(
+                return array_merge(
                     [
                         'mname' => self::decodeDomainName($rdata, $offset),
                         'rname' => self::decodeDomainName($rdata, $offset),
                     ],
                     unpack('Nserial/Nrefresh/Nretry/Nexpire/Nminimum', substr($rdata, $offset))
                 );
-                break;
             case RecordTypeEnum::TYPE_MX:
-                $data = [
+                return [
                     'preference' => unpack('npreference', $rdata)['preference'],
                     'exchange' => self::decodeDomainName(substr($rdata, 2)),
                 ];
-                break;
             case RecordTypeEnum::TYPE_TXT:
                 $len = ord($rdata[0]);
-
                 if ((strlen($rdata) + 1) < $len) {
-                    $data = null;
-                    break;
+                    return null;
                 }
 
-                $data = substr($rdata, 1, $len);
-                break;
+                return substr($rdata, 1, $len);
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:
-                $data = null;
-                break;
+                return null;
             default:
                 throw new UnsupportedTypeException(
                     sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
                 );
         }
-
-        return $data;
     }
 
     /**

@@ -39,7 +39,7 @@ class Encoder
     public static function encodeDomainName($domain): string
     {
         if ('.' === $domain) {
-            return "\0";
+            return chr(0);
         }
 
         $domain = rtrim($domain, '.').'.';
@@ -66,35 +66,26 @@ class Encoder
             case RecordTypeEnum::TYPE_A:
             case RecordTypeEnum::TYPE_AAAA:
                 $n = (RecordTypeEnum::TYPE_A === $type) ? 4 : 16;
-                $enc = filter_var($rdata, FILTER_VALIDATE_IP) ? inet_pton($rdata) : str_repeat("\0", $n);
-                break;
+                return filter_var($rdata, FILTER_VALIDATE_IP) ? inet_pton($rdata) : str_repeat(chr(0), $n);
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
-                $enc = self::encodeDomainName($rdata);
-                break;
+                return self::encodeDomainName($rdata);
             case RecordTypeEnum::TYPE_SOA:
-                $enc = self::encodeSOA($rdata);
-                break;
+                return self::encodeSOA($rdata);
             case RecordTypeEnum::TYPE_MX:
-                $enc = pack('n', (int) $rdata['preference']);
-                $enc .= self::encodeDomainName($rdata['exchange']);
-                break;
+                return pack('n', (int) $rdata['preference']).self::encodeDomainName($rdata['exchange']);
             case RecordTypeEnum::TYPE_TXT:
                 $rdata = substr($rdata, 0, 255);
-                $enc = chr(strlen($rdata)).$rdata;
-                break;
+                return chr(strlen($rdata)).$rdata;
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:
-                $enc = '';
-                break;
+                return '';
             default:
                 throw new UnsupportedTypeException(
                     sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
                 );
         }
-
-        return $enc;
     }
 
     /**

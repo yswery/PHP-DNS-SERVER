@@ -70,7 +70,9 @@ abstract class AbstractResolver implements ResolverInterface
     /**
      * Add the parent domain to names that are not fully qualified.
      *
-     * EnhancedJsonResolver::handleName('www', 'example.com.') //Outputs 'www.example.com.'
+     * AbstractResolver::handleName('www', 'example.com.') //Outputs 'www.example.com.'
+     * AbstractResolver::handleName('@', 'example.com.') //Outputs 'example.com.'
+     * AbstractResolver::handleName('ns1.example.com.', 'example.com.') //Outputs 'ns1.example.com.'
      *
      * @param $name
      * @param $parent
