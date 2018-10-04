@@ -55,7 +55,7 @@ class ResourceRecord
      *
      * @return ResourceRecord
      */
-    public function setName($name): ResourceRecord
+    public function setName(string $name): ResourceRecord
     {
         $this->name = $name;
 
@@ -75,7 +75,7 @@ class ResourceRecord
      *
      * @return ResourceRecord
      */
-    public function setType($type): ResourceRecord
+    public function setType(int $type): ResourceRecord
     {
         $this->type = $type;
 
@@ -95,7 +95,7 @@ class ResourceRecord
      *
      * @return ResourceRecord
      */
-    public function setTtl($ttl): ResourceRecord
+    public function setTtl(int $ttl): ResourceRecord
     {
         $this->ttl = $ttl;
 
@@ -135,7 +135,7 @@ class ResourceRecord
      *
      * @return ResourceRecord
      */
-    public function setClass($class): ResourceRecord
+    public function setClass(int $class): ResourceRecord
     {
         $this->class = $class;
 
@@ -155,9 +155,9 @@ class ResourceRecord
      *
      * @return ResourceRecord
      */
-    public function setQuestion($question): ResourceRecord
+    public function setQuestion(bool $question): ResourceRecord
     {
-        $this->question = (bool) $question;
+        $this->question = $question;
 
         return $this;
     }

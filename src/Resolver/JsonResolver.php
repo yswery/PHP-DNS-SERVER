@@ -20,7 +20,7 @@ class JsonResolver extends AbstractResolver
     protected $defaultTtl;
 
     /**
-     * EnhancedJsonResolver constructor.
+     * JsonResolver constructor.
      *
      * @param array $files
      * @param int   $defaultTtl
@@ -34,47 +34,39 @@ class JsonResolver extends AbstractResolver
         $this->defaultTtl = $defaultTtl;
 
         foreach ($files as $file) {
-            $this->addZone(json_decode(file_get_contents($file), true));
+            $zone = json_decode(file_get_contents($file), true);
+            $resourceRecords = $this->isLegacyFormat($zone) ? $this->processLegacyZone($zone) : $this->processZone($zone);
+            $this->addZone($resourceRecords);
         }
     }
 
     /**
      * @param array $zone
      *
-     * @throws UnsupportedTypeException
-     */
-    protected function addZone(array $zone): void
-    {
-        $resourceRecords = $this->isLegacyFormat($zone) ? $this->processLegacyZone($zone) : $this->processZone($zone);
-        foreach ($resourceRecords as $resourceRecord) {
-            $this->resourceRecords[$resourceRecord->getName()][$resourceRecord->getType()][$resourceRecord->getClass()][] = $resourceRecord;
-        }
-    }
-
-    /**
-     * @param array $zone
-     *
-     * @return \Generator|ResourceRecord[]
+     * @return ResourceRecord[]
      *
      * @throws UnsupportedTypeException
      */
-    private function processZone(array $zone)
+    protected function processZone(array $zone): array
     {
         $parent = rtrim($zone['domain'], '.').'.';
         $defaultTtl = $zone['default-ttl'];
         $rrs = $zone['resource-records'];
+        $resourceRecords = [];
 
         foreach ($rrs as $rr) {
             $name = $rr['name'] ?? $parent;
             $class = isset($rr['class']) ? ClassEnum::getClassFromName($rr['class']) : $this->defaultClass;
 
-            yield (new ResourceRecord())
+            $resourceRecords[] = (new ResourceRecord())
                 ->setName($this->handleName($name, $parent))
                 ->setClass($class)
-                ->setType(RecordTypeEnum::getTypeIndex($rr['type']))
+                ->setType($type = RecordTypeEnum::getTypeIndex($rr['type']))
                 ->setTtl($rr['ttl'] ?? $defaultTtl)
-                ->setRdata($this->extractRdata($rr, $parent));
+                ->setRdata($this->extractRdata($rr, $type, $parent));
         }
+
+        return $resourceRecords;
     }
 
     /**
@@ -84,7 +76,7 @@ class JsonResolver extends AbstractResolver
      *
      * @return bool
      */
-    private function isLegacyFormat(array $zone): bool
+    protected function isLegacyFormat(array $zone): bool
     {
         $keys = array_map(function ($value) {
             return strtolower($value);
@@ -98,17 +90,18 @@ class JsonResolver extends AbstractResolver
     /**
      * @param array $zones
      *
-     * @return \Generator|ResourceRecord[]
+     * @return ResourceRecord[]
      */
-    private function processLegacyZone(array $zones)
+    protected function processLegacyZone(array $zones): array
     {
+        $resourceRecords = [];
         foreach ($zones as $domain => $types) {
             $domain = rtrim($domain, '.').'.';
             foreach ($types as $type => $data) {
                 $data = (array) $data;
                 $type = RecordTypeEnum::getTypeIndex($type);
                 foreach ($data as $rdata) {
-                    yield (new ResourceRecord())
+                    $resourceRecords[] = (new ResourceRecord())
                         ->setName($domain)
                         ->setType($type)
                         ->setClass($this->defaultClass)
@@ -117,73 +110,7 @@ class JsonResolver extends AbstractResolver
                 }
             }
         }
-    }
 
-    /**
-     * Add the parent domain to names that are not fully qualified.
-     *
-     * EnhancedJsonResolver::handleName('www', 'example.com.') //Outputs 'www.example.com.'
-     *
-     * @param $name
-     * @param $parent
-     *
-     * @return string
-     */
-    private function handleName($name, $parent)
-    {
-        if ('@' === $name || '' === $name) {
-            return $parent;
-        }
-
-        if ('.' !== substr($name, -1, 1)) {
-            return $name.'.'.$parent;
-        }
-
-        return $name;
-    }
-
-    /**
-     * @param array  $resourceRecord
-     * @param string $parent
-     *
-     * @throws UnsupportedTypeException
-     *
-     * @return array|string
-     */
-    private function extractRdata(array $resourceRecord, string $parent)
-    {
-        switch (RecordTypeEnum::getTypeIndex($resourceRecord['type'])) {
-            case RecordTypeEnum::TYPE_A:
-            case RecordTypeEnum::TYPE_AAAA:
-                return $resourceRecord['address'];
-            case RecordTypeEnum::TYPE_NS:
-            case RecordTypeEnum::TYPE_CNAME:
-            case RecordTypeEnum::TYPE_PTR:
-                return $this->handleName($resourceRecord['target'], $parent);
-            case RecordTypeEnum::TYPE_SOA:
-                return [
-                    'mname' => $this->handleName($resourceRecord['mname'], $parent),
-                    'rname' => $this->handleName($resourceRecord['rname'], $parent),
-                    'serial' => $resourceRecord['serial'],
-                    'refresh' => $resourceRecord['refresh'],
-                    'retry' => $resourceRecord['retry'],
-                    'expire' => $resourceRecord['expire'],
-                    'minimum' => $resourceRecord['minimum'],
-                ];
-            case RecordTypeEnum::TYPE_MX:
-                return [
-                    'preference' => $resourceRecord['preference'],
-                    'exchange' => $this->handleName($resourceRecord['exchange'], $parent),
-                ];
-            case RecordTypeEnum::TYPE_TXT:
-                return $resourceRecord['text'];
-            case RecordTypeEnum::TYPE_AXFR:
-            case RecordTypeEnum::TYPE_ANY:
-                return '';
-            default:
-                throw new UnsupportedTypeException(
-                    sprintf('Resource Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
-                );
-        }
+        return $resourceRecords;
     }
 }

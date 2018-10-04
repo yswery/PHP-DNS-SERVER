@@ -75,7 +75,7 @@ class SystemResolver extends AbstractResolver
 
         foreach ($records as $record) {
             $result[] = [
-                'rdata' => $this->extractRdata($record),
+                'rdata' => $this->extractPhpRdata($record),
                 'ttl' => $record['ttl'],
             ];
         }
@@ -84,42 +84,42 @@ class SystemResolver extends AbstractResolver
     }
 
     /**
-     * @param array $array
-     *
+     * @param array $resourceRecord
+     * @param int $type
+     * @param string $parent
      * @return array|mixed
-     *
      * @throws UnsupportedTypeException
      */
-    private function extractRdata(array $array)
+    protected function extractPhpRdata(array $resourceRecord)
     {
-        $type = RecordTypeEnum::getTypeIndex($array['type']);
+        $type = RecordTypeEnum::getTypeIndex($resourceRecord['type']);
 
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
-                return $array['ip'];
+                return $resourceRecord['ip'];
             case RecordTypeEnum::TYPE_AAAA:
-                return $array['ipv6'];
+                return $resourceRecord['ipv6'];
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:
-                return $array['target'];
+                return $resourceRecord['target'];
             case RecordTypeEnum::TYPE_SOA:
                 return [
-                        'mname' => $array['mname'],
-                        'rname' => $array['rname'],
-                        'serial' => $array['serial'],
-                        'refresh' => $array['refresh'],
-                        'retry' => $array['retry'],
-                        'expire' => $array['expire'],
-                        'minimum' => $array['minimum-ttl'],
+                        'mname' => $resourceRecord['mname'],
+                        'rname' => $resourceRecord['rname'],
+                        'serial' => $resourceRecord['serial'],
+                        'refresh' => $resourceRecord['refresh'],
+                        'retry' => $resourceRecord['retry'],
+                        'expire' => $resourceRecord['expire'],
+                        'minimum' => $resourceRecord['minimum-ttl'],
                     ];
             case RecordTypeEnum::TYPE_MX:
                 return [
-                    'preference' => $array['pri'],
-                    'exchange' => $array['host'],
+                    'preference' => $resourceRecord['pri'],
+                    'exchange' => $resourceRecord['host'],
                 ];
             case RecordTypeEnum::TYPE_TXT:
-                return $array['txt'];
+                return $resourceRecord['txt'];
             default:
                 throw new UnsupportedTypeException(
                     sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
