@@ -45,3 +45,25 @@ $server = new Server(new JsonResolver('./record.json'), $eventDispatcher);
 * `Events::MESSAGE` - Message is received from client in raw format.
 * `Events::QUERY_RECEIVE` - Query is parsed to dns message class.
 * `Events::QUERY_RESPONSE` - Message is resolved and sent to client.
+
+## Example
+### Adding a kill switch
+Say you wanted to be able to stop the server if you send it a particular query. In the example below,
+if the server receives a query for `STOP.DNS.`, then it will trigger an `exit()`.
+
+```php
+$dispatcher->addListener(Events::QUERY_RECEIVE, function (QueryReceiveEvent $event) {
+    foreach ($event->getMessage()->getQuestions() as $query) {
+        if ('STOP.DNS.' === $query->getName()) {
+            exit;
+        }
+    }
+});
+
+$server = new Server($resolver, $dispatcher);
+$server->start();
+```
+
+```BASH
+> nslookup STOP.DNS. 127.0.0.1
+```

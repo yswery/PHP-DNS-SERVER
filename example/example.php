@@ -3,7 +3,7 @@
 require_once __DIR__.'/../vendor/autoload.php';
 
 // JsonResolver created and provided with path to file with json dns records
-$jsonResolver = new yswery\DNS\Resolver\JsonResolver(__DIR__.'/record.json');
+$jsonResolver = new yswery\DNS\Resolver\JsonResolver([__DIR__.'/record.json']);
 
 // System resolver acting as a fallback to the JsonResolver
 $systemResolver = new yswery\DNS\Resolver\SystemResolver();

@@ -11,7 +11,6 @@
 namespace yswery\DNS\Resolver;
 
 use Symfony\Component\Yaml\Yaml;
-use yswery\DNS\Tests\Resolver\JsonResolverTest;
 use yswery\DNS\UnsupportedTypeException;
 
 /**
