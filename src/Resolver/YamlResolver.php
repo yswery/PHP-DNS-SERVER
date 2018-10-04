@@ -11,6 +11,7 @@
 namespace yswery\DNS\Resolver;
 
 use Symfony\Component\Yaml\Yaml;
+use yswery\DNS\Tests\Resolver\JsonResolverTest;
 use yswery\DNS\UnsupportedTypeException;
 
 /**
@@ -31,7 +32,9 @@ class YamlResolver extends JsonResolver
         parent::__construct([], $defaultTtl);
 
         foreach ($files as $file) {
-            $this->addZone(Yaml::parseFile($file));
+            $zone = Yaml::parseFile($file);
+            $resourceRecords = $this->isLegacyFormat($zone) ? $this->processLegacyZone($zone) : $this->processZone($zone);
+            $this->addZone($resourceRecords);
         }
     }
 }
