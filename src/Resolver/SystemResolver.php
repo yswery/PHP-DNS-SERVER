@@ -84,10 +84,12 @@ class SystemResolver extends AbstractResolver
     }
 
     /**
-     * @param array $resourceRecord
-     * @param int $type
+     * @param array  $resourceRecord
+     * @param int    $type
      * @param string $parent
+     *
      * @return array|mixed
+     *
      * @throws UnsupportedTypeException
      */
     protected function extractPhpRdata(array $resourceRecord)

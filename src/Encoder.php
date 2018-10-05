@@ -66,6 +66,7 @@ class Encoder
             case RecordTypeEnum::TYPE_A:
             case RecordTypeEnum::TYPE_AAAA:
                 $n = (RecordTypeEnum::TYPE_A === $type) ? 4 : 16;
+
                 return filter_var($rdata, FILTER_VALIDATE_IP) ? inet_pton($rdata) : str_repeat(chr(0), $n);
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
@@ -77,6 +78,7 @@ class Encoder
                 return pack('n', (int) $rdata['preference']).self::encodeDomainName($rdata['exchange']);
             case RecordTypeEnum::TYPE_TXT:
                 $rdata = substr($rdata, 0, 255);
+
                 return chr(strlen($rdata)).$rdata;
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:

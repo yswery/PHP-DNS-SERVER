@@ -3,11 +3,10 @@
  * Created by PhpStorm.
  * User: Samuel Williams
  * Date: 5/10/2018
- * Time: 9:19 AM
+ * Time: 9:19 AM.
  */
 
 namespace yswery\DNS\Tests;
-
 
 use Evenement\EventEmitterTrait;
 use React\Datagram\SocketInterface;

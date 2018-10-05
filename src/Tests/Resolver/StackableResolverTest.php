@@ -35,6 +35,5 @@ class StackableResolverTest extends JsonResolverTest
             new XmlResolver($xmlFiles),
             new YamlResolver($ymlFiles),
         ]);
-
     }
 }

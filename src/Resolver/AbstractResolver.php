@@ -93,11 +93,12 @@ abstract class AbstractResolver implements ResolverInterface
     }
 
     /**
-     * @param array $resourceRecord
-     * @param int $type
+     * @param array  $resourceRecord
+     * @param int    $type
      * @param string $parent
      *
      * @return mixed
+     *
      * @throws UnsupportedTypeException
      */
     protected function extractRdata(array $resourceRecord, int $type, string $parent)

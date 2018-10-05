@@ -29,8 +29,8 @@ class MessageEvent extends ServerStartEvent
      * MessageEvent constructor.
      *
      * @param SocketInterface $socket
-     * @param string $remote
-     * @param string $message
+     * @param string          $remote
+     * @param string          $message
      */
     public function __construct(SocketInterface $socket, string $remote, string $message)
     {

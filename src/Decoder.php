@@ -115,6 +115,7 @@ class Decoder
                 return self::decodeDomainName($rdata);
             case RecordTypeEnum::TYPE_SOA:
                 $offset = 0;
+
                 return array_merge(
                     [
                         'mname' => self::decodeDomainName($rdata, $offset),

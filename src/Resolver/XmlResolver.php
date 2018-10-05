@@ -13,7 +13,9 @@ class XmlResolver extends AbstractResolver
 
     /**
      * XmlResolver constructor.
+     *
      * @param array $files
+     *
      * @throws UnsupportedTypeException
      */
     public function __construct(array $files)
@@ -28,8 +30,10 @@ class XmlResolver extends AbstractResolver
     }
 
     /**
-     * @param Object $xml
+     * @param object $xml
+     *
      * @return ResourceRecord[]
+     *
      * @throws UnsupportedTypeException
      */
     private function process($xml): array
@@ -55,7 +59,7 @@ class XmlResolver extends AbstractResolver
     }
 
     /**
-     * Convert a SimpleXML object to an associative array
+     * Convert a SimpleXML object to an associative array.
      *
      * @param \SimpleXMLElement $xmlObject
      *

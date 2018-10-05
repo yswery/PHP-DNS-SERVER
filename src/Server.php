@@ -89,11 +89,12 @@ class Server
     }
 
     /**
-     * @param string $message
-     * @param string $address
+     * @param string          $message
+     * @param string          $address
      * @param SocketInterface $socket
      */
-    public function onMessage(string $message, string $address, SocketInterface $socket) {
+    public function onMessage(string $message, string $address, SocketInterface $socket)
+    {
         try {
             $this->dispatcher->dispatch(Events::MESSAGE, new MessageEvent($socket, $address, $message));
             $socket->send($this->handleQueryFromStream($message), $address);

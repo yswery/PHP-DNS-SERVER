@@ -122,9 +122,6 @@ class ServerTest extends TestCase
         $this->assertEquals($responseEncoded, $server->handleQueryFromStream($queryEncoded));
     }
 
-    /**
-     *
-     */
     public function testOnMessage()
     {
         list($query, $response) = $this->mockQueryAndResponse();
