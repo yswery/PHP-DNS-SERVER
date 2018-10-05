@@ -11,6 +11,7 @@
 namespace yswery\DNS\Event;
 
 use React\Datagram\Socket;
+use React\Datagram\SocketInterface;
 use Symfony\Component\EventDispatcher\Event;
 
 class ServerStartEvent extends Event
@@ -23,9 +24,9 @@ class ServerStartEvent extends Event
     /**
      * ServerStartEvent constructor.
      *
-     * @param Socket $socket
+     * @param SocketInterface $socket
      */
-    public function __construct(Socket $socket)
+    public function __construct(SocketInterface $socket)
     {
         $this->socket = $socket;
     }

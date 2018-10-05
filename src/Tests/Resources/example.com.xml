@@ -48,12 +48,12 @@
             <name>www</name>
             <type>cname</type>
             <rdata>
-                <target>'@'</target>
+                <target>@</target>
             </rdata>
         </resource-record>
 
         <resource-record>
-            <name>'@'</name>
+            <name>@</name>
             <type>MX</type>
             <rdata>
                 <preference>15</preference>

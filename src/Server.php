@@ -11,6 +11,8 @@
 namespace yswery\DNS;
 
 use React\Datagram\Socket;
+use React\Datagram\SocketInterface;
+use React\EventLoop\LoopInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use yswery\DNS\Event\ServerExceptionEvent;
 use yswery\DNS\Event\MessageEvent;
@@ -43,6 +45,11 @@ class Server
     private $ip;
 
     /**
+     * @var LoopInterface
+     */
+    private $loop;
+
+    /**
      * Server constructor.
      *
      * @param ResolverInterface        $resolver
@@ -54,16 +61,22 @@ class Server
      */
     public function __construct(ResolverInterface $resolver, EventDispatcherInterface $dispatcher, string $ip = '0.0.0.0', int $port = 53)
     {
+        if (!function_exists('socket_create') || !extension_loaded('sockets')) {
+            throw new \Exception('Socket extension or socket_create() function not found.');
+        }
+
         $this->dispatcher = $dispatcher;
         $this->resolver = $resolver;
         $this->port = $port;
         $this->ip = $ip;
 
-        set_time_limit(0);
+        $this->loop = \React\EventLoop\Factory::create();
+        $factory = new \React\Datagram\Factory($this->loop);
 
-        if (!function_exists('socket_create') || !extension_loaded('sockets')) {
-            throw new \Exception('Socket extension or socket_create() function not found.');
-        }
+        $factory->createServer($this->ip.':'.$this->port)->then(function (Socket $server) {
+            $this->dispatcher->dispatch(Events::SERVER_START, new ServerStartEvent($server));
+            $server->on('message', [$this, 'onMessage']);
+        });
     }
 
     /**
@@ -71,26 +84,27 @@ class Server
      */
     public function start(): void
     {
-        $loop = \React\EventLoop\Factory::create();
-        $factory = new \React\Datagram\Factory($loop);
-
-        $factory->createServer($this->ip.':'.$this->port)->then(function (Socket $server) {
-            $this->dispatcher->dispatch(Events::SERVER_START, new ServerStartEvent($server));
-
-            $server->on('message', function (string $message, string $address, Socket $server) {
-                try {
-                    $this->dispatcher->dispatch(Events::MESSAGE, new MessageEvent($server, $address, $message));
-                    $server->send($this->handleQueryFromStream($message), $address);
-                } catch (\Exception $exception) {
-                    $this->dispatcher->dispatch(Events::SERVER_EXCEPTION, new ServerExceptionEvent($exception));
-                }
-            });
-        });
-
-        $loop->run();
+        set_time_limit(0);
+        $this->loop->run();
     }
 
     /**
+     * @param string $message
+     * @param string $address
+     * @param SocketInterface $socket
+     */
+    public function onMessage(string $message, string $address, SocketInterface $socket) {
+        try {
+            $this->dispatcher->dispatch(Events::MESSAGE, new MessageEvent($socket, $address, $message));
+            $socket->send($this->handleQueryFromStream($message), $address);
+        } catch (\Exception $exception) {
+            $this->dispatcher->dispatch(Events::SERVER_EXCEPTION, new ServerExceptionEvent($exception));
+        }
+    }
+
+    /**
+     * Decode a message and return an encoded response.
+     *
      * @param string $buffer
      *
      * @return string

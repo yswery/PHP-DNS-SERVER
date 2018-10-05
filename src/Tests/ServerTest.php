@@ -57,12 +57,14 @@ class ServerTest extends TestCase
     }
 
     /**
-     * @throws \yswery\DNS\UnsupportedTypeException
+     * Create a mock query and response pair.
+     *
+     * @return array
      */
-    public function testHandleQueryFromStream()
+    private function mockQueryAndResponse(): array
     {
         list($queryHeader, $question) = $this->encodeQuery($name = 'test.com.', RecordTypeEnum::TYPE_A, $id = 1337);
-        $packet = $queryHeader.$question;
+        $query = $queryHeader.$question;
 
         $flags = 0b1000010000000000;
         $qname = Encoder::encodeDomainName($name);
@@ -71,9 +73,19 @@ class ServerTest extends TestCase
         $rdata = inet_pton('111.111.111.111');
         $answer = $qname.pack('nnNn', 1, 1, 300, strlen($rdata)).$rdata;
 
-        $expectation = $header.$question.$answer;
+        $response = $header.$question.$answer;
 
-        $this->assertEquals($expectation, $this->server->handleQueryFromStream($packet));
+        return [$query, $response];
+    }
+
+    /**
+     * @throws \yswery\DNS\UnsupportedTypeException
+     */
+    public function testHandleQueryFromStream()
+    {
+        list($query, $response) = $this->mockQueryAndResponse();
+
+        $this->assertEquals($response, $this->server->handleQueryFromStream($query));
     }
 
     /**
@@ -108,5 +120,17 @@ class ServerTest extends TestCase
 
         $server = new Server(new DummyResolver(), new EventDispatcher());
         $this->assertEquals($responseEncoded, $server->handleQueryFromStream($queryEncoded));
+    }
+
+    /**
+     *
+     */
+    public function testOnMessage()
+    {
+        list($query, $response) = $this->mockQueryAndResponse();
+        $socket = new MockSocket();
+        $this->server->onMessage($query, '127.0.0.1', $socket);
+
+        $this->assertEquals($response, $socket->getLasTransmission());
     }
 }
