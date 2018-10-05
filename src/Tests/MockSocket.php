@@ -22,7 +22,7 @@ class MockSocket implements SocketInterface
         $this->transmissions[] = $data;
     }
 
-    public function getLasTransmission(): string
+    public function getLastTransmission(): string
     {
         return end($this->transmissions);
     }

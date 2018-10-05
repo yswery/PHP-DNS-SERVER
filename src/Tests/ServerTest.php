@@ -125,9 +125,8 @@ class ServerTest extends TestCase
     public function testOnMessage()
     {
         list($query, $response) = $this->mockQueryAndResponse();
-        $socket = new MockSocket();
-        $this->server->onMessage($query, '127.0.0.1', $socket);
+        $this->server->onMessage($query, '127.0.0.1', $socket = new MockSocket());
 
-        $this->assertEquals($response, $socket->getLasTransmission());
+        $this->assertEquals($response, $socket->getLastTransmission());
     }
 }
