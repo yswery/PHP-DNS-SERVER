@@ -89,6 +89,8 @@ class Server
     }
 
     /**
+     * This methods gets called each time a query is received.
+     *
      * @param string          $message
      * @param string          $address
      * @param SocketInterface $socket
@@ -115,7 +117,6 @@ class Server
     public function handleQueryFromStream(string $buffer): string
     {
         $message = Decoder::decodeMessage($buffer);
-
         $this->dispatcher->dispatch(Events::QUERY_RECEIVE, new QueryReceiveEvent($message));
 
         $responseMessage = clone $message;
@@ -126,17 +127,17 @@ class Server
 
         try {
             $responseMessage->setAnswers($this->resolver->getAnswer($responseMessage->getQuestions()));
-            $encodedResponse = Encoder::encodeMessage($responseMessage);
+            $this->dispatcher->dispatch(Events::QUERY_RESPONSE, new QueryResponseEvent($responseMessage));
+
+            return Encoder::encodeMessage($responseMessage);
         } catch (UnsupportedTypeException $e) {
-            $responseMessage
-                ->setAnswers([])
-                ->getHeader()->setRcode(Header::RCODE_NOT_IMPLEMENTED);
-            $encodedResponse = Encoder::encodeMessage($responseMessage);
+                $responseMessage
+                    ->setAnswers([])
+                    ->getHeader()->setRcode(Header::RCODE_NOT_IMPLEMENTED);
+            $this->dispatcher->dispatch(Events::QUERY_RESPONSE, new QueryResponseEvent($responseMessage));
+
+            return Encoder::encodeMessage($responseMessage);
         }
-
-        $this->dispatcher->dispatch(Events::QUERY_RESPONSE, new QueryResponseEvent($responseMessage));
-
-        return $encodedResponse;
     }
 
     /**
