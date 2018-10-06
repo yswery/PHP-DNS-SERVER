@@ -131,7 +131,7 @@ class Server
 
             return Encoder::encodeMessage($responseMessage);
         } catch (UnsupportedTypeException $e) {
-                $responseMessage
+            $responseMessage
                     ->setAnswers([])
                     ->getHeader()->setRcode(Header::RCODE_NOT_IMPLEMENTED);
             $this->dispatcher->dispatch(Events::QUERY_RESPONSE, new QueryResponseEvent($responseMessage));

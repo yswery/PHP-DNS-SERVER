@@ -20,11 +20,11 @@ interface ResolverInterface
     /**
      * Return answer for given query.
      *
-     * @param ResourceRecord[] $query
+     * @param ResourceRecord[] $queries
      *
      * @return ResourceRecord[]
      */
-    public function getAnswer(array $query): array;
+    public function getAnswer(array $queries): array;
 
     /**
      * Returns true if resolver supports recursion.

@@ -5,14 +5,13 @@ namespace yswery\DNS\Tests\Resolver;
 use PHPUnit\Framework\TestCase;
 use yswery\DNS\ClassEnum;
 use yswery\DNS\RecordTypeEnum;
-use yswery\DNS\Resolver\ResolverInterface;
 use yswery\DNS\Resolver\JsonResolver;
 use yswery\DNS\ResourceRecord;
 
 class JsonResolverTest extends TestCase
 {
     /**
-     * @var ResolverInterface
+     * @var JsonResolver
      */
     protected $resolver;
 
@@ -114,6 +113,35 @@ class JsonResolverTest extends TestCase
             ->setType(RecordTypeEnum::TYPE_A)
             ->setTtl(300)
             ->setRdata('112.112.112.112');
+
+        $this->assertEquals($expectation, $this->resolver->getAnswer($question));
+    }
+
+    public function testIsWildcardDomain()
+    {
+        $input1 = '*.example.com.';
+        $input2 = '*.sub.domain.com.';
+        $input3 = '*';
+        $input4 = 'www.test.com.au.';
+
+        $this->assertTrue($this->resolver->isWildcardDomain($input1));
+        $this->assertTrue($this->resolver->isWildcardDomain($input2));
+        $this->assertTrue($this->resolver->isWildcardDomain($input3));
+        $this->assertFalse($this->resolver->isWildcardDomain($input4));
+    }
+
+    public function testWildcardDomains()
+    {
+        $question[] = (new ResourceRecord())
+            ->setName('badcow.subdomain.example.com.')
+            ->setType(RecordTypeEnum::TYPE_A)
+            ->setQuestion(true);
+
+        $expectation[] = (new ResourceRecord())
+            ->setName('badcow.subdomain.example.com.')
+            ->setType(RecordTypeEnum::TYPE_A)
+            ->setTtl(7200)
+            ->setRdata('192.168.1.42');
 
         $this->assertEquals($expectation, $this->resolver->getAnswer($question));
     }

@@ -27,13 +27,13 @@ class DummyResolver implements ResolverInterface
     }
 
     /**
-     * @param ResourceRecord[] $query
+     * @param ResourceRecord[] $queries
      *
      * @return array
      */
-    public function getAnswer(array $query): array
+    public function getAnswer(array $queries): array
     {
-        $q = $query[0];
+        $q = $queries[0];
 
         return [(new ResourceRecord())
             ->setName($q->getName())

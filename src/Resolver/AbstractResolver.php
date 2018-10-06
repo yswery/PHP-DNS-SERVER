@@ -24,18 +24,28 @@ abstract class AbstractResolver implements ResolverInterface
     protected $resourceRecords = [];
 
     /**
-     * @param ResourceRecord[] $query
+     * Wildcard records are stored as an associative array of labels in reverse. E.g.
+     * ResourceRecord for "*.example.com." is stored as ['com']['example']['*'][<CLASS>][<TYPE>][].
+     *
+     * @var ResourceRecord[]
+     */
+    protected $wildcardRecords = [];
+
+    /**
+     * @param ResourceRecord[] $queries
      *
      * @return array
      */
-    public function getAnswer(array $query): array
+    public function getAnswer(array $queries): array
     {
         $answers = [];
-        foreach ($query as $q) {
-            $answer = $this->resourceRecords[$q->getName()][$q->getType()][$q->getClass()] ?? null;
-            if (null !== $answer) {
-                $answers = array_merge($answers, $answer);
+        foreach ($queries as $query) {
+            $answer = $this->resourceRecords[$query->getName()][$query->getType()][$query->getClass()] ?? [];
+            if (empty($answer)) {
+                $answer = $this->findWildcardEntry($query);
             }
+
+            $answers = array_merge($answers, $answer);
         }
 
         return $answers;
@@ -58,13 +68,87 @@ abstract class AbstractResolver implements ResolverInterface
     }
 
     /**
+     * Determine if a domain is a wildcard domain.
+     *
+     * @param string $domain
+     *
+     * @return bool
+     */
+    public function isWildcardDomain(string $domain): bool
+    {
+        $domain = rtrim($domain, '.').'.';
+        $pattern = '/^\*\.(?:[a-zA-Z0-9\-\_]+\.)*$/';
+
+        return preg_match($pattern, $domain);
+    }
+
+    /**
      * @param ResourceRecord[] $resourceRecords
      */
     protected function addZone(array $resourceRecords): void
     {
         foreach ($resourceRecords as $resourceRecord) {
+            if ($this->isWildcardDomain($resourceRecord->getName())) {
+                $this->addWildcardRecord($resourceRecord);
+                continue;
+            }
             $this->resourceRecords[$resourceRecord->getName()][$resourceRecord->getType()][$resourceRecord->getClass()][] = $resourceRecord;
         }
+    }
+
+    /**
+     * Add a wildcard ResourceRecord.
+     *
+     * @param ResourceRecord $resourceRecord
+     */
+    protected function addWildcardRecord(ResourceRecord $resourceRecord): void
+    {
+        $labels = explode('.', rtrim($resourceRecord->getName(), '.'));
+        $labels = array_reverse($labels);
+
+        $array = &$this->wildcardRecords;
+        foreach ($labels as $label) {
+            if ('*' === $label) {
+                $array[$label][$resourceRecord->getClass()][$resourceRecord->getType()][] = $resourceRecord;
+                break;
+            }
+
+            $array = &$array[$label];
+        }
+    }
+
+    /**
+     * @param ResourceRecord $query
+     *
+     * @return array
+     */
+    protected function findWildcardEntry(ResourceRecord $query): array
+    {
+        $labels = explode('.', rtrim($query->getName(), '.'));
+        $labels = array_reverse($labels);
+
+        /** @var ResourceRecord[] $wildcards */
+        $wildcards = [];
+        $array = &$this->wildcardRecords;
+        foreach ($labels as $label) {
+            if (array_key_exists($label, $array)) {
+                $array = &$array[$label];
+                continue;
+            }
+
+            if (array_key_exists('*', $array)) {
+                $wildcards = $array['*'][$query->getClass()][$query->getType()] ?? null;
+            }
+        }
+
+        $answers = [];
+        foreach ($wildcards as $wildcard) {
+            $rr = clone $wildcard;
+            $rr->setName($query->getName());
+            $answers[] = $rr;
+        }
+
+        return $answers;
     }
 
     /**

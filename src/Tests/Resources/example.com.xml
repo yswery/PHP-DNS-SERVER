@@ -60,5 +60,13 @@
                 <exchange>mail</exchange>
             </rdata>
         </resource-record>
+
+        <resource-record>
+            <name>*.subdomain</name>
+            <type>A</type>
+            <rdata>
+                <address>192.168.1.42</address>
+            </rdata>
+        </resource-record>
     </resource-records>
 </domain>

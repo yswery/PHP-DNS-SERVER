@@ -36,4 +36,9 @@ class StackableResolverTest extends JsonResolverTest
             new YamlResolver($ymlFiles),
         ]);
     }
+
+    public function testIsWildcardDomain()
+    {
+        $this->markTestSkipped();
+    }
 }
