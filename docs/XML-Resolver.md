@@ -46,6 +46,14 @@ Each `<resource-record>` within `<resource-records>` can have the following prop
                 <address>111.111.111.111</address>
             </rdata>
         </resource-record>
+        
+        <resource-record>
+            <name>*.subdomain</name>
+            <type>A</type>
+            <rdata>
+                <address>127.132.145.1</address>
+            </rdata>
+        </resource-record>
 
         <resource-record>
             <type>A</type>

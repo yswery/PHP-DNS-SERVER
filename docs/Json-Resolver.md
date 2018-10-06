@@ -52,6 +52,10 @@ Each Resource Record object can have the following properties:
       "type": "MX",
       "preference": 15,
       "exchange": "mail"
+    }, {
+      "name": "*.subdomain",
+      "type": "A",
+      "address": "192.168.1.42"
     }
   ]
 }
