@@ -20,7 +20,10 @@ Here is an example of DNS server usage:
 require_once __DIR__.'/../vendor/autoload.php';
 
 // JsonResolver created and provided with path to file with json dns records
-$jsonResolver = new yswery\DNS\Resolver\JsonResolver(__DIR__.'/record.json');
+$jsonResolver = new yswery\DNS\Resolver\JsonResolver([
+    '/path/to/zones/example.com.json',
+    '/path/to/zone/test.com.json',
+]);
 
 // System resolver acting as a fallback to the JsonResolver
 $systemResolver = new yswery\DNS\Resolver\SystemResolver();
@@ -55,6 +58,56 @@ $ dig @127.0.0.1 test.com TXT +short +noedns
 $ dig @127.0.0.1 test2.com A +short +noedns
 111.111.111.111
 112.112.112.112
+```
+## Zone File Storage
+PHP DNS Server supports three zone file formats out-of-the-box: JSON, XML, and YAML; each file format
+is supported by a specialised `Resolver` class: `JsonResolver`, `XmlResolver`, and `YamlResolver`,
+respectively. Example files are in the `example/` directory.
+
+### JSON zone example
+```json
+{
+  "domain": "example.com.",
+  "default-ttl": 7200,
+  "resource-records": [
+    {
+      "name": "@",
+      "ttl": 10800,
+      "type": "SOA",
+      "class": "IN",
+      "mname": "example.com.",
+      "rname": "postmaster",
+      "serial": 2,
+      "refresh": 3600,
+      "retry": 7200,
+      "expire": 10800,
+      "minimum": 3600
+    }, {
+      "type": "A",
+      "address": "12.34.56.78"
+    },{
+      "type": "A",
+      "address": "90.12.34.56"
+    }, {
+      "type": "AAAA",
+      "address": "2001:acad:ad::32"
+    }, {
+      "name": "www",
+      "type": "cname",
+      "target": "@"
+    }, {
+      "name": "@",
+      "type": "MX",
+      "preference": 15,
+      "exchange": "mail"
+    }, {
+      "name": "*.subdomain",
+      "ttl": 3600,
+      "type": "A",
+      "address": "192.168.1.42"
+    }
+  ]
+}
 ```
 
 ## Running Tests

@@ -61,6 +61,10 @@ Each Resource Record object can have the following properties:
 }
 ```
 
+## Wildcard Domains
+Wildcard domains are supported, in the example above, a query for `foobar.subdomain.example.com.` will
+return `192.168.1.42`.
+
 ## Processing Records
 ```php
 $files = [__DIR__.'/example.com.json', __DIR__.'/test.com.json'];
@@ -69,7 +73,7 @@ $resolver->getAnswer(/*some query*/);
 ```
 
 ## Backward Compatibility
-The Enhanced JSON Resolver can handle the older format JSON zone records (example below). These are loaded
+The JSON Resolver can handle the older format JSON zone records (example below). These are loaded
 the same way as the new file format.
 
 ```json
