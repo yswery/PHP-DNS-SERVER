@@ -39,8 +39,6 @@ class Decoder
      */
     public static function decodeDomainName(string $string, int &$offset = 0): string
     {
-        $domainName = '';
-
         $len = ord($string[$offset]);
         ++$offset;
 
@@ -48,6 +46,7 @@ class Decoder
             return '.';
         }
 
+        $domainName = '';
         while (0 !== $len) {
             $domainName .= substr($string, $offset, $len).'.';
             $offset += $len;
@@ -180,17 +179,15 @@ class Decoder
      */
     private static function decodeFlags($flags): array
     {
-        $res = [];
-
-        $res['qr'] = $flags >> 15 & 0x1;
-        $res['opcode'] = $flags >> 11 & 0xf;
-        $res['aa'] = $flags >> 10 & 0x1;
-        $res['tc'] = $flags >> 9 & 0x1;
-        $res['rd'] = $flags >> 8 & 0x1;
-        $res['ra'] = $flags >> 7 & 0x1;
-        $res['z'] = $flags >> 4 & 0x7;
-        $res['rcode'] = $flags & 0xf;
-
-        return $res;
+        return [
+            'qr' => $flags >> 15 & 0x1,
+            'opcode' => $flags >> 11 & 0xf,
+            'aa' => $flags >> 10 & 0x1,
+            'tc' => $flags >> 9 & 0x1,
+            'rd' => $flags >> 8 & 0x1,
+            'ra' => $flags >> 7 & 0x1,
+            'z' => $flags >> 4 & 0x7,
+            'rcode' => $flags & 0xf,
+        ];
     }
 }

@@ -143,18 +143,15 @@ class Encoder
      */
     private static function encodeFlags(Header $header): int
     {
-        $val = 0;
-
-        $val |= ((int) $header->isResponse() & 0x1) << 15;
-        $val |= ($header->getOpcode() & 0xf) << 11;
-        $val |= ((int) $header->isAuthoritative() & 0x1) << 10;
-        $val |= ((int) $header->isTruncated() & 0x1) << 9;
-        $val |= ((int) $header->isRecursionDesired() & 0x1) << 8;
-        $val |= ((int) $header->isRecursionAvailable() & 0x1) << 7;
-        $val |= ($header->getZ() & 0x7) << 4;
-        $val |= ($header->getRcode() & 0xf);
-
-        return $val;
+        return 0x0 |
+            ($header->isResponse() & 0x1) << 15 |
+            ($header->getOpcode() & 0xf) << 11 |
+            ($header->isAuthoritative() & 0x1) << 10 |
+            ($header->isTruncated() & 0x1) << 9 |
+            ($header->isRecursionDesired() & 0x1) << 8 |
+            ($header->isRecursionAvailable() & 0x1) << 7 |
+            ($header->getZ() & 0x7) << 4 |
+            ($header->getRcode() & 0xf);
     }
 
     /**
