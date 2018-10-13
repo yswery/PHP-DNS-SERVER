@@ -6,4 +6,6 @@ before_script:
   - composer install
 after_script:
   - php vendor/bin/php-coveralls -v
+  - wget https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
 dist: trusty
