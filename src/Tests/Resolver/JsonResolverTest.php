@@ -145,4 +145,14 @@ class JsonResolverTest extends TestCase
 
         $this->assertEquals($expectation, $this->resolver->getAnswer($question));
     }
+
+    public function testAllowsRecursion()
+    {
+        $this->assertFalse($this->resolver->allowsRecursion());
+    }
+
+    public function testIsAuthority()
+    {
+        $this->assertTrue($this->resolver->isAuthority('example.com.'));
+    }
 }
