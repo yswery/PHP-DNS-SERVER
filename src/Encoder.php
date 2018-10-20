@@ -58,16 +58,18 @@ class Encoder
      *
      * @return string
      *
-     * @throws UnsupportedTypeException
+     * @throws UnsupportedTypeException|\InvalidArgumentException
      */
     public static function encodeRdata(int $type, $rdata): string
     {
         switch ($type) {
             case RecordTypeEnum::TYPE_A:
             case RecordTypeEnum::TYPE_AAAA:
-                $n = (RecordTypeEnum::TYPE_A === $type) ? 4 : 16;
+                if (!filter_var($rdata, FILTER_VALIDATE_IP)) {
+                    throw new \InvalidArgumentException(sprintf('The IP address "%s" is invalid.', $rdata));
+                }
 
-                return filter_var($rdata, FILTER_VALIDATE_IP) ? inet_pton($rdata) : str_repeat(chr(0), $n);
+                return inet_pton($rdata);
             case RecordTypeEnum::TYPE_NS:
             case RecordTypeEnum::TYPE_CNAME:
             case RecordTypeEnum::TYPE_PTR:

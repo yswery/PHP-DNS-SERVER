@@ -10,6 +10,7 @@
 
 namespace yswery\DNS\Tests;
 
+use http\Exception\InvalidArgumentException;
 use yswery\DNS\ClassEnum;
 use yswery\DNS\Encoder;
 use yswery\DNS\Header;
@@ -121,12 +122,6 @@ class EncoderTest extends TestCase
         $decoded_2 = '2001:acad:1337:b8::19';
         $encoded_2 = inet_pton($decoded_2);
 
-        $decoded_3 = '192.168.1';
-        $encoded_3 = str_repeat("\0", 4);
-
-        $decoded_4 = '2001:acad:1337:b8:19';
-        $encoded_4 = str_repeat("\0", 16);
-
         $decoded_5 = 'dns1.example.com.';
         $encoded_5 = chr(4).'dns1'.chr(7).'example'.chr(3).'com'."\0";
 
@@ -157,12 +152,26 @@ class EncoderTest extends TestCase
 
         $this->assertEquals($encoded_1, Encoder::encodeRdata(1, $decoded_1));
         $this->assertEquals($encoded_2, Encoder::encodeRdata(28, $decoded_2));
-        $this->assertEquals($encoded_3, Encoder::encodeRdata(1, $decoded_3));
-        $this->assertEquals($encoded_4, Encoder::encodeRdata(28, $decoded_4));
         $this->assertEquals($encoded_5, Encoder::encodeRdata(2, $decoded_5));
         $this->assertEquals($encoded_6, Encoder::encodeRdata(6, $decoded_6));
         $this->assertEquals($encoded_7, Encoder::encodeRdata(15, $decoded_7));
         $this->assertEquals($encoded_8, Encoder::encodeRdata(16, $decoded_8));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testInvalidIpv4()
+    {
+        Encoder::encodeRdata(RecordTypeEnum::TYPE_A, '192.168.1');
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testInvalidIpv6()
+    {
+        Encoder::encodeRdata(RecordTypeEnum::TYPE_AAAA,'2001:acad:1337:b8:19');
     }
 
     public function testEncodeHeader()
