@@ -12,12 +12,19 @@ class RecursiveResolver implements ResolverInterface
     private $dns_answer_names = array(
         'DNS_A' => 'ip',
         'DNS_AAAA' => 'ipv6',
+	'DNS_A6' => array('masklen', 'ipv6', 'chain'),
+	/* 'DNS_ALL' => '', */
+	/* 'DNS_ANY' => '', */
         'DNS_CNAME' => 'target',
-        'DNS_TXT' => 'txt',
+	'DNS_CAA' => array('flags', 'tag', 'value'),
+	'DNS_HINFO' => array('cpu', 'os'),
         'DNS_MX' => 'target',
+	'DNS_NAPTR' => array('order', 'pref'),
         'DNS_NS' => 'target',
-        'DNS_SOA' => array('mname', 'rname', 'serial', 'retry', 'refresh', 'expire', 'minimum-ttl'),
         'DNS_PTR' => 'target',
+        'DNS_SOA' => array('mname', 'rname', 'serial', 'retry', 'refresh', 'expire', 'minimum-ttl'),
+	'DNS_SRV' => array('pri', 'weight', 'target', 'port'),
+        'DNS_TXT' => 'txt',
     );
 
     public function getAnswer(array $question)
