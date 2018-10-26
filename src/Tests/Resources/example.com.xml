@@ -53,6 +53,14 @@
         </resource-record>
 
         <resource-record>
+            <name>ldap</name>
+            <type>A</type>
+            <rdata>
+                <address>192.168.3.89</address>
+            </rdata>
+        </resource-record>
+
+        <resource-record>
             <name>@</name>
             <type>MX</type>
             <rdata>
@@ -66,6 +74,17 @@
             <type>A</type>
             <rdata>
                 <address>192.168.1.42</address>
+            </rdata>
+        </resource-record>
+
+        <resource-record>
+            <name>_ldap._tcp</name>
+            <type>SRV</type>
+            <rdata>
+                <priority>1</priority>
+                <weight>5</weight>
+                <port>389</port>
+                <target>ldap</target>
             </rdata>
         </resource-record>
     </resource-records>

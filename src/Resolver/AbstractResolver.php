@@ -212,6 +212,13 @@ abstract class AbstractResolver implements ResolverInterface
                 ];
             case RecordTypeEnum::TYPE_TXT:
                 return $resourceRecord['text'];
+            case RecordTypeEnum::TYPE_SRV:
+                return [
+                    'priority' => (int) $resourceRecord['priority'],
+                    'weight' => (int) $resourceRecord['weight'],
+                    'port' => (int) $resourceRecord['port'],
+                    'target' => $this->handleName($resourceRecord['target'], $parent),
+                ];
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:
                 return '';

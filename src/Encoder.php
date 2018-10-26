@@ -82,6 +82,9 @@ class Encoder
                 $rdata = substr($rdata, 0, 255);
 
                 return chr(strlen($rdata)).$rdata;
+            case RecordTypeEnum::TYPE_SRV:
+                return pack('nnn', (int) $rdata['priority'], (int) $rdata['weight'], (int) $rdata['port']).
+                    self::encodeDomainName($rdata['target']);
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:
                 return '';

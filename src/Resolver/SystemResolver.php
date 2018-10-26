@@ -122,6 +122,13 @@ class SystemResolver extends AbstractResolver
                 ];
             case RecordTypeEnum::TYPE_TXT:
                 return $resourceRecord['txt'];
+            case RecordTypeEnum::TYPE_SRV:
+                return [
+                    'priority' => $resourceRecord['pri'],
+                    'port' => $resourceRecord['port'],
+                    'weight' => $resourceRecord['weight'],
+                    'target' => $resourceRecord['target'],
+                ];
             default:
                 throw new UnsupportedTypeException(
                     sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))

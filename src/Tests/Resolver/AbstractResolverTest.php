@@ -114,4 +114,25 @@ abstract class AbstractResolverTest extends TestCase
     {
         $this->assertTrue($this->resolver->isAuthority('example.com.'));
     }
+
+    public function testSrvRdata()
+    {
+        $question[] = (new ResourceRecord())
+            ->setName('_ldap._tcp.example.com.')
+            ->setType(RecordTypeEnum::TYPE_SRV)
+            ->setQuestion(true);
+
+        $expectation[] = (new ResourceRecord())
+            ->setName('_ldap._tcp.example.com.')
+            ->setType(RecordTypeEnum::TYPE_SRV)
+            ->setTtl(7200)
+            ->setRdata([
+                'priority' => 1,
+                'weight' => 5,
+                'port' => 389,
+                'target' => 'ldap.example.com.'
+            ]);
+
+        $this->assertEquals($expectation, $this->resolver->getAnswer($question));
+    }
 }

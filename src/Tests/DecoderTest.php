@@ -192,4 +192,20 @@ class DecoderTest extends TestCase
         $this->assertEquals(0, $header->getZ());
         $this->assertEquals(0, $header->getRcode());
     }
+
+    /**
+     * @throws \yswery\DNS\UnsupportedTypeException
+     */
+    public function testDecodeSrv()
+    {
+        $rdata = [
+            'priority'=> 1,
+            'weight'=> 5,
+            'port'=> 389,
+            'target'=> 'ldap.example.com.'
+        ];
+
+        $encoded = Encoder::encodeRdata(RecordTypeEnum::TYPE_SRV, $rdata);
+        $this->assertEquals($rdata, Decoder::decodeRdata(RecordTypeEnum::TYPE_SRV, $encoded));
+    }
 }

@@ -29,6 +29,9 @@
                                                     <xs:element type="xs:byte" name="preference" minOccurs="0"/>
                                                     <xs:element type="xs:string" name="exchange" minOccurs="0"/>
                                                     <xs:element type="xs:string" name="text" minOccurs="0"/>
+                                                    <xs:element type="xs:byte" name="priority" minOccurs="0"/>
+                                                    <xs:element type="xs:byte" name="weight" minOccurs="0"/>
+                                                    <xs:element type="xs:byte" name="port" minOccurs="0"/>
                                                 </xs:sequence>
                                             </xs:complexType>
                                         </xs:element>

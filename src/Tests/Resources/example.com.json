@@ -33,9 +33,20 @@
       "preference": 15,
       "exchange": "mail"
     }, {
+      "name": "ldap",
+      "type": "A",
+      "address": "192.168.3.89"
+    }, {
       "name": "*.subdomain",
       "type": "A",
       "address": "192.168.1.42"
+    }, {
+      "name": "_ldap._tcp",
+      "type": "SRV",
+      "priority": 1,
+      "weight": 5,
+      "port": 389,
+      "target": "ldap.example.com."
     }
   ]
 }

@@ -134,6 +134,12 @@ class Decoder
                 }
 
                 return substr($rdata, 1, $len);
+            case RecordTypeEnum::TYPE_SRV:
+                $offset = 6;
+                $values = unpack('npriority/nweight/nport', $rdata);
+                $values['target'] = self::decodeDomainName($rdata, $offset);
+
+                return $values;
             case RecordTypeEnum::TYPE_AXFR:
             case RecordTypeEnum::TYPE_ANY:
                 return null;
