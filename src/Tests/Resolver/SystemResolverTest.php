@@ -9,6 +9,9 @@ use yswery\DNS\ResourceRecord;
 
 class SystemResolverTest extends TestCase
 {
+    /**
+     * @throws \yswery\DNS\UnsupportedTypeException
+     */
     public function testGetAnswer()
     {
         $query1 = (new ResourceRecord())

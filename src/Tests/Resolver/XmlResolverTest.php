@@ -4,8 +4,11 @@ namespace yswery\DNS\Tests\Resolver;
 
 use yswery\DNS\Resolver\XmlResolver;
 
-class XmlResolverTest extends JsonResolverTest
+class XmlResolverTest extends AbstractResolverTest
 {
+    /**
+     * @throws \yswery\DNS\UnsupportedTypeException
+     */
     public function setUp()
     {
         $files = [
@@ -14,10 +17,5 @@ class XmlResolverTest extends JsonResolverTest
             __DIR__.'/../Resources/test2.com.xml',
         ];
         $this->resolver = new XmlResolver($files);
-    }
-
-    public function testResolveLegacyRecord()
-    {
-        $this->markTestSkipped();
     }
 }

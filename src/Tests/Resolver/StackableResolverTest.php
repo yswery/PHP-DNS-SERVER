@@ -7,7 +7,7 @@ use yswery\DNS\Resolver\StackableResolver;
 use yswery\DNS\Resolver\XmlResolver;
 use yswery\DNS\Resolver\YamlResolver;
 
-class StackableResolverTest extends JsonResolverTest
+class StackableResolverTest extends AbstractResolverTest
 {
     /**
      * @throws \Exception
@@ -35,10 +35,5 @@ class StackableResolverTest extends JsonResolverTest
             new XmlResolver($xmlFiles),
             new YamlResolver($ymlFiles),
         ]);
-    }
-
-    public function testIsWildcardDomain()
-    {
-        $this->markTestSkipped();
     }
 }
