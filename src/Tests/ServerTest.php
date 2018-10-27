@@ -12,6 +12,7 @@ namespace yswery\DNS\Tests;
 
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use yswery\DNS\ClassEnum;
+use yswery\DNS\Decoder;
 use yswery\DNS\Header;
 use yswery\DNS\Message;
 use yswery\DNS\RecordTypeEnum;
@@ -34,7 +35,10 @@ class ServerTest extends TestCase
     public function setUp()
     {
         $this->server = new Server(
-            new JsonResolver([__DIR__.'/Resources/test_records.json']),
+            new JsonResolver([
+                __DIR__.'/Resources/test_records.json',
+                __DIR__.'/Resources/example.com.json',
+            ]),
             new EventDispatcher()
         );
     }
@@ -128,5 +132,35 @@ class ServerTest extends TestCase
         $this->server->onMessage($query, '127.0.0.1', $socket = new MockSocket());
 
         $this->assertEquals($response, $socket->getLastTransmission());
+    }
+
+    /**
+     * Certain queries such as SRV, SOA, and NS records SHOULD return additional records in order to prevent
+     * unnecessary additional requests.
+     */
+    public function testAdditionalRecords()
+    {
+        $queryHeader = (new Header())
+            ->setQuery(true)
+            ->setOpcode(Header::OPCODE_STANDARD_QUERY)
+            ->setId(1234);
+
+        $queryRecord = (new ResourceRecord())
+            ->setQuestion(true)
+            ->setName('_ldap._tcp.example.com.')
+            ->setType(RecordTypeEnum::TYPE_SRV);
+
+        $message = (new Message())
+            ->setHeader($queryHeader)
+            ->addQuestion($queryRecord);
+
+        $query = Encoder::encodeMessage($message);
+        $this->server->onMessage($query, '127.0.0.1', $socket = new MockSocket());
+        $encodedResponse = $socket->getLastTransmission();
+        $response = Decoder::decodeMessage($encodedResponse);
+
+        $this->assertEquals(1, $response->getHeader()->getAnswerCount());
+        $this->assertEquals(1, $response->getHeader()->getAdditionalRecordsCount());
+        $this->assertEquals('192.168.3.89', $response->getAdditionals()[0]->getRdata());
     }
 }

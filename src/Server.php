@@ -126,7 +126,10 @@ class Server
             ->setAuthoritative($this->resolver->isAuthority($responseMessage->getQuestions()[0]->getName()));
 
         try {
-            $responseMessage->setAnswers($this->resolver->getAnswer($responseMessage->getQuestions()));
+            $answers = $this->resolver->getAnswer($responseMessage->getQuestions());
+            $responseMessage->setAnswers($answers);
+            $this->needsAdditionalRecords($responseMessage);
+
             $this->dispatcher->dispatch(Events::QUERY_RESPONSE, new QueryResponseEvent($responseMessage));
 
             return Encoder::encodeMessage($responseMessage);
@@ -170,5 +173,30 @@ class Server
     public function getIp(): string
     {
         return $this->ip;
+    }
+
+    /**
+     * Populate the additional records of a message if required.
+     *
+     * @param Message $message
+     */
+    private function needsAdditionalRecords(Message $message): void
+    {
+        $additionals = [];
+        foreach ($message->getAnswers() as $answer) {
+            switch ($answer->getType()) {
+                case RecordTypeEnum::TYPE_SRV:
+                    $name = $answer->getRdata()['target'];
+                    $query[] = (new ResourceRecord())
+                        ->setQuestion(true)
+                        ->setType(RecordTypeEnum::TYPE_A)
+                        ->setName($name);
+
+                    $additionals = array_merge($additionals, $this->resolver->getAnswer($query));
+                    break;
+            }
+        }
+
+        $message->setAdditionals($additionals);
     }
 }

@@ -64,10 +64,13 @@ class Message
 
     /**
      * @param Header $header
+     * @return Message
      */
-    public function setHeader(Header $header): void
+    public function setHeader(Header $header): Message
     {
         $this->header = $header;
+
+        return $this;
     }
 
     /**
@@ -80,10 +83,10 @@ class Message
 
     /**
      * @param ResourceRecord $resourceRecord
-     *
      * @throws \InvalidArgumentException
+     * @return Message
      */
-    public function addQuestion(ResourceRecord $resourceRecord): void
+    public function addQuestion(ResourceRecord $resourceRecord): Message
     {
         if (!$resourceRecord->isQuestion()) {
             throw new \InvalidArgumentException('Resource Record provided is not a question.');
@@ -91,6 +94,8 @@ class Message
 
         $this->questions[] = $resourceRecord;
         $this->header->setQuestionCount(count($this->questions));
+
+        return $this;
     }
 
     /**
@@ -103,11 +108,14 @@ class Message
 
     /**
      * @param ResourceRecord $resourceRecord
+     * @return Message
      */
-    public function addAnswer(ResourceRecord $resourceRecord): void
+    public function addAnswer(ResourceRecord $resourceRecord): Message
     {
         $this->answers[] = $resourceRecord;
         $this->header->setAnswerCount(count($this->answers));
+
+        return $this;
     }
 
     /**
@@ -120,11 +128,14 @@ class Message
 
     /**
      * @param ResourceRecord $resourceRecord
+     * @return Message
      */
-    public function addAuthoritative(ResourceRecord $resourceRecord): void
+    public function addAuthoritative(ResourceRecord $resourceRecord): Message
     {
         $this->authoritatives[] = $resourceRecord;
         $this->header->setNameServerCount(count($this->authoritatives));
+
+        return $this;
     }
 
     /**
@@ -137,11 +148,14 @@ class Message
 
     /**
      * @param ResourceRecord $resourceRecord
+     * @return Message
      */
-    public function addAdditional(ResourceRecord $resourceRecord): void
+    public function addAdditional(ResourceRecord $resourceRecord): Message
     {
         $this->additionals[] = $resourceRecord;
         $this->header->setAdditionalRecordsCount(count($this->additionals));
+
+        return $this;
     }
 
     /**
