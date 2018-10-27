@@ -184,17 +184,36 @@ class Server
     {
         $additionals = [];
         foreach ($message->getAnswers() as $answer) {
+            $name = null;
             switch ($answer->getType()) {
+                case RecordTypeEnum::TYPE_NS:
+                    $name = $answer->getRdata();
+                    break;
+                case RecordTypeEnum::TYPE_MX:
+                    $name = $answer->getRdata()['exchange'];
+                    break;
                 case RecordTypeEnum::TYPE_SRV:
                     $name = $answer->getRdata()['target'];
-                    $query[] = (new ResourceRecord())
-                        ->setQuestion(true)
-                        ->setType(RecordTypeEnum::TYPE_A)
-                        ->setName($name);
-
-                    $additionals = array_merge($additionals, $this->resolver->getAnswer($query));
                     break;
             }
+
+            if (null === $name) {
+                continue;
+            }
+
+            $query = [
+                (new ResourceRecord())
+                    ->setQuestion(true)
+                    ->setType(RecordTypeEnum::TYPE_A)
+                    ->setName($name),
+
+                (new ResourceRecord())
+                    ->setQuestion(true)
+                    ->setType(RecordTypeEnum::TYPE_AAAA)
+                    ->setName($name),
+            ];
+
+            $additionals = array_merge($additionals, $this->resolver->getAnswer($query));
         }
 
         $message->setAdditionals($additionals);

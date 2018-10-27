@@ -54,6 +54,22 @@
         </resource-record>
 
         <resource-record>
+            <name>ns1</name>
+            <type>A</type>
+            <rdata>
+                <address>15.15.12.10</address>
+            </rdata>
+        </resource-record>
+
+        <resource-record>
+            <name>ns2</name>
+            <type>A</type>
+            <rdata>
+                <address>15.15.12.20</address>
+            </rdata>
+        </resource-record>
+
+        <resource-record>
             <name>@</name>
             <type>cname</type>
             <rdata>

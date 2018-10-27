@@ -18,11 +18,25 @@
       "type": "A",
       "address": "12.34.56.78"
     },{
+      "type": "NS",
+      "target": "ns1.test.com."
+    },{
+      "type": "NS",
+      "target": "ns2.test.com."
+    }, {
       "type": "A",
       "address": "90.12.34.56"
     }, {
       "type": "AAAA",
       "address": "2001:acad:ad::32"
+    }, {
+      "name": "mail-gw1",
+      "type": "AAAA",
+      "address": "2001:acad:ad::64"
+    }, {
+      "name": "mail-gw2",
+      "type": "AAAA",
+      "address": "2001:acad:ad::92"
     }, {
       "name": "www",
       "type": "cname",
@@ -31,7 +45,12 @@
       "name": "@",
       "type": "MX",
       "preference": 15,
-      "exchange": "mail"
+      "exchange": "mail-gw1"
+    }, {
+      "name": "@",
+      "type": "MX",
+      "preference": 20,
+      "exchange": "mail-gw2"
     }, {
       "name": "ldap",
       "type": "A",

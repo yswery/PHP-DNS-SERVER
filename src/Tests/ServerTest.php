@@ -17,6 +17,8 @@ use yswery\DNS\Header;
 use yswery\DNS\Message;
 use yswery\DNS\RecordTypeEnum;
 use yswery\DNS\Encoder;
+use yswery\DNS\Resolver\StackableResolver;
+use yswery\DNS\Resolver\XmlResolver;
 use yswery\DNS\ResourceRecord;
 use yswery\DNS\Server;
 use yswery\DNS\Resolver\JsonResolver;
@@ -34,13 +36,21 @@ class ServerTest extends TestCase
      */
     public function setUp()
     {
-        $this->server = new Server(
-            new JsonResolver([
-                __DIR__.'/Resources/test_records.json',
-                __DIR__.'/Resources/example.com.json',
-            ]),
-            new EventDispatcher()
-        );
+        $xmlResolver = new XmlResolver([
+            __DIR__.'/Resources/test.com.xml',
+        ]);
+
+        $jsonResolver = new JsonResolver([
+            __DIR__.'/Resources/test_records.json',
+            __DIR__.'/Resources/example.com.json',
+        ]);
+
+        $resolver = new StackableResolver([
+            $jsonResolver,
+            $xmlResolver,
+        ]);
+
+        $this->server = new Server($resolver, new EventDispatcher());
     }
 
     /**
@@ -95,7 +105,7 @@ class ServerTest extends TestCase
     /**
      * Tests that the server sends back a "Not implemented" RCODE for a type that has not been implemented, namely "OPT".
      *
-     * @throws \yswery\DNS\UnsupportedTypeException
+     * @throws \yswery\DNS\UnsupportedTypeException | \Exception
      */
     public function testOptType()
     {
@@ -137,8 +147,10 @@ class ServerTest extends TestCase
     /**
      * Certain queries such as SRV, SOA, and NS records SHOULD return additional records in order to prevent
      * unnecessary additional requests.
+     *
+     * @throws \yswery\DNS\UnsupportedTypeException
      */
-    public function testAdditionalRecords()
+    public function testSrvAdditionalRecords()
     {
         $queryHeader = (new Header())
             ->setQuery(true)
@@ -162,5 +174,61 @@ class ServerTest extends TestCase
         $this->assertEquals(1, $response->getHeader()->getAnswerCount());
         $this->assertEquals(1, $response->getHeader()->getAdditionalRecordsCount());
         $this->assertEquals('192.168.3.89', $response->getAdditionals()[0]->getRdata());
+    }
+
+    /**
+     * @throws \yswery\DNS\UnsupportedTypeException
+     */
+    public function testMxAdditionalRecords()
+    {
+        $queryHeader = (new Header())
+            ->setQuery(true)
+            ->setOpcode(Header::OPCODE_STANDARD_QUERY)
+            ->setId(1234);
+
+        $mxQuestion = (new ResourceRecord())
+            ->setQuestion(true)
+            ->setType(RecordTypeEnum::TYPE_MX)
+            ->setName('example.com.');
+
+        $message = (new Message())
+            ->setHeader($queryHeader)
+            ->addQuestion($mxQuestion);
+
+        $query = Encoder::encodeMessage($message);
+        $this->server->onMessage($query, '127.0.0.1', $socket = new MockSocket());
+        $encodedResponse = $socket->getLastTransmission();
+        $response = Decoder::decodeMessage($encodedResponse);
+
+        $this->assertEquals(2, $response->getHeader()->getAnswerCount());
+        $this->assertEquals(2, $response->getHeader()->getAdditionalRecordsCount());
+    }
+
+    /**
+     * @throws \yswery\DNS\UnsupportedTypeException
+     */
+    public function testNsAdditionalRecords()
+    {
+        $queryHeader = (new Header())
+            ->setQuery(true)
+            ->setOpcode(Header::OPCODE_STANDARD_QUERY)
+            ->setId(1234);
+
+        $nsQuestion = (new ResourceRecord())
+            ->setQuestion(true)
+            ->setType(RecordTypeEnum::TYPE_NS)
+            ->setName('example.com.');
+
+        $message = (new Message())
+            ->setHeader($queryHeader)
+            ->addQuestion($nsQuestion);
+
+        $query = Encoder::encodeMessage($message);
+        $this->server->onMessage($query, '127.0.0.1', $socket = new MockSocket());
+        $encodedResponse = $socket->getLastTransmission();
+        $response = Decoder::decodeMessage($encodedResponse);
+
+        $this->assertEquals(2, $response->getHeader()->getAnswerCount());
+        $this->assertEquals(2, $response->getHeader()->getAdditionalRecordsCount());
     }
 }
