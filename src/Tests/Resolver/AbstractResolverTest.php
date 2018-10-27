@@ -130,7 +130,7 @@ abstract class AbstractResolverTest extends TestCase
                 'priority' => 1,
                 'weight' => 5,
                 'port' => 389,
-                'target' => 'ldap.example.com.'
+                'target' => 'ldap.example.com.',
             ]);
 
         $this->assertEquals($expectation, $this->resolver->getAnswer($question));

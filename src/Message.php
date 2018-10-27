@@ -64,6 +64,7 @@ class Message
 
     /**
      * @param Header $header
+     *
      * @return Message
      */
     public function setHeader(Header $header): Message
@@ -83,7 +84,9 @@ class Message
 
     /**
      * @param ResourceRecord $resourceRecord
+     *
      * @throws \InvalidArgumentException
+     *
      * @return Message
      */
     public function addQuestion(ResourceRecord $resourceRecord): Message
@@ -108,6 +111,7 @@ class Message
 
     /**
      * @param ResourceRecord $resourceRecord
+     *
      * @return Message
      */
     public function addAnswer(ResourceRecord $resourceRecord): Message
@@ -128,6 +132,7 @@ class Message
 
     /**
      * @param ResourceRecord $resourceRecord
+     *
      * @return Message
      */
     public function addAuthoritative(ResourceRecord $resourceRecord): Message
@@ -148,6 +153,7 @@ class Message
 
     /**
      * @param ResourceRecord $resourceRecord
+     *
      * @return Message
      */
     public function addAdditional(ResourceRecord $resourceRecord): Message

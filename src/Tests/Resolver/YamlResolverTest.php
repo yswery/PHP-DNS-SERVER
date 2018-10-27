@@ -43,7 +43,7 @@ class YamlResolverTest extends AbstractResolverTest
             ->setTtl(300)
             ->setRdata([
                 'preference' => 20,
-                'exchange' => 'mail-gw1.test2.com.'
+                'exchange' => 'mail-gw1.test2.com.',
             ]);
 
         $expectation[] = (new ResourceRecord())
@@ -52,7 +52,7 @@ class YamlResolverTest extends AbstractResolverTest
             ->setTtl(300)
             ->setRdata([
                 'preference' => 30,
-                'exchange' => 'mail-gw2.test2.com.'
+                'exchange' => 'mail-gw2.test2.com.',
             ]);
 
         $this->assertEquals($expectation, $this->resolver->getAnswer($question));

@@ -10,7 +10,6 @@
 
 namespace yswery\DNS\Tests;
 
-use http\Exception\InvalidArgumentException;
 use yswery\DNS\ClassEnum;
 use yswery\DNS\Encoder;
 use yswery\DNS\Header;
@@ -171,7 +170,7 @@ class EncoderTest extends TestCase
      */
     public function testInvalidIpv6()
     {
-        Encoder::encodeRdata(RecordTypeEnum::TYPE_AAAA,'2001:acad:1337:b8:19');
+        Encoder::encodeRdata(RecordTypeEnum::TYPE_AAAA, '2001:acad:1337:b8:19');
     }
 
     public function testEncodeHeader()

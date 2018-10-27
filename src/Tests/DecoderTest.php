@@ -199,10 +199,10 @@ class DecoderTest extends TestCase
     public function testDecodeSrv()
     {
         $rdata = [
-            'priority'=> 1,
-            'weight'=> 5,
-            'port'=> 389,
-            'target'=> 'ldap.example.com.'
+            'priority' => 1,
+            'weight' => 5,
+            'port' => 389,
+            'target' => 'ldap.example.com.',
         ];
 
         $encoded = Encoder::encodeRdata(RecordTypeEnum::TYPE_SRV, $rdata);
