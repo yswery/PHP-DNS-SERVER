@@ -143,12 +143,23 @@ class SystemResolver extends AbstractResolver
      *
      * @param int $type the IANA RTYPE
      *
-     * @return int|bool the built-in PHP DNS_<type> constant or `false` if the type is not defined
+     * @return int the built-in PHP DNS_<type> constant or `false` if the type is not defined
+     *
+     * @throws UnsupportedTypeException|\InvalidArgumentException
      */
-    private function IANA2PHP(int $type)
+    private function IANA2PHP(int $type): int
     {
         $constantName = 'DNS_'.RecordTypeEnum::getName($type);
+        if (!defined($constantName)) {
+            throw new UnsupportedTypeException(sprintf('Record type "%d" is not a supported type.', $type));
+        }
 
-        return defined($constantName) ? constant($constantName) : false;
+        $phpType = constant($constantName);
+
+        if (!is_int($phpType)) {
+            throw new \InvalidArgumentException(sprintf('Constant "%s" is not an integer.', $constantName));
+        }
+
+        return $phpType;
     }
 }

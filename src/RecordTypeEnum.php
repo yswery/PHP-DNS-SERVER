@@ -115,6 +115,8 @@ class RecordTypeEnum
      * @param int $type The index of the type
      *
      * @return string
+     *
+     * @throws \InvalidArgumentException
      */
     public static function getName(int $type): string
     {
@@ -131,6 +133,8 @@ class RecordTypeEnum
      * @param string $name The name of the record type, e.g. = 'A' or 'MX' or 'SOA'
      *
      * @return int
+     *
+     * @throws \InvalidArgumentException
      */
     public static function getTypeFromName(string $name): int
     {

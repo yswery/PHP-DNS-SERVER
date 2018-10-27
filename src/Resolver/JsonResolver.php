@@ -10,7 +10,7 @@ use yswery\DNS\UnsupportedTypeException;
 class JsonResolver extends AbstractResolver
 {
     /**
-     * @var string
+     * @var int
      */
     protected $defaultClass = ClassEnum::INTERNET;
 
@@ -90,7 +90,7 @@ class JsonResolver extends AbstractResolver
     /**
      * @param array $zones
      *
-     * @return ResourceRecord[]
+     * @return array
      */
     protected function processLegacyZone(array $zones): array
     {
