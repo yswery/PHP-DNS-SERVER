@@ -57,20 +57,16 @@ class SystemResolver extends AbstractResolver
     }
 
     /**
-     * @param $domain
-     * @param $type
+     * @param string $domain
+     * @param int    $type
      *
      * @return array
      *
      * @throws UnsupportedTypeException
      */
-    private function getRecordsRecursively($domain, $type): array
+    private function getRecordsRecursively(string $domain, int $type): array
     {
-        if (false === $php_dns_type = $this->IANA2PHP($type)) {
-            throw new UnsupportedTypeException(sprintf('Record type "%s" is not a supported type.', $type));
-        }
-
-        $records = dns_get_record($domain, $php_dns_type);
+        $records = dns_get_record($domain, $this->IANA2PHP($type));
         $result = [];
 
         foreach ($records as $record) {
@@ -85,10 +81,8 @@ class SystemResolver extends AbstractResolver
 
     /**
      * @param array  $resourceRecord
-     * @param int    $type
-     * @param string $parent
      *
-     * @return array|mixed
+     * @return array|string
      *
      * @throws UnsupportedTypeException
      */

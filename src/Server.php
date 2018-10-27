@@ -182,7 +182,6 @@ class Server
      */
     private function needsAdditionalRecords(Message $message): void
     {
-        $additionals = [];
         foreach ($message->getAnswers() as $answer) {
             $name = null;
             switch ($answer->getType()) {
@@ -213,9 +212,9 @@ class Server
                     ->setName($name),
             ];
 
-            $additionals = array_merge($additionals, $this->resolver->getAnswer($query));
+            foreach ($this->resolver->getAnswer($query) as $additional) {
+                $message->addAdditional($additional);
+            }
         }
-
-        $message->setAdditionals($additionals);
     }
 }
