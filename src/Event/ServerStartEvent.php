@@ -10,14 +10,13 @@
 
 namespace yswery\DNS\Event;
 
-use React\Datagram\Socket;
 use React\Datagram\SocketInterface;
 use Symfony\Component\EventDispatcher\Event;
 
 class ServerStartEvent extends Event
 {
     /**
-     * @var Socket
+     * @var SocketInterface
      */
     private $socket;
 
@@ -32,9 +31,9 @@ class ServerStartEvent extends Event
     }
 
     /**
-     * @return Socket
+     * @return SocketInterface
      */
-    public function getSocket(): Socket
+    public function getSocket(): SocketInterface
     {
         return $this->socket;
     }

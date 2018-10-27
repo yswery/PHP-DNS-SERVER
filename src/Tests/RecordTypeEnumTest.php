@@ -24,13 +24,17 @@ class RecordTypeEnumTest extends TestCase
     public function testGetName()
     {
         $this->assertEquals('MX', RecordTypeEnum::getName(RecordTypeEnum::TYPE_MX));
-        $this->assertFalse(RecordTypeEnum::getName(651));
+        $this->expectException(\InvalidArgumentException::class);
+        RecordTypeEnum::getName(651);
     }
 
-    public function testGetTypeIndex()
+    public function testGetTypeFromName()
     {
-        $this->assertEquals(15, RecordTypeEnum::getTypeIndex('MX'));
-        $this->assertFalse(RecordTypeEnum::getTypeIndex('NONE'));
+        $this->assertEquals(15, RecordTypeEnum::getTypeFromName('MX'));
+        $this->assertEquals(6, RecordTypeEnum::getTypeFromName('soa'));
+
+        $this->expectException(\InvalidArgumentException::class);
+        RecordTypeEnum::getTypeFromName('NONE');
     }
 
     public function testGetTypes()

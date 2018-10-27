@@ -50,7 +50,7 @@ class XmlResolver extends AbstractResolver
             $resourceRecords[] = (new ResourceRecord())
                 ->setName($this->handleName($name, $parent))
                 ->setClass($class)
-                ->setType($type = RecordTypeEnum::getTypeIndex($rr->{'type'}))
+                ->setType($type = RecordTypeEnum::getTypeFromName($rr->{'type'}))
                 ->setTtl($ttl)
                 ->setRdata($this->extractRdata($this->simpleXmlToArray($rr->{'rdata'}), $type, $parent));
         }

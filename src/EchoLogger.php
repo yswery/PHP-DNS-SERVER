@@ -34,6 +34,7 @@ class EchoLogger extends AbstractLogger implements EventSubscriberInterface
     public function onServerStart(ServerStartEvent $event): void
     {
         $this->log(LogLevel::INFO, 'Server started.');
+        $this->log(LogLevel::INFO, sprintf('Listening on %s', $event->getSocket()->getLocalAddress()));
     }
 
     public function onException(ServerExceptionEvent $event): void

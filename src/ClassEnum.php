@@ -62,7 +62,9 @@ class ClassEnum
      */
     public static function getClassFromName(string $name): int
     {
-        if (false === $class = array_search(strtoupper($name), self::$classes, true)) {
+        $class = array_search(strtoupper($name), self::$classes, true);
+
+        if (false === $class || !is_int($class)) {
             throw new \InvalidArgumentException(sprintf('Class: "%s" is not defined.', $name));
         }
 

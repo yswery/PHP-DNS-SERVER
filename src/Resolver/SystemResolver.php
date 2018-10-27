@@ -94,7 +94,7 @@ class SystemResolver extends AbstractResolver
      */
     protected function extractPhpRdata(array $resourceRecord)
     {
-        $type = RecordTypeEnum::getTypeIndex($resourceRecord['type']);
+        $type = RecordTypeEnum::getTypeFromName($resourceRecord['type']);
 
         switch ($type) {
             case RecordTypeEnum::TYPE_A:

@@ -110,27 +110,40 @@ class RecordTypeEnum
     }
 
     /**
+     * Get the name of an RDATA type. E.g. RecordTypeEnum::getName(6) return 'SOA'.
+     *
      * @param int $type The index of the type
      *
-     * @return bool|int
+     * @return string
      */
-    public static function getName(int $type)
+    public static function getName(int $type): string
     {
-        return self::isValid($type) ? self::$names[$type] : false;
+        if (!self::isValid($type)) {
+            throw new \InvalidArgumentException(sprintf('The integer "%d" does not correspond to a valid type', $type));
+        }
+
+        return self::$names[$type];
     }
 
     /**
+     * Return the integer value of an RDATA type. E.g. getTypeFromName('MX') returns 15.
+     *
      * @param string $name The name of the record type, e.g. = 'A' or 'MX' or 'SOA'
      *
-     * @return int|false
+     * @return int
      */
-    public static function getTypeIndex(string $name)
+    public static function getTypeFromName(string $name): int
     {
-        return array_search(strtoupper(trim($name)), self::$names);
+        $type = array_search(strtoupper(trim($name)), self::$names);
+        if (false === $type || !is_int($type)) {
+            throw new \InvalidArgumentException(sprintf('RData type "%s" is not defined.', $name));
+        }
+
+        return $type;
     }
 
     /**
-     * @return array
+     * @return array An array of all valid RDATA types
      */
     public static function getTypes(): array
     {

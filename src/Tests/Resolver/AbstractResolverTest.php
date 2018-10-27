@@ -5,7 +5,6 @@ namespace yswery\DNS\Tests\Resolver;
 use PHPUnit\Framework\TestCase;
 use yswery\DNS\ClassEnum;
 use yswery\DNS\RecordTypeEnum;
-use yswery\DNS\Resolver\AbstractResolver;
 use yswery\DNS\Resolver\JsonResolver;
 use yswery\DNS\Resolver\ResolverInterface;
 use yswery\DNS\ResourceRecord;

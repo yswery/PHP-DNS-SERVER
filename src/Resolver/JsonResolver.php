@@ -61,7 +61,7 @@ class JsonResolver extends AbstractResolver
             $resourceRecords[] = (new ResourceRecord())
                 ->setName($this->handleName($name, $parent))
                 ->setClass($class)
-                ->setType($type = RecordTypeEnum::getTypeIndex($rr['type']))
+                ->setType($type = RecordTypeEnum::getTypeFromName($rr['type']))
                 ->setTtl($rr['ttl'] ?? $defaultTtl)
                 ->setRdata($this->extractRdata($rr, $type, $parent));
         }
@@ -99,7 +99,7 @@ class JsonResolver extends AbstractResolver
             $domain = rtrim($domain, '.').'.';
             foreach ($types as $type => $data) {
                 $data = (array) $data;
-                $type = RecordTypeEnum::getTypeIndex($type);
+                $type = RecordTypeEnum::getTypeFromName($type);
                 foreach ($data as $rdata) {
                     $resourceRecords[] = (new ResourceRecord())
                         ->setName($domain)
