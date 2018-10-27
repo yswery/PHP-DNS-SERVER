@@ -143,9 +143,9 @@ class SystemResolver extends AbstractResolver
      *
      * @param int $type the IANA RTYPE
      *
-     * @return int|bool the built in PHP DNS_<type> constant
+     * @return int|bool the built-in PHP DNS_<type> constant or `false` if the type is not defined
      */
-    private function IANA2PHP(int $type): int
+    private function IANA2PHP(int $type)
     {
         $constantName = 'DNS_'.RecordTypeEnum::getName($type);
 

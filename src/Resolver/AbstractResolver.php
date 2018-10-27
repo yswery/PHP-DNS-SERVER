@@ -79,7 +79,7 @@ abstract class AbstractResolver implements ResolverInterface
         $domain = rtrim($domain, '.').'.';
         $pattern = '/^\*\.(?:[a-zA-Z0-9\-\_]+\.)*$/';
 
-        return preg_match($pattern, $domain);
+        return (bool) preg_match($pattern, $domain);
     }
 
     /**

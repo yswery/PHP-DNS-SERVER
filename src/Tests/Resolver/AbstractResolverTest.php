@@ -5,6 +5,8 @@ namespace yswery\DNS\Tests\Resolver;
 use PHPUnit\Framework\TestCase;
 use yswery\DNS\ClassEnum;
 use yswery\DNS\RecordTypeEnum;
+use yswery\DNS\Resolver\AbstractResolver;
+use yswery\DNS\Resolver\JsonResolver;
 use yswery\DNS\Resolver\ResolverInterface;
 use yswery\DNS\ResourceRecord;
 
@@ -103,6 +105,16 @@ abstract class AbstractResolverTest extends TestCase
             ->setRdata('192.168.1.42');
 
         $this->assertEquals($expectation, $this->resolver->getAnswer($question));
+    }
+
+    /**
+     * @throws \yswery\DNS\UnsupportedTypeException
+     */
+    public function testIsWildcardDomain()
+    {
+        $resolver = new JsonResolver([]);
+        $this->assertTrue($resolver->isWildcardDomain('*.cat.com.'));
+        $this->assertFalse($resolver->isWildcardDomain('github.com.'));
     }
 
     public function testAllowsRecursion()
