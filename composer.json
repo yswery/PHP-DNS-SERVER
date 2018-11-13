@@ -30,7 +30,8 @@
         "php": "~7.1",
         "ext-json": "~1.0",
         "ext-simplexml": "*",
-        "symfony/event-dispatcher": "~4.0"
+        "symfony/event-dispatcher": "~4.0",
+        "psr/log": "^1.0"
     },
     "autoload": {
         "psr-4": {
