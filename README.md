@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/yswery/PHP-DNS-SERVER.svg?branch=version-1)](https://travis-ci.org/yswery/PHP-DNS-SERVER?branch=version-1)
-[![Coverage Status](https://coveralls.io/repos/yswery/PHP-DNS-SERVER/badge.png?branch=version-1)](https://coveralls.io/github/yswery/PHP-DNS-SERVER?branch=version-1)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/samuelwilliams/PHP-DNS-SERVER/badges/quality-score.png?b=version-1)](https://scrutinizer-ci.com/g/samuelwilliams/PHP-DNS-SERVER/?branch=version-1)
+[![Build Status](https://travis-ci.org/yswery/PHP-DNS-SERVER.svg)](https://travis-ci.org/yswery/PHP-DNS-SERVER)
+[![Coverage Status](https://coveralls.io/repos/yswery/PHP-DNS-SERVER/badge.png)](https://coveralls.io/github/yswery/PHP-DNS-SERVER)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/samuelwilliams/PHP-DNS-SERVER/badges/quality-score.png)](https://scrutinizer-ci.com/g/samuelwilliams/PHP-DNS-SERVER/)
 
 
 # PHP DNS Server
