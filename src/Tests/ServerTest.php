@@ -102,6 +102,21 @@ class ServerTest extends TestCase
         $this->assertEquals($response, $this->server->handleQueryFromStream($query));
     }
 
+    public function testStatusQueryWithNoQuestionsResolves()
+    {
+        $message = new Message();
+        $message->getHeader()
+            ->setOpcode(Header::OPCODE_STATUS_REQUEST)
+            ->setId(1234);
+
+        $encodedMessage = Encoder::encodeMessage($message);
+
+        $message->getHeader()->setResponse(true);
+        $expectation = Encoder::encodeMessage($message);
+
+        $this->assertEquals($expectation, $this->server->handleQueryFromStream($encodedMessage));
+    }
+
     /**
      * Tests that the server sends back a "Not implemented" RCODE for a type that has not been implemented, namely "OPT".
      *

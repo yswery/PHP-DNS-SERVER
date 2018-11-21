@@ -123,7 +123,7 @@ class Server
         $responseMessage->getHeader()
             ->setResponse(true)
             ->setRecursionAvailable($this->resolver->allowsRecursion())
-            ->setAuthoritative($this->resolver->isAuthority($responseMessage->getQuestions()[0]->getName()));
+            ->setAuthoritative($this->isAuthoritative($message->getQuestions()));
 
         try {
             $answers = $this->resolver->getAnswer($responseMessage->getQuestions());
@@ -216,5 +216,23 @@ class Server
                 $message->addAdditional($additional);
             }
         }
+    }
+
+    /**
+     * @param ResourceRecord[] $query
+     * @return bool
+     */
+    private function isAuthoritative(array $query): bool
+    {
+        if (empty($query)) {
+            return false;
+        }
+
+        $authoritative = true;
+        foreach ($query as $rr) {
+            $authoritative &= $this->resolver->isAuthority($rr->getName());
+        }
+
+        return $authoritative;
     }
 }
