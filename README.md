@@ -128,7 +128,6 @@ Unit tests using PHPUnit are provided. A simple script is located in the root.
 * MX
 * TXT
 * AAAA
-* OPT
 * AXFR
 * ANY
 
