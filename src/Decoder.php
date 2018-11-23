@@ -16,19 +16,18 @@ class Decoder
      * @param string $message
      *
      * @return Message
-     *
-     * @throws UnsupportedTypeException
      */
     public static function decodeMessage(string $message): Message
     {
         $offset = 0;
         $header = self::decodeHeader($message, $offset);
+        $messageObject = new Message($header);
+        $messageObject->setQuestions(self::decodeResourceRecords($message, $header->getQuestionCount(), $offset, true));
+        $messageObject->setAnswers(self::decodeResourceRecords($message, $header->getAnswerCount(), $offset));
+        $messageObject->setAuthoritatives(self::decodeResourceRecords($message, $header->getNameServerCount(), $offset));
+        $messageObject->setAdditionals(self::decodeResourceRecords($message, $header->getAdditionalRecordsCount(), $offset));
 
-        return (new Message($header))
-            ->setQuestions(self::decodeResourceRecords($message, $header->getQuestionCount(), $offset, true))
-            ->setAnswers(self::decodeResourceRecords($message, $header->getAnswerCount(), $offset))
-            ->setAuthoritatives(self::decodeResourceRecords($message, $header->getNameServerCount(), $offset))
-            ->setAdditionals(self::decodeResourceRecords($message, $header->getAdditionalRecordsCount(), $offset));
+        return $messageObject;
     }
 
     /**
@@ -64,8 +63,6 @@ class Decoder
      * @param bool   $isQuestion Is the resource record from the question section
      *
      * @return ResourceRecord[]
-     *
-     * @throws UnsupportedTypeException
      */
     public static function decodeResourceRecords(string $pkt, int $count = 1, int &$offset = 0, bool $isQuestion = false): array
     {
@@ -84,7 +81,14 @@ class Decoder
                 $values = unpack('ntype/nclass/Nttl/ndlength', substr($pkt, $offset, 10));
                 $rr->setType($values['type'])->setClass($values['class'])->setTtl($values['ttl']);
                 $offset += 10;
-                $rr->setRdata(self::decodeRdata($rr->getType(), substr($pkt, $offset, $values['dlength'])));
+
+                //Ignore unsupported types.
+                try {
+                    $rr->setRdata(self::decodeRdata($rr->getType(), substr($pkt, $offset, $values['dlength'])));
+                } catch (UnsupportedTypeException $e) {
+                    $offset += $values['dlength'];
+                    continue;
+                }
                 $offset += $values['dlength'];
             }
 
