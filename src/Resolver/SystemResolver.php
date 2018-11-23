@@ -32,48 +32,43 @@ class SystemResolver extends AbstractResolver
     }
 
     /**
-     * @param ResourceRecord[] $question
+     * @param ResourceRecord[] $queries
      *
      * @return ResourceRecord[]
      *
      * @throws UnsupportedTypeException
      */
-    public function getAnswer(array $question): array
+    public function getAnswer(array $queries): array
     {
         $answer = [];
-        $query = $question[0];
-
-        $records = $this->getRecordsRecursively($query->getName(), $query->getType());
-        foreach ($records as $record) {
-            $answer[] = (new ResourceRecord())
-                ->setName($query->getName())
-                ->setClass($query->getClass())
-                ->setTtl($record['ttl'])
-                ->setRdata($record['rdata'])
-                ->setType($query->getType());
+        foreach ($queries as $query) {
+            $answer = array_merge($answer, $this->getRecordsRecursively($query));
         }
 
         return $answer;
     }
 
     /**
-     * @param string $domain
-     * @param int    $type
+     * Resolve the $query using the system configured local DNS.
      *
-     * @return array
+     * @param ResourceRecord $query
+     *
+     * @return ResourceRecord[]
      *
      * @throws UnsupportedTypeException
      */
-    private function getRecordsRecursively(string $domain, int $type): array
+    private function getRecordsRecursively(ResourceRecord $query): array
     {
-        $records = dns_get_record($domain, $this->IANA2PHP($type));
+        $records = dns_get_record($query->getName(), $this->IANA2PHP($query->getType()));
         $result = [];
 
         foreach ($records as $record) {
-            $result[] = [
-                'rdata' => $this->extractPhpRdata($record),
-                'ttl' => $record['ttl'],
-            ];
+            $result[] = (new ResourceRecord())
+                ->setName($query->getName())
+                ->setClass($query->getClass())
+                ->setTtl($record['ttl'])
+                ->setRdata($this->extractPhpRdata($record))
+                ->setType($query->getType());
         }
 
         return $result;

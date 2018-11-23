@@ -49,4 +49,13 @@ class SystemResolverTest extends TestCase
         $this->assertEquals($expectation3, $resolver->getAnswer([$query3])[0]->getRdata());
         $this->assertEquals($expectation4, $resolver->getAnswer([$query4])[0]->getRdata());
     }
+
+    /**
+     * @throws \yswery\DNS\UnsupportedTypeException
+     */
+    public function testGetAnswerWithEmptyQuestion()
+    {
+        $resolver = new SystemResolver();
+        $this->assertEquals([], $resolver->getAnswer([]));
+    }
 }
