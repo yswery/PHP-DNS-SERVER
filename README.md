@@ -50,13 +50,13 @@ $server->start();
 
 Query server using `dig` command to ensure proper functioning
 ```bash
-$ dig @127.0.0.1 test.com A +short +noedns
+$ dig @127.0.0.1 test.com A +short
 111.111.111.111
 
-$ dig @127.0.0.1 test.com TXT +short +noedns
+$ dig @127.0.0.1 test.com TXT +short
 "Some text."
 
-$ dig @127.0.0.1 test2.com A +short +noedns
+$ dig @127.0.0.1 test2.com A +short
 111.111.111.111
 112.112.112.112
 ```
@@ -130,6 +130,7 @@ Unit tests using PHPUnit are provided. A simple script is located in the root.
 * AAAA
 * AXFR
 * ANY
+* SRV
 
 ## License
 
