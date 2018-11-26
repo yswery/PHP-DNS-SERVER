@@ -45,5 +45,10 @@
         "exchange": "mail-gw2.test2.com."
       }
     ]
+  },
+  "112.111.112.111.in-addr.arpa.": {
+    "PTR": {
+      "target": "test2.com"
+    }
   }
 }
