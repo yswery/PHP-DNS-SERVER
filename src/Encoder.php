@@ -53,49 +53,6 @@ class Encoder
     }
 
     /**
-     * @param int          $type
-     * @param string|array $rdata
-     *
-     * @return string
-     *
-     * @throws UnsupportedTypeException|\InvalidArgumentException
-     */
-    public static function encodeRdata(int $type, $rdata): string
-    {
-        switch ($type) {
-            case RecordTypeEnum::TYPE_A:
-            case RecordTypeEnum::TYPE_AAAA:
-                if (!filter_var($rdata, FILTER_VALIDATE_IP)) {
-                    throw new \InvalidArgumentException(sprintf('The IP address "%s" is invalid.', $rdata));
-                }
-
-                return inet_pton($rdata);
-            case RecordTypeEnum::TYPE_NS:
-            case RecordTypeEnum::TYPE_CNAME:
-            case RecordTypeEnum::TYPE_PTR:
-                return self::encodeDomainName($rdata);
-            case RecordTypeEnum::TYPE_SOA:
-                return self::encodeSOA($rdata);
-            case RecordTypeEnum::TYPE_MX:
-                return pack('n', (int) $rdata['preference']).self::encodeDomainName($rdata['exchange']);
-            case RecordTypeEnum::TYPE_TXT:
-                $rdata = substr($rdata, 0, 255);
-
-                return chr(strlen($rdata)).$rdata;
-            case RecordTypeEnum::TYPE_SRV:
-                return pack('nnn', (int) $rdata['priority'], (int) $rdata['weight'], (int) $rdata['port']).
-                    self::encodeDomainName($rdata['target']);
-            case RecordTypeEnum::TYPE_AXFR:
-            case RecordTypeEnum::TYPE_ANY:
-                return '';
-            default:
-                throw new UnsupportedTypeException(
-                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
-                );
-        }
-    }
-
-    /**
      * @param ResourceRecord[] $resourceRecords
      *
      * @return string
@@ -113,7 +70,7 @@ class Encoder
                 continue;
             }
 
-            $data = self::encodeRdata($rr->getType(), $rr->getRdata());
+            $data = RdataEncoder::encodeRdata($rr->getType(), $rr->getRdata());
             $res .= pack('nnNn', $rr->getType(), $rr->getClass(), $rr->getTtl(), strlen($data));
             $res .= $data;
         }
@@ -157,25 +114,5 @@ class Encoder
             ($header->isRecursionAvailable() & 0x1) << 7 |
             ($header->getZ() & 0x7) << 4 |
             ($header->getRcode() & 0xf);
-    }
-
-    /**
-     * @param array $soa
-     *
-     * @return string
-     */
-    private static function encodeSOA(array $soa): string
-    {
-        return
-            self::encodeDomainName($soa['mname']).
-            self::encodeDomainName($soa['rname']).
-            pack(
-                'NNNNN',
-                $soa['serial'],
-                $soa['refresh'],
-                $soa['retry'],
-                $soa['expire'],
-                $soa['minimum']
-            );
     }
 }
