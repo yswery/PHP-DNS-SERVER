@@ -14,7 +14,7 @@
     >
     <testsuites>
         <testsuite name="YSWERY PHP DNS Server">
-            <directory>./src/Tests</directory>
+            <directory>./tests/</directory>
         </testsuite>
     </testsuites>
     <logging>
@@ -23,9 +23,6 @@
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">./src/</directory>
-            <exclude>
-                <directory>./src/Tests/</directory>
-            </exclude>
         </whitelist>
     </filter>
 </phpunit>
