@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of PHP DNS Server.
  *
@@ -220,6 +221,7 @@ class Server
 
     /**
      * @param ResourceRecord[] $query
+     *
      * @return bool
      */
     private function isAuthoritative(array $query): bool

@@ -6,3 +6,4 @@ composer.lock
 clover.xml
 /nbproject
 phpunit.xml
+.php_cs.cache

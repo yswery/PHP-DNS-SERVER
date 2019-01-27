@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of PHP DNS Server.
  *
@@ -75,7 +76,7 @@ class SystemResolver extends AbstractResolver
     }
 
     /**
-     * @param array  $resourceRecord
+     * @param array $resourceRecord
      *
      * @return array|string
      *
