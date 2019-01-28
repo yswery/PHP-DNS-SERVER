@@ -77,6 +77,7 @@ class Server
             $server->on('message', [$this, 'onMessage']);
         })->otherwise(function ($exception) {
             $this->dispatcher->dispatch(Events::SERVER_EXCEPTION, new ServerExceptionEvent($exception));
+            exit(1);
         });
     }
 
