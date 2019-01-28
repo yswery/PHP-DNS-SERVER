@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace yswery\DNS;
+namespace yswery\DNS\Event\Subscriber;
 
 use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
