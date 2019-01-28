@@ -1,0 +1,16 @@
+{
+  "Status": 2,  // SERVFAIL - Standard DNS response code (32 bit integer).
+  "TC": false,  // Whether the response is truncated
+  "RD": true,   // Always true for Google Public DNS
+  "RA": true,   // Always true for Google Public DNS
+  "AD": false,  // Whether all response data was validated with DNSSEC
+  "CD": false,  // Whether the client asked to disable DNSSEC
+  "Question":
+  [
+    {
+      "name": "dnssec-failed.org.",  // FQDN with trailing dot
+      "type": 1                      // A - Standard DNS RR type
+    }
+  ],
+  "Comment": "DNSSEC validation failure. Please check http://dnsviz.net/d/dnssec-failed.org/dnssec/."
+}
