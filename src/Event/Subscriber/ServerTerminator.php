@@ -19,7 +19,7 @@ class ServerTerminator implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            Events::SERVER_EXCEPTION => 'onException'
+            Events::SERVER_START_FAIL => 'onException'
         ];
     }
 

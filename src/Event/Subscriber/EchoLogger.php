@@ -25,6 +25,7 @@ class EchoLogger extends AbstractLogger implements EventSubscriberInterface
     {
         return [
             Events::SERVER_START => 'onServerStart',
+            Events::SERVER_START_FAIL => 'onException',
             Events::SERVER_EXCEPTION => 'onException',
             Events::QUERY_RECEIVE => 'onQueryReceive',
             Events::QUERY_RESPONSE => 'onQueryResponse',
