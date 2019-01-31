@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace yswery\DNS;
+namespace yswery\DNS\Event\Subscriber;
 
 use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
@@ -26,6 +26,7 @@ class EchoLogger extends AbstractLogger implements EventSubscriberInterface
     {
         return [
             Events::SERVER_START => 'onServerStart',
+            Events::SERVER_START_FAIL => 'onException',
             Events::SERVER_EXCEPTION => 'onException',
             Events::QUERY_RECEIVE => 'onQueryReceive',
             Events::QUERY_RESPONSE => 'onQueryResponse',
