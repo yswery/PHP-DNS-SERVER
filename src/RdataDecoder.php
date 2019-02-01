@@ -56,7 +56,7 @@ class RdataDecoder
      * @param string $rdata
      * @return string
      */
-    private static function a(string $rdata): string
+    public static function a(string $rdata): string
     {
         return inet_ntop($rdata);
     }
@@ -67,7 +67,7 @@ class RdataDecoder
      * @param string $rdata
      * @return string
      */
-    private static function cname(string $rdata): string
+    public static function cname(string $rdata): string
     {
         return Decoder::decodeDomainName($rdata);
     }
@@ -78,7 +78,7 @@ class RdataDecoder
      * @param string $rdata
      * @return array
      */
-    private static function soa(string $rdata): array
+    public static function soa(string $rdata): array
     {
         $offset = 0;
 
@@ -97,7 +97,7 @@ class RdataDecoder
      * @param string $rdata
      * @return array
      */
-    private static function mx(string $rdata): array
+    public static function mx(string $rdata): array
     {
         return [
             'preference' => unpack('npreference', $rdata)['preference'],
@@ -111,7 +111,7 @@ class RdataDecoder
      * @param string $rdata
      * @return string
      */
-    private static function txt(string $rdata): string
+    public static function txt(string $rdata): string
     {
         $len = ord($rdata[0]);
         if ((strlen($rdata) + 1) < $len) {
@@ -127,7 +127,7 @@ class RdataDecoder
      * @param string $rdata
      * @return array
      */
-    private static function srv(string $rdata): array
+    public static function srv(string $rdata): array
     {
         $offset = 6;
         $values = unpack('npriority/nweight/nport', $rdata);

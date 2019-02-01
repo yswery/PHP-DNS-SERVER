@@ -61,21 +61,29 @@ class Encoder
      */
     public static function encodeResourceRecords(array $resourceRecords): string
     {
-        $res = '';
+        $records = array_map('self::encodeResourceRecord', $resourceRecords);
 
-        foreach ($resourceRecords as $rr) {
-            $res .= self::encodeDomainName($rr->getName());
-            if ($rr->isQuestion()) {
-                $res .= pack('nn', $rr->getType(), $rr->getClass());
-                continue;
-            }
+        return implode('', $records);
+    }
 
-            $data = RdataEncoder::encodeRdata($rr->getType(), $rr->getRdata());
-            $res .= pack('nnNn', $rr->getType(), $rr->getClass(), $rr->getTtl(), strlen($data));
-            $res .= $data;
+    /**
+     * @param ResourceRecord $rr
+     *
+     * @return string
+     *
+     * @throws UnsupportedTypeException
+     */
+    public static function encodeResourceRecord(ResourceRecord $rr): string
+    {
+        $encoded = self::encodeDomainName($rr->getName());
+        if ($rr->isQuestion()) {
+            return $encoded.pack('nn', $rr->getType(), $rr->getClass());
         }
 
-        return $res;
+        $data = RdataEncoder::encodeRdata($rr->getType(), $rr->getRdata());
+        $encoded .= pack('nnNn', $rr->getType(), $rr->getClass(), $rr->getTtl(), strlen($data));
+
+        return $encoded.$data;
     }
 
     /**

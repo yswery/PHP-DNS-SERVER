@@ -52,7 +52,7 @@ class RdataEncoder
      * @param string $rdata
      * @return string
      */
-    private static function a(string $rdata): string
+    public static function a(string $rdata): string
     {
         if (!filter_var($rdata, FILTER_VALIDATE_IP)) {
             throw new \InvalidArgumentException(sprintf('The IP address "%s" is invalid.', $rdata));
@@ -67,7 +67,7 @@ class RdataEncoder
      * @param string $rdata
      * @return string
      */
-    private static function cname(string $rdata): string
+    public static function cname(string $rdata): string
     {
         return Encoder::encodeDomainName($rdata);
     }
@@ -78,7 +78,7 @@ class RdataEncoder
      * @param array $rdata
      * @return string
      */
-    private static function soa(array $rdata): string
+    public static function soa(array $rdata): string
     {
         return
             Encoder::encodeDomainName($rdata['mname']).
@@ -99,7 +99,7 @@ class RdataEncoder
      * @param array $rdata
      * @return string
      */
-    private static function mx(array $rdata): string
+    public static function mx(array $rdata): string
     {
         return pack('n', (int) $rdata['preference']).Encoder::encodeDomainName($rdata['exchange']);
     }
@@ -110,7 +110,7 @@ class RdataEncoder
      * @param string $rdata
      * @return string
      */
-    private static function txt(string $rdata): string
+    public static function txt(string $rdata): string
     {
         $rdata = substr($rdata, 0, 255);
 
@@ -123,7 +123,7 @@ class RdataEncoder
      * @param array $rdata
      * @return string
      */
-    private static function srv(array $rdata): string
+    public static function srv(array $rdata): string
     {
         return pack('nnn', (int) $rdata['priority'], (int) $rdata['weight'], (int) $rdata['port']).
             Encoder::encodeDomainName($rdata['target']);
