@@ -75,8 +75,8 @@ class Server
         $factory->createServer($this->ip.':'.$this->port)->then(function (Socket $server) {
             $this->dispatcher->dispatch(Events::SERVER_START, new ServerStartEvent($server));
             $server->on('message', [$this, 'onMessage']);
-        })->otherwise(function ($exception) {
-            $this->dispatcher->dispatch(Events::SERVER_EXCEPTION, new ServerExceptionEvent($exception));
+        })->otherwise(function (\Exception $exception) {
+            $this->dispatcher->dispatch(Events::SERVER_START_FAIL, new ServerExceptionEvent($exception));
         });
     }
 
