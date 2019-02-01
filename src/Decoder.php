@@ -84,7 +84,7 @@ class Decoder
 
                 //Ignore unsupported types.
                 try {
-                    $rr->setRdata(self::decodeRdata($rr->getType(), substr($pkt, $offset, $values['dlength'])));
+                    $rr->setRdata(RdataDecoder::decodeRdata($rr->getType(), substr($pkt, $offset, $values['dlength'])));
                 } catch (UnsupportedTypeException $e) {
                     $offset += $values['dlength'];
                     continue;
@@ -96,62 +96,6 @@ class Decoder
         }
 
         return $resourceRecords;
-    }
-
-    /**
-     * @param int    $type
-     * @param string $rdata
-     *
-     * @return array|string|null
-     *
-     * @throws UnsupportedTypeException
-     */
-    public static function decodeRdata(int $type, string $rdata)
-    {
-        switch ($type) {
-            case RecordTypeEnum::TYPE_A:
-            case RecordTypeEnum::TYPE_AAAA:
-                return inet_ntop($rdata);
-            case RecordTypeEnum::TYPE_NS:
-            case RecordTypeEnum::TYPE_CNAME:
-            case RecordTypeEnum::TYPE_PTR:
-                return self::decodeDomainName($rdata);
-            case RecordTypeEnum::TYPE_SOA:
-                $offset = 0;
-
-                return array_merge(
-                    [
-                        'mname' => self::decodeDomainName($rdata, $offset),
-                        'rname' => self::decodeDomainName($rdata, $offset),
-                    ],
-                    unpack('Nserial/Nrefresh/Nretry/Nexpire/Nminimum', substr($rdata, $offset))
-                );
-            case RecordTypeEnum::TYPE_MX:
-                return [
-                    'preference' => unpack('npreference', $rdata)['preference'],
-                    'exchange' => self::decodeDomainName(substr($rdata, 2)),
-                ];
-            case RecordTypeEnum::TYPE_TXT:
-                $len = ord($rdata[0]);
-                if ((strlen($rdata) + 1) < $len) {
-                    return null;
-                }
-
-                return substr($rdata, 1, $len);
-            case RecordTypeEnum::TYPE_SRV:
-                $offset = 6;
-                $values = unpack('npriority/nweight/nport', $rdata);
-                $values['target'] = self::decodeDomainName($rdata, $offset);
-
-                return $values;
-            case RecordTypeEnum::TYPE_AXFR:
-            case RecordTypeEnum::TYPE_ANY:
-                return null;
-            default:
-                throw new UnsupportedTypeException(
-                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
-                );
-        }
     }
 
     /**
