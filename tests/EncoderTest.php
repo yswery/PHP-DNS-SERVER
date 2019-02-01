@@ -16,6 +16,7 @@ use yswery\DNS\Encoder;
 use yswery\DNS\Header;
 use yswery\DNS\RecordTypeEnum;
 use yswery\DNS\ResourceRecord;
+use yswery\DNS\RdataEncoder;
 use PHPUnit\Framework\TestCase;
 
 class EncoderTest extends TestCase
@@ -150,28 +151,32 @@ class EncoderTest extends TestCase
         $decoded_8 = 'This is a comment.';
         $encoded_8 = chr(18).$decoded_8;
 
-        $this->assertEquals($encoded_1, Encoder::encodeRdata(1, $decoded_1));
-        $this->assertEquals($encoded_2, Encoder::encodeRdata(28, $decoded_2));
-        $this->assertEquals($encoded_5, Encoder::encodeRdata(2, $decoded_5));
-        $this->assertEquals($encoded_6, Encoder::encodeRdata(6, $decoded_6));
-        $this->assertEquals($encoded_7, Encoder::encodeRdata(15, $decoded_7));
-        $this->assertEquals($encoded_8, Encoder::encodeRdata(16, $decoded_8));
+        $this->assertEquals($encoded_1, RdataEncoder::encodeRdata(1, $decoded_1));
+        $this->assertEquals($encoded_2, RdataEncoder::encodeRdata(28, $decoded_2));
+        $this->assertEquals($encoded_5, RdataEncoder::encodeRdata(2, $decoded_5));
+        $this->assertEquals($encoded_6, RdataEncoder::encodeRdata(6, $decoded_6));
+        $this->assertEquals($encoded_7, RdataEncoder::encodeRdata(15, $decoded_7));
+        $this->assertEquals($encoded_8, RdataEncoder::encodeRdata(16, $decoded_8));
     }
 
     /**
      * @expectedException \InvalidArgumentException
+     *
+     * @throws \yswery\DNS\UnsupportedTypeException
      */
     public function testInvalidIpv4()
     {
-        Encoder::encodeRdata(RecordTypeEnum::TYPE_A, '192.168.1');
+        RdataEncoder::encodeRdata(RecordTypeEnum::TYPE_A, '192.168.1');
     }
 
     /**
      * @expectedException \InvalidArgumentException
+     *
+     * @throws \yswery\DNS\UnsupportedTypeException
      */
     public function testInvalidIpv6()
     {
-        Encoder::encodeRdata(RecordTypeEnum::TYPE_AAAA, '2001:acad:1337:b8:19');
+        RdataEncoder::encodeRdata(RecordTypeEnum::TYPE_AAAA, '2001:acad:1337:b8:19');
     }
 
     public function testEncodeHeader()

@@ -13,9 +13,11 @@ namespace yswery\DNS\Tests;
 
 use yswery\DNS\Decoder;
 use yswery\DNS\Encoder;
+use yswery\DNS\RdataEncoder;
 use yswery\DNS\RecordTypeEnum;
 use yswery\DNS\ResourceRecord;
 use PHPUnit\Framework\TestCase;
+use yswery\DNS\RdataDecoder;
 
 class DecoderTest extends TestCase
 {
@@ -158,12 +160,12 @@ class DecoderTest extends TestCase
         $decoded_8 = 'This is a comment.';
         $encoded_8 = chr(strlen($decoded_8)).$decoded_8;
 
-        $this->assertEquals($decoded_1, Decoder::decodeRdata(RecordTypeEnum::TYPE_A, $encoded_1));
-        $this->assertEquals($decoded_2, Decoder::decodeRdata(RecordTypeEnum::TYPE_AAAA, $encoded_2));
-        $this->assertEquals($decoded_5, Decoder::decodeRdata(RecordTypeEnum::TYPE_NS, $encoded_5));
-        $this->assertEquals($decoded_6_prime, Decoder::decodeRdata(RecordTypeEnum::TYPE_SOA, $encoded_6));
-        $this->assertEquals($decoded_7_prime, Decoder::decodeRdata(RecordTypeEnum::TYPE_MX, $encoded_7));
-        $this->assertEquals($decoded_8, Decoder::decodeRdata(RecordTypeEnum::TYPE_TXT, $encoded_8));
+        $this->assertEquals($decoded_1, RdataDecoder::decodeRdata(RecordTypeEnum::TYPE_A, $encoded_1));
+        $this->assertEquals($decoded_2, RdataDecoder::decodeRdata(RecordTypeEnum::TYPE_AAAA, $encoded_2));
+        $this->assertEquals($decoded_5, RdataDecoder::decodeRdata(RecordTypeEnum::TYPE_NS, $encoded_5));
+        $this->assertEquals($decoded_6_prime, RdataDecoder::decodeRdata(RecordTypeEnum::TYPE_SOA, $encoded_6));
+        $this->assertEquals($decoded_7_prime, RdataDecoder::decodeRdata(RecordTypeEnum::TYPE_MX, $encoded_7));
+        $this->assertEquals($decoded_8, RdataDecoder::decodeRdata(RecordTypeEnum::TYPE_TXT, $encoded_8));
     }
 
     public function testDecodeHeader()
@@ -206,7 +208,7 @@ class DecoderTest extends TestCase
             'target' => 'ldap.example.com.',
         ];
 
-        $encoded = Encoder::encodeRdata(RecordTypeEnum::TYPE_SRV, $rdata);
-        $this->assertEquals($rdata, Decoder::decodeRdata(RecordTypeEnum::TYPE_SRV, $encoded));
+        $encoded = RdataEncoder::encodeRdata(RecordTypeEnum::TYPE_SRV, $rdata);
+        $this->assertEquals($rdata, RdataDecoder::decodeRdata(RecordTypeEnum::TYPE_SRV, $encoded));
     }
 }
