@@ -120,7 +120,7 @@ class RdataDecoder
     {
         $len = ord($rdata[0]);
         if ((strlen($rdata) + 1) < $len) {
-            return null;
+            return '';
         }
 
         return substr($rdata, 1, $len);
