@@ -49,7 +49,7 @@ class Events
     public const SERVER_START = 'dns.server_start';
 
     /**
-     * Exception is thrown when there is any error starting the server
+     * Exception is thrown when there is any error starting the server.
      *
      * @Event("yswery\DNS\Event\ServerExceptionEvent")
      */

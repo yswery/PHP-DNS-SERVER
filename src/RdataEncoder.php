@@ -11,7 +11,6 @@
 
 namespace yswery\DNS;
 
-
 class RdataEncoder
 {
     private static $methodMap = [
@@ -26,7 +25,7 @@ class RdataEncoder
         RecordTypeEnum::TYPE_TXT => 'txt',
         RecordTypeEnum::TYPE_SRV => 'srv',
     ];
-    
+
     /**
      * @param int          $type
      * @param string|array $rdata
@@ -50,6 +49,7 @@ class RdataEncoder
      * Used for A and AAAA records.
      *
      * @param string $rdata
+     *
      * @return string
      */
     public static function a(string $rdata): string
@@ -65,6 +65,7 @@ class RdataEncoder
      * Used for CNAME, DNAME, NS, and PTR records.
      *
      * @param string $rdata
+     *
      * @return string
      */
     public static function cname(string $rdata): string
@@ -76,6 +77,7 @@ class RdataEncoder
      * Exclusively for SOA records.
      *
      * @param array $rdata
+     *
      * @return string
      */
     public static function soa(array $rdata): string
@@ -97,6 +99,7 @@ class RdataEncoder
      * Exclusively for MX records.
      *
      * @param array $rdata
+     *
      * @return string
      */
     public static function mx(array $rdata): string
@@ -108,6 +111,7 @@ class RdataEncoder
      * Exclusively for TXT records.
      *
      * @param string $rdata
+     *
      * @return string
      */
     public static function txt(string $rdata): string
@@ -121,6 +125,7 @@ class RdataEncoder
      * Exclusively for SRV records.
      *
      * @param array $rdata
+     *
      * @return string
      */
     public static function srv(array $rdata): string

@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This file is part of PHP DNS Server.
  *
@@ -19,7 +20,7 @@ class ServerTerminator implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            Events::SERVER_START_FAIL => 'onException'
+            Events::SERVER_START_FAIL => 'onException',
         ];
     }
 

@@ -30,7 +30,7 @@ class RdataDecoder
         RecordTypeEnum::TYPE_TXT => 'txt',
         RecordTypeEnum::TYPE_SRV => 'srv',
     ];
-    
+
     /**
      * @param int    $type
      * @param string $rdata
@@ -54,6 +54,7 @@ class RdataDecoder
      * Used for A and AAAA records.
      *
      * @param string $rdata
+     *
      * @return string
      */
     public static function a(string $rdata): string
@@ -65,6 +66,7 @@ class RdataDecoder
      * Used for CNAME, DNAME, NS, and PTR records.
      *
      * @param string $rdata
+     *
      * @return string
      */
     public static function cname(string $rdata): string
@@ -76,6 +78,7 @@ class RdataDecoder
      * Exclusively for SOA records.
      *
      * @param string $rdata
+     *
      * @return array
      */
     public static function soa(string $rdata): array
@@ -95,6 +98,7 @@ class RdataDecoder
      * Exclusively for MX records.
      *
      * @param string $rdata
+     *
      * @return array
      */
     public static function mx(string $rdata): array
@@ -109,6 +113,7 @@ class RdataDecoder
      * Exclusively for TXT records.
      *
      * @param string $rdata
+     *
      * @return string
      */
     public static function txt(string $rdata): string
@@ -125,6 +130,7 @@ class RdataDecoder
      * Exclusively for SRV records.
      *
      * @param string $rdata
+     *
      * @return array
      */
     public static function srv(string $rdata): array
