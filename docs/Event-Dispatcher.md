@@ -38,9 +38,11 @@ $eventDispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
 $eventDispatcher->addSubscriber(new ExampleEventSubscriber());
 $server = new Server(new JsonResolver('./record.json'), $eventDispatcher);
 ```
+
 ## Supported events
 
 * `Events::SERVER_START` - Server is started and listening for queries.
+* `Events::SERVER_START_FAIL` - The server failed to start at all.
 * `Events::SERVER_EXCEPTION` - Exception is thrown when processing and responding to query.
 * `Events::MESSAGE` - Message is received from client in raw format.
 * `Events::QUERY_RECEIVE` - Query is parsed to dns message class.
