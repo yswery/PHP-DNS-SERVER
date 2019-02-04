@@ -1,0 +1,16 @@
+{
+  "Status": 2,
+  "TC": false,
+  "RD": true,
+  "RA": true,
+  "AD": false,
+  "CD": false,
+  "Question":
+  [
+    {
+      "name": "dnssec-failed.org.",
+      "type": 1
+    }
+  ],
+  "Comment": "DNSSEC validation failure. Please check http://dnsviz.net/d/dnssec-failed.org/dnssec/."
+}

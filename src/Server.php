@@ -97,7 +97,7 @@ class Server
      * @param string          $address
      * @param SocketInterface $socket
      */
-    public function onMessage(string $message, string $address, SocketInterface $socket)
+    public function onMessage(string $message, string $address, SocketInterface $socket): void
     {
         try {
             $this->dispatcher->dispatch(Events::MESSAGE, new MessageEvent($socket, $address, $message));
