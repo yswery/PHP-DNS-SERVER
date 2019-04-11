@@ -146,7 +146,7 @@ abstract class AbstractResolver implements ResolverInterface
             }
 
             if (array_key_exists('*', $array)) {
-                $wildcards = $array['*'][$query->getClass()][$query->getType()] ?? null;
+                $wildcards = $array['*'][$query->getClass()][$query->getType()] ?? [];
             }
         }
 
