@@ -34,7 +34,7 @@ $stackableResolver = new yswery\DNS\Resolver\StackableResolver([$jsonResolver, $
 
 // Create the eventDispatcher and add the event subscribers
 $eventDispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
-$eventDispatcher->addSubscriber(new \yswery\DNS\EchoLogger());
+$eventDispatcher->addSubscriber(new \yswery\DNS\Event\Subscriber\EchoLogger());
 
 // Create a new instance of Server class
 $server = new yswery\DNS\Server($stackableResolver, $eventDispatcher);
