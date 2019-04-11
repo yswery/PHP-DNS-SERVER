@@ -15,6 +15,7 @@ use React\Datagram\Socket;
 use React\Datagram\SocketInterface;
 use React\EventLoop\LoopInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\Event;
 use yswery\DNS\Event\ServerExceptionEvent;
 use yswery\DNS\Event\MessageEvent;
 use yswery\DNS\Event\QueryReceiveEvent;
@@ -60,7 +61,7 @@ class Server
      *
      * @throws \Exception
      */
-    public function __construct(ResolverInterface $resolver, EventDispatcherInterface $dispatcher, string $ip = '0.0.0.0', int $port = 53)
+    public function __construct(ResolverInterface $resolver, ?EventDispatcherInterface $dispatcher = null, string $ip = '0.0.0.0', int $port = 53)
     {
         if (!function_exists('socket_create') || !extension_loaded('sockets')) {
             throw new \Exception('Socket extension or socket_create() function not found.');
@@ -74,10 +75,10 @@ class Server
         $this->loop = \React\EventLoop\Factory::create();
         $factory = new \React\Datagram\Factory($this->loop);
         $factory->createServer($this->ip.':'.$this->port)->then(function (Socket $server) {
-            $this->dispatcher->dispatch(Events::SERVER_START, new ServerStartEvent($server));
+            $this->dispatch(Events::SERVER_START, new ServerStartEvent($server));
             $server->on('message', [$this, 'onMessage']);
         })->otherwise(function (\Exception $exception) {
-            $this->dispatcher->dispatch(Events::SERVER_START_FAIL, new ServerExceptionEvent($exception));
+            $this->dispatch(Events::SERVER_START_FAIL, new ServerExceptionEvent($exception));
         });
     }
 
@@ -100,10 +101,10 @@ class Server
     public function onMessage(string $message, string $address, SocketInterface $socket)
     {
         try {
-            $this->dispatcher->dispatch(Events::MESSAGE, new MessageEvent($socket, $address, $message));
+            $this->dispatch(Events::MESSAGE, new MessageEvent($socket, $address, $message));
             $socket->send($this->handleQueryFromStream($message), $address);
         } catch (\Exception $exception) {
-            $this->dispatcher->dispatch(Events::SERVER_EXCEPTION, new ServerExceptionEvent($exception));
+            $this->dispatch(Events::SERVER_EXCEPTION, new ServerExceptionEvent($exception));
         }
     }
 
@@ -119,7 +120,7 @@ class Server
     public function handleQueryFromStream(string $buffer): string
     {
         $message = Decoder::decodeMessage($buffer);
-        $this->dispatcher->dispatch(Events::QUERY_RECEIVE, new QueryReceiveEvent($message));
+        $this->dispatch(Events::QUERY_RECEIVE, new QueryReceiveEvent($message));
 
         $responseMessage = clone $message;
         $responseMessage->getHeader()
@@ -131,15 +132,14 @@ class Server
             $answers = $this->resolver->getAnswer($responseMessage->getQuestions());
             $responseMessage->setAnswers($answers);
             $this->needsAdditionalRecords($responseMessage);
-
-            $this->dispatcher->dispatch(Events::QUERY_RESPONSE, new QueryResponseEvent($responseMessage));
+            $this->dispatch(Events::QUERY_RESPONSE, new QueryResponseEvent($responseMessage));
 
             return Encoder::encodeMessage($responseMessage);
         } catch (UnsupportedTypeException $e) {
             $responseMessage
                     ->setAnswers([])
                     ->getHeader()->setRcode(Header::RCODE_NOT_IMPLEMENTED);
-            $this->dispatcher->dispatch(Events::QUERY_RESPONSE, new QueryResponseEvent($responseMessage));
+            $this->dispatch(Events::QUERY_RESPONSE, new QueryResponseEvent($responseMessage));
 
             return Encoder::encodeMessage($responseMessage);
         }
@@ -237,5 +237,20 @@ class Server
         }
 
         return $authoritative;
+    }
+
+    /**
+     * @param string     $eventName
+     * @param Event|null $event
+     *
+     * @return Event|null
+     */
+    private function dispatch($eventName, ?Event $event = null): ?Event
+    {
+        if (null === $this->dispatcher) {
+            return null;
+        }
+
+        return $this->dispatcher->dispatch($eventName, $event);
     }
 }
