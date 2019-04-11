@@ -1,4 +1,10 @@
-CHANGELOG for 1.x
+CHANGELOG for 1.2
+=================
+* New event `SERVER_START_FAIL` triggered when the server fails to start.
+* RData encoding and decoding methods separated into their own classess: `RdataEncoder` and `RdataDecoder`.
+* It is now optional to inject an `EventDispatcher` into `Server` instance.
+
+CHANGELOG for 1.1
 =================
 * Normalised RDATA naming conventions to be consistent with RFC1035.
 * Tests moved into the main src directory.
