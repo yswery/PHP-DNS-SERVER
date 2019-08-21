@@ -1,17 +1,21 @@
 language: php
 
 php:
-- "7.1"
-- "7.2"
 - "7.3"
 
 before_script:
 - composer install
 
-script: vendor/bin/phpunit --coverage-clover=coverage.clover
+services:
+  - docker
 
-after_script:
-- php vendor/bin/php-coveralls -v
-- wget https://scrutinizer-ci.com/ocular.phar
-- php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+jobs:
+  include:
+    - stage: build docker image
+      script:
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      - docker build -t radio_dns .
+      - docker images
+      - docker tag radio_dns kimbtechnologies/radio_dns
+      - docker push kimbtechnologies/radio_dns
 
