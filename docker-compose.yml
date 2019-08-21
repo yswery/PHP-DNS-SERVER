@@ -1,0 +1,15 @@
+version: "2"
+
+services:
+  dns:
+    container_name: radio_dns
+    network_mode: host
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - SERVER_IP=0.0.0.0
+      - SERVER_PORT=53
+      - RADIO_DOMAIN=radio.example.com
+      - ALLOWED_DOMAIN=toelpel.example.com
+    restart: always

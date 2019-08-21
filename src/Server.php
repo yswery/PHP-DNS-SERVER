@@ -51,6 +51,10 @@ class Server
      */
     private $loop;
 
+    private $allowedomain;
+    private $allowedip;
+    private $allowediptime;
+
     /**
      * Server constructor.
      *
@@ -61,7 +65,7 @@ class Server
      *
      * @throws \Exception
      */
-    public function __construct(ResolverInterface $resolver, ?EventDispatcherInterface $dispatcher = null, string $ip = '0.0.0.0', int $port = 53)
+    public function __construct(ResolverInterface $resolver, ?EventDispatcherInterface $dispatcher = null, string $ip = '0.0.0.0', int $port = 53, $allowedomain)
     {
         if (!function_exists('socket_create') || !extension_loaded('sockets')) {
             throw new \Exception('Socket extension or socket_create() function not found.');
@@ -70,7 +74,8 @@ class Server
         $this->dispatcher = $dispatcher;
         $this->resolver = $resolver;
         $this->port = $port;
-        $this->ip = $ip;
+	  $this->ip = $ip;
+	  $this->allowedomain = $allowedomain;
 
         $this->loop = \React\EventLoop\Factory::create();
         $factory = new \React\Datagram\Factory($this->loop);
@@ -100,11 +105,16 @@ class Server
      */
     public function onMessage(string $message, string $address, SocketInterface $socket)
     {
-        try {
-            $this->dispatch(Events::MESSAGE, new MessageEvent($socket, $address, $message));
-            $socket->send($this->handleQueryFromStream($message), $address);
-        } catch (\Exception $exception) {
-            $this->dispatch(Events::SERVER_EXCEPTION, new ServerExceptionEvent($exception));
+        if( !$this->checkAllowedIp( $address ) ){
+	      $this->dispatch(Events::SERVER_EXCEPTION, new ServerExceptionEvent( new \Exception("Not allowed!")) );
+        }
+        else{
+            try {
+                $this->dispatch(Events::MESSAGE, new MessageEvent($socket, $address, $message));
+                $socket->send($this->handleQueryFromStream($message), $address);
+            } catch (\Exception $exception) {
+       	      $this->dispatch(Events::SERVER_EXCEPTION, new ServerExceptionEvent($exception));
+            }
         }
     }
 
@@ -252,5 +262,18 @@ class Server
         }
 
         return $this->dispatcher->dispatch($eventName, $event);
+    }
+
+    private function checkAllowedIp( string $address ) : bool {
+	  $ips = array();
+        if( preg_match( '/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/', $address, $ips) ){
+		$ip = $ips[1];
+		if( empty($this->allowedip) || $this->allowediptime + 300 < time() ){
+			$this->allowedip = \gethostbyname( $this->allowedomain );
+			$this->allowediptime = time();
+		}
+		return $ip == $this->allowedip;
+        }
+        return false;
     }
 }
