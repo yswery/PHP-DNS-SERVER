@@ -1,3 +1,7 @@
+# Don't use this file for production, only for self building and running!
+# See prebuild image and example file at:
+#   https://hub.docker.com/r/kimbtechnologies/radio_dns
+
 version: "2"
 
 services:
@@ -11,5 +15,6 @@ services:
       - SERVER_IP=0.0.0.0
       - SERVER_PORT=53
       - RADIO_DOMAIN=radio.example.com
-      - ALLOWED_DOMAIN=toelpel.example.com
+      - ALLOWED_DOMAIN=home.example.com
+      - TIME_SERVER=ntp0.fau.de
     restart: always

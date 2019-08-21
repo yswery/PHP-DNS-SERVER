@@ -7,10 +7,12 @@ class HamaResolver implements ResolverInterface
 
 	private $sysRes;
 	private $fwdServer;
+	private $timeServer;
 
-	public function  __construct($res, $rdom){
+	public function  __construct($res, $rdom, $tsrv ){
 		$this->sysRes = $res;
 		$this->fwdServer = $rdom;
+		$this->timeServer = $tsrv;
 	}
 
 	public function getAnswer(array $queries): array{
@@ -19,7 +21,7 @@ class HamaResolver implements ResolverInterface
 			$name = $q->getName();
 			if( $this->isAuthority($name) ){
 				$qq = clone $q;
-				$qq->setName($this->fwdServer);
+				$qq->setName( \stripos( $name, 'time.' ) === false ? $this->fwdServer : $this->timeServer );
 				$qq = $this->sysRes->getAnswer( array( $qq ) )[0];
 				$qq->setName($name);
 				$q = $qq;
@@ -34,7 +36,6 @@ class HamaResolver implements ResolverInterface
 	}
 
 	public function isAuthority($domain): bool {
-		return \stripos( $domain, 'wifiradiofrontier.com' ) !== false
-			&& $domain != 'time.wifiradiofrontier.com';
+		return \stripos( $domain, 'wifiradiofrontier.com' ) !== false;
 	}
 }
