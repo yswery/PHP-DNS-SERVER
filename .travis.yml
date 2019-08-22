@@ -1,13 +1,17 @@
 language: php
 
 php:
-- "7.3"
+  - "7.3"
 
 before_script:
-- composer install
+  - composer install
 
 services:
   - docker
+
+branches:
+  only: 
+    - master
 
 jobs:
   include:
@@ -16,6 +20,8 @@ jobs:
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
       - docker build -t radio_dns .
       - docker images
-      - docker tag radio_dns kimbtechnologies/radio_dns
-      - docker push kimbtechnologies/radio_dns
+      - docker tag radio_dns kimbtechnologies/radio_dns:$TRAVIS_COMMIT
+      - docker tag radio_dns kimbtechnologies/radio_dns:latest
+      - docker push kimbtechnologies/radio_dns:$TRAVIS_COMMIT
+      - docker push kimbtechnologies/radio_dns:latest
 
