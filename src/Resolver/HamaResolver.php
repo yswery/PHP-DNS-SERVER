@@ -31,7 +31,7 @@ class HamaResolver implements ResolverInterface
 		return $ok ? $queries : [];
 	}
 
-    	public function allowsRecursion(): bool{
+    public function allowsRecursion(): bool{
 	    return false;
 	}
 
