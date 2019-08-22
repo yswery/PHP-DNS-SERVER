@@ -20,4 +20,3 @@ jobs:
       - docker tag radio_dns kimbtechnologies/radio_dns:latest
       - docker push kimbtechnologies/radio_dns:$TRAVIS_COMMIT
       - docker push kimbtechnologies/radio_dns:latest
-
