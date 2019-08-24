@@ -65,7 +65,7 @@ class Server
      *
      * @throws \Exception
      */
-    public function __construct(ResolverInterface $resolver, ?EventDispatcherInterface $dispatcher = null, string $ip = '0.0.0.0', int $port = 53, $allowedomain)
+    public function __construct(ResolverInterface $resolver, ?EventDispatcherInterface $dispatcher = null, string $ip = '0.0.0.0', int $port = 53, $allowedomain = 'all')
     {
         if (!function_exists('socket_create') || !extension_loaded('sockets')) {
             throw new \Exception('Socket extension or socket_create() function not found.');
@@ -265,15 +265,20 @@ class Server
     }
 
     private function checkAllowedIp( string $address ) : bool {
-	    $ips = array();
-        if( preg_match( '/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/', $address, $ips) ){
-	    	$ip = $ips[1];
-		    if( empty($this->allowedip) || $this->allowediptime + 300 < time() ){
-		    	$this->allowedip = \gethostbyname( $this->allowedomain );
-		    	$this->allowediptime = time();
-		    }
-		    return $ip == $this->allowedip;
+        if( $this->allowedomain != 'all' ){
+            $ips = array();
+            if( preg_match( '/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/', $address, $ips) ){
+                $ip = $ips[1];
+                if( empty($this->allowedip) || $this->allowediptime + 300 < time() ){
+                    $this->allowedip = \gethostbyname( $this->allowedomain );
+                    $this->allowediptime = time();
+                }
+                return $ip == $this->allowedip;
+            }
+            return false;
         }
-        return false;
+        else{
+            return true;
+        }
     }
 }
