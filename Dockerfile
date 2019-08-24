@@ -15,7 +15,7 @@ COPY --chown=php:php . /home/php/dns/
 ENV SERVER_IP=0.0.0.0 \
     SERVER_PORT=53 \
     RADIO_DOMAIN=radio.example.com \
-    ALLOWED_DOMAIN=home.example.com \
+    ALLOWED_DOMAIN=all \
     TIME_SERVER=ntp0.fau.de
 
 # open port
