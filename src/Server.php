@@ -51,9 +51,10 @@ class Server
      */
     private $loop;
 
-    private $allowedomain;
-    private $allowedip;
-    private $allowediptime;
+    /**
+     * Save allowed array of (ips, hostnames and times) of lookup
+     */
+    private $allowed = array();
 
     /**
      * Server constructor.
@@ -74,8 +75,22 @@ class Server
         $this->dispatcher = $dispatcher;
         $this->resolver = $resolver;
         $this->port = $port;
-	    $this->ip = $ip;
-	    $this->allowedomain = $allowedomain;
+        $this->ip = $ip;
+    
+        // domain names fetch
+        if( $allowedomain == 'all' ){
+            $this->allowed = 'all';
+        }
+        else {
+            $this->allowed = array();
+            foreach( explode(',', $allowedomain) as $domain ){
+                $this->allowed[] = array(
+                    'ip' => '',
+                    'time' => 0, // no ip and timed out
+                    'domain' => trim($domain)
+                );
+            }
+        }
 
         $this->loop = \React\EventLoop\Factory::create();
         $factory = new \React\Datagram\Factory($this->loop);
@@ -265,20 +280,32 @@ class Server
     }
 
     private function checkAllowedIp( string $address ) : bool {
-        if( $this->allowedomain != 'all' ){
+        // all?
+        if( !is_array($this->allowed) && $this->allowed === 'all' ){
+            return true;
+        }
+        else {
+            // get ip of client
             $ips = array();
             if( preg_match( '/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/', $address, $ips) ){
-                $ip = $ips[1];
-                if( empty($this->allowedip) || $this->allowediptime + 300 < time() ){
-                    $this->allowedip = \gethostbyname( $this->allowedomain );
-                    $this->allowediptime = time();
+                $ip = $ips[1]; // client ip
+
+                // sort, that newest time() will be checked first
+                //  so, we will check all domains with not timed out  first
+                array_multisort(array_column($this->allowed, 'time'), SORT_DESC, $this->allowed);
+
+                // check client ip
+                foreach( $this->allowed as &$allowed ){
+                    if( empty($allowed['ip']) || $allowed['time'] + 300 < time() ){
+                        $allowed['ip'] = \gethostbyname( $allowed['domain'] );
+                        $allowed['time'] = time();
+                    }
+                    if( $allowed['ip'] == $ip ){
+                        return true;
+                    }
                 }
-                return $ip == $this->allowedip;
             }
             return false;
-        }
-        else{
-            return true;
         }
     }
 }

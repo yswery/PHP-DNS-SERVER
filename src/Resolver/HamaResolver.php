@@ -17,7 +17,7 @@ class HamaResolver implements ResolverInterface
 
 	public function getAnswer(array $queries): array{
 		$ok = false;
-		foreach( $queries as &$q){
+		foreach( $queries as &$q ){
 			$name = $q->getName();
 			if( $this->isAuthority($name) ){
 				$qq = clone $q;
@@ -31,7 +31,7 @@ class HamaResolver implements ResolverInterface
 		return $ok ? $queries : [];
 	}
 
-    public function allowsRecursion(): bool{
+	public function allowsRecursion(): bool{
 	    return false;
 	}
 
