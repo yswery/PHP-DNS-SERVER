@@ -72,6 +72,11 @@ class Server
     private $useFilesystem;
 
     /**
+     * @var bool
+     */
+    private $isWindows;
+
+    /**
      * Server constructor.
      *
      * @param ResolverInterface        $resolver
@@ -93,7 +98,16 @@ class Server
         $this->port = $port;
         $this->ip = $ip;
 
-        // setup file system manger
+        // detect os and setup file manager, default to working directory on windows
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $this->isWindows = true;
+            $this->filesystemManager = new FilesystemManager(getcwd());
+        } else {
+            // default to /etc/phpdnsserver on unix
+            $this->isWindows = false;
+            $this->filesystemManager = new FilesystemManager("/etc/phpdnsserver/");
+        }
+
         $this->filesystemManager = new FilesystemManager(getcwd());
         $this->useFilesystem = $useFilesystem;
 
