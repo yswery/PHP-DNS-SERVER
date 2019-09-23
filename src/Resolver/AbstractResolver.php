@@ -28,6 +28,11 @@ abstract class AbstractResolver implements ResolverInterface
     protected $isAuthoritative;
 
     /**
+     * @var bool
+     */
+    protected $supportsSaving = false;
+
+    /**
      * @var ResourceRecord[]
      */
     protected $resourceRecords = [];
@@ -74,6 +79,14 @@ abstract class AbstractResolver implements ResolverInterface
     public function isAuthority($domain): bool
     {
         return $this->isAuthoritative;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function supportsSaving()
+    {
+        return $this->supportsSaving;
     }
 
     /**

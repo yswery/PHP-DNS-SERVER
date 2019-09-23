@@ -14,6 +14,8 @@ namespace yswery\DNS;
 use React\Datagram\Socket;
 use React\Datagram\SocketInterface;
 use React\EventLoop\LoopInterface;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\Event;
 use yswery\DNS\Event\ServerExceptionEvent;
@@ -21,11 +23,19 @@ use yswery\DNS\Event\MessageEvent;
 use yswery\DNS\Event\QueryReceiveEvent;
 use yswery\DNS\Event\QueryResponseEvent;
 use yswery\DNS\Event\ServerStartEvent;
+use yswery\DNS\Resolver\JsonFileSystemResolver;
 use yswery\DNS\Resolver\ResolverInterface;
 use yswery\DNS\Event\Events;
+use yswery\DNS\Filesystem\FilesystemManager;
 
 class Server
 {
+    /**
+     * The version of PhpDnsServer we are running
+     * @var string
+     */
+    const VERSION = "1.4.0";
+
     /**
      * @var EventDispatcherInterface
      */
@@ -52,16 +62,27 @@ class Server
     private $loop;
 
     /**
+     * @var FilesystemManager
+     */
+    private $filesystemManager;
+
+    /**
+     * @var bool
+     */
+    private $useFilesystem;
+
+    /**
      * Server constructor.
      *
      * @param ResolverInterface        $resolver
      * @param EventDispatcherInterface $dispatcher
+     * @param bool                     $useFilesystem
      * @param string                   $ip
      * @param int                      $port
      *
      * @throws \Exception
      */
-    public function __construct(ResolverInterface $resolver, ?EventDispatcherInterface $dispatcher = null, string $ip = '0.0.0.0', int $port = 53)
+    public function __construct(ResolverInterface $resolver = null, ?EventDispatcherInterface $dispatcher = null, bool $useFilesystem = false,  string $ip = '0.0.0.0', int $port = 53)
     {
         if (!function_exists('socket_create') || !extension_loaded('sockets')) {
             throw new \Exception('Socket extension or socket_create() function not found.');
@@ -71,6 +92,14 @@ class Server
         $this->resolver = $resolver;
         $this->port = $port;
         $this->ip = $ip;
+
+        // setup file system manger
+        $this->filesystemManager = new FilesystemManager(getcwd());
+        $this->useFilesystem = $useFilesystem;
+
+        if ($useFilesystem) {
+            $this->resolver = new JsonFileSystemResolver($this->filesystemManager);
+        }
 
         $this->loop = \React\EventLoop\Factory::create();
         $factory = new \React\Datagram\Factory($this->loop);
@@ -82,6 +111,7 @@ class Server
         });
     }
 
+
     /**
      * Start the server.
      */
@@ -89,6 +119,11 @@ class Server
     {
         set_time_limit(0);
         $this->loop->run();
+    }
+
+    public function run()
+    {
+        $this->start();
     }
 
     /**
@@ -121,6 +156,7 @@ class Server
     {
         $message = Decoder::decodeMessage($buffer);
         $this->dispatch(Events::QUERY_RECEIVE, new QueryReceiveEvent($message));
+
 
         $responseMessage = clone $message;
         $responseMessage->getHeader()
