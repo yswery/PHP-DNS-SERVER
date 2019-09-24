@@ -49,6 +49,7 @@
     },
     "scripts": {
         "build-server": "box compile -c server.box.json",
-        "build-console": "box compile -c console.box.json"
+        "build-console": "box compile -c console.box.json",
+        "build-installer": "box compile -c installer.box.json"
     }
 }
