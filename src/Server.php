@@ -88,14 +88,14 @@ class Server
      * @param ResolverInterface        $resolver
      * @param EventDispatcherInterface $dispatcher
      * @param FileConfig               $config
-     * @param string                   $storageDirectory
+     * @param string|null              $storageDirectory
      * @param bool                     $useFilesystem
      * @param string                   $ip
      * @param int                      $port
      *
      * @throws \Exception
      */
-    public function __construct(?ResolverInterface $resolver = null, ?EventDispatcherInterface $dispatcher = null, ?FileConfig $config = null, string $storageDirectory,  bool $useFilesystem = false,  string $ip = '0.0.0.0', int $port = 53)
+    public function __construct(?ResolverInterface $resolver = null, ?EventDispatcherInterface $dispatcher = null, ?FileConfig $config = null, string $storageDirectory = null,  bool $useFilesystem = false,  string $ip = '0.0.0.0', int $port = 53)
     {
         if (!function_exists('socket_create') || !extension_loaded('sockets')) {
             throw new \Exception('Socket extension or socket_create() function not found.');
@@ -106,20 +106,18 @@ class Server
         $this->config = $config;
         $this->port = $port;
         $this->ip = $ip;
-
-        // detect os and setup file manager, default to working directory on windows
+        $this->useFilesystem = $useFilesystem;
+        
+        // detect os
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             $this->isWindows = true;
-            $this->filesystemManager = new FilesystemManager($storageDirectory);
         } else {
-            // default to /etc/phpdnsserver on unix
             $this->isWindows = false;
-            $this->filesystemManager = new FilesystemManager($storageDirectory);
         }
 
-        $this->useFilesystem = $useFilesystem;
-
+        // only register filesystem if we want to use it
         if ($useFilesystem) {
+            $this->filesystemManager = new FilesystemManager($storageDirectory);
             $this->resolver = new JsonFileSystemResolver($this->filesystemManager);
         }
 
