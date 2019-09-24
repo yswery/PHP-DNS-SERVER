@@ -18,6 +18,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\Event;
+use yswery\DNS\Config\FileConfig;
 use yswery\DNS\Event\ServerExceptionEvent;
 use yswery\DNS\Event\MessageEvent;
 use yswery\DNS\Event\QueryReceiveEvent;
@@ -67,6 +68,11 @@ class Server
     private $filesystemManager;
 
     /**
+     * @var FileConfig
+     */
+    private $config;
+
+    /**
      * @var bool
      */
     private $useFilesystem;
@@ -81,13 +87,15 @@ class Server
      *
      * @param ResolverInterface        $resolver
      * @param EventDispatcherInterface $dispatcher
+     * @param FileConfig               $config
+     * @param string                   $storageDirectory
      * @param bool                     $useFilesystem
      * @param string                   $ip
      * @param int                      $port
      *
      * @throws \Exception
      */
-    public function __construct(ResolverInterface $resolver = null, ?EventDispatcherInterface $dispatcher = null, bool $useFilesystem = false,  string $ip = '0.0.0.0', int $port = 53)
+    public function __construct(?ResolverInterface $resolver = null, ?EventDispatcherInterface $dispatcher = null, ?FileConfig $config = null, string $storageDirectory,  bool $useFilesystem = false,  string $ip = '0.0.0.0', int $port = 53)
     {
         if (!function_exists('socket_create') || !extension_loaded('sockets')) {
             throw new \Exception('Socket extension or socket_create() function not found.');
@@ -95,20 +103,20 @@ class Server
 
         $this->dispatcher = $dispatcher;
         $this->resolver = $resolver;
+        $this->config = $config;
         $this->port = $port;
         $this->ip = $ip;
 
         // detect os and setup file manager, default to working directory on windows
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             $this->isWindows = true;
-            $this->filesystemManager = new FilesystemManager(getcwd());
+            $this->filesystemManager = new FilesystemManager($storageDirectory);
         } else {
             // default to /etc/phpdnsserver on unix
             $this->isWindows = false;
-            $this->filesystemManager = new FilesystemManager("/etc/phpdnsserver/");
+            $this->filesystemManager = new FilesystemManager($storageDirectory);
         }
 
-        $this->filesystemManager = new FilesystemManager(getcwd());
         $this->useFilesystem = $useFilesystem;
 
         if ($useFilesystem) {
