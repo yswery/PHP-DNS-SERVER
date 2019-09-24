@@ -107,7 +107,7 @@ class Server
         $this->port = $port;
         $this->ip = $ip;
         $this->useFilesystem = $useFilesystem;
-        
+
         // detect os
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             $this->isWindows = true;
