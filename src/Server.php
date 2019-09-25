@@ -14,8 +14,6 @@ namespace yswery\DNS;
 use React\Datagram\Socket;
 use React\Datagram\SocketInterface;
 use React\EventLoop\LoopInterface;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\Event;
 use yswery\DNS\Config\FileConfig;
@@ -32,10 +30,11 @@ use yswery\DNS\Filesystem\FilesystemManager;
 class Server
 {
     /**
-     * The version of PhpDnsServer we are running
+     * The version of PhpDnsServer we are running.
+     *
      * @var string
      */
-    const VERSION = "1.4.0";
+    const VERSION = '1.4.0';
 
     /**
      * @var EventDispatcherInterface
@@ -95,7 +94,7 @@ class Server
      *
      * @throws \Exception
      */
-    public function __construct(?ResolverInterface $resolver = null, ?EventDispatcherInterface $dispatcher = null, ?FileConfig $config = null, string $storageDirectory = null,  bool $useFilesystem = false,  string $ip = '0.0.0.0', int $port = 53)
+    public function __construct(?ResolverInterface $resolver = null, ?EventDispatcherInterface $dispatcher = null, ?FileConfig $config = null, string $storageDirectory = null, bool $useFilesystem = false, string $ip = '0.0.0.0', int $port = 53)
     {
         if (!function_exists('socket_create') || !extension_loaded('sockets')) {
             throw new \Exception('Socket extension or socket_create() function not found.');
@@ -109,7 +108,7 @@ class Server
         $this->useFilesystem = $useFilesystem;
 
         // detect os
-        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+        if ('WIN' === strtoupper(substr(PHP_OS, 0, 3))) {
             $this->isWindows = true;
         } else {
             $this->isWindows = false;
@@ -130,7 +129,6 @@ class Server
             $this->dispatch(Events::SERVER_START_FAIL, new ServerExceptionEvent($exception));
         });
     }
-
 
     /**
      * Start the server.
@@ -176,7 +174,6 @@ class Server
     {
         $message = Decoder::decodeMessage($buffer);
         $this->dispatch(Events::QUERY_RECEIVE, new QueryReceiveEvent($message));
-
 
         $responseMessage = clone $message;
         $responseMessage->getHeader()

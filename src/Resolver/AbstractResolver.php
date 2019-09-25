@@ -82,7 +82,7 @@ abstract class AbstractResolver implements ResolverInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function supportsSaving()
     {

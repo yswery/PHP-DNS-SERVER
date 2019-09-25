@@ -39,7 +39,7 @@ class JsonFileSystemResolver extends AbstractResolver
      * JsonResolver constructor.
      *
      * @param FilesystemManager $filesystemManager
-     * @param int   $defaultTtl
+     * @param int               $defaultTtl
      *
      * @throws UnsupportedTypeException
      */
@@ -50,9 +50,8 @@ class JsonFileSystemResolver extends AbstractResolver
         $this->filesystemManager = $filesystemManager;
         $this->defaultTtl = $defaultTtl;
 
-        $zones = glob($filesystemManager->zonePath()."/*.json");
-        foreach ($zones as $file)
-        {
+        $zones = glob($filesystemManager->zonePath().'/*.json');
+        foreach ($zones as $file) {
             $zone = json_decode(file_get_contents($file), true);
             $resourceRecords = $this->isLegacyFormat($zone) ? $this->processLegacyZone($zone) : $this->processZone($zone);
             $this->addZone($resourceRecords);
@@ -60,31 +59,31 @@ class JsonFileSystemResolver extends AbstractResolver
     }
 
     /**
-     * Load a zone file
+     * Load a zone file.
      *
      * @param string $file
+     *
      * @throws UnsupportedTypeException
      * @throws ZoneFileNotFoundException
      */
-    public function loadZone($file) {
-        if (file_exists($file))
-        {
+    public function loadZone($file)
+    {
+        if (file_exists($file)) {
             $zone = json_decode(file_get_contents($file), true);
             $resourceRecords = $this->isLegacyFormat($zone) ? $this->processLegacyZone($zone) : $this->processZone($zone);
             $this->addZone($resourceRecords);
         } else {
-            throw new ZoneFileNotFoundException("The zone file could not be found");
+            throw new ZoneFileNotFoundException('The zone file could not be found');
         }
     }
 
-
     /**
-     * Saves the zone to a .json file
+     * Saves the zone to a .json file.
+     *
      * @param string $zone
      */
     public function saveZone($zone)
     {
-
     }
 
     /**

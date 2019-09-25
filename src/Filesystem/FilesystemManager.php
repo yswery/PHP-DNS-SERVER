@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of PHP DNS Server.
+ *
+ * (c) Yif Swery <yiftachswr@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace yswery\DNS\Filesystem;
 
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
@@ -25,16 +34,13 @@ class FilesystemManager
 
     public function __construct($basePath = null, $zonePath = null)
     {
-        if ($basePath)
-        {
+        if ($basePath) {
             $this->setBasePath($basePath);
         }
 
-        if ($zonePath)
-        {
+        if ($zonePath) {
             $this->setZonePath($zonePath);
         }
-
 
         $this->registerFilesystem();
     }
@@ -44,21 +50,19 @@ class FilesystemManager
         $this->filesystem = new Filesystem();
 
         // make sure our directories exist
-        if (!$this->filesystem->exists($this->zonePath()))
-        {
+        if (!$this->filesystem->exists($this->zonePath())) {
             try {
                 $this->filesystem->mkdir($this->zonePath(), 0700);
             } catch (IOExceptionInterface $e) {
                 // todo: implement logging functions
             }
-
         }
-
     }
 
     public function setBasePath($basePath)
     {
         $this->basePath = rtrim($basePath, '\/');
+
         return $this;
     }
 
@@ -70,6 +74,7 @@ class FilesystemManager
     public function setZonePath($zonePath)
     {
         $this->zonePath = rtrim($zonePath, '\/');
+
         return $this;
     }
 
@@ -80,12 +85,15 @@ class FilesystemManager
 
     /**
      * @param string $zone
+     *
      * @return JsonFileSystemResolver
+     *
      * @throws \yswery\DNS\UnsupportedTypeException
      */
     public function getZone(string $zone)
     {
         $zoneFile = $this->basePath().DIRECTORY_SEPARATOR.$zone.'.json';
+
         return new JsonFileSystemResolver($zoneFile);
     }
 }
