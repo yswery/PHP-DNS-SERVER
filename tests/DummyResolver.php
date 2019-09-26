@@ -32,7 +32,7 @@ class DummyResolver implements ResolverInterface
      *
      * @return array
      */
-    public function getAnswer(array $queries): array
+    public function getAnswer(array $queries, ?string $client = null): array
     {
         $q = $queries[0];
 

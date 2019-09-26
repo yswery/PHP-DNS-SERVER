@@ -39,7 +39,7 @@ class SystemResolver extends AbstractResolver
      *
      * @throws UnsupportedTypeException
      */
-    public function getAnswer(array $queries): array
+    public function getAnswer(array $queries, ?string $client = null): array
     {
         $answer = [];
         foreach ($queries as $query) {
