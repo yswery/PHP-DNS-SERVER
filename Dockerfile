@@ -9,7 +9,9 @@ RUN docker-php-ext-install sockets \
 
 # copy all files
 WORKDIR /home/php/dns/
-COPY --chown=php:php . /home/php/dns/
+COPY --chown=php:php ./src/ /home/php/dns/src/
+COPY --chown=php:php ./vendor/ /home/php/dns/vendor/
+COPY --chown=php:php ./hamaserver.php ./LICENSE.md ./README.md ./VERSION /home/php/dns/
 
 # set server vars
 ENV SERVER_IP=0.0.0.0 \

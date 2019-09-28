@@ -12,11 +12,4 @@ services:
 jobs:
   include:
     - stage: build docker image
-      script:
-      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      - docker build -t radio_dns .
-      - docker images
-      - docker tag radio_dns kimbtechnologies/radio_dns:$TRAVIS_COMMIT
-      - docker tag radio_dns kimbtechnologies/radio_dns:latest
-      - docker push kimbtechnologies/radio_dns:$TRAVIS_COMMIT
-      - docker push kimbtechnologies/radio_dns:latest
+      script: bash ./dockerpublish.sh
