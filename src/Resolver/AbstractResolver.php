@@ -45,7 +45,7 @@ abstract class AbstractResolver implements ResolverInterface
      *
      * @return array
      */
-    public function getAnswer(array $queries): array
+    public function getAnswer(array $queries, ?string $client = null): array
     {
         $answers = [];
         foreach ($queries as $query) {

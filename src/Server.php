@@ -102,7 +102,7 @@ class Server
     {
         try {
             $this->dispatch(Events::MESSAGE, new MessageEvent($socket, $address, $message));
-            $socket->send($this->handleQueryFromStream($message), $address);
+            $socket->send($this->handleQueryFromStream($message, $address), $address);
         } catch (\Exception $exception) {
             $this->dispatch(Events::SERVER_EXCEPTION, new ServerExceptionEvent($exception));
         }
@@ -117,7 +117,7 @@ class Server
      *
      * @throws UnsupportedTypeException
      */
-    public function handleQueryFromStream(string $buffer): string
+    public function handleQueryFromStream(string $buffer, ?string $client = null): string
     {
         $message = Decoder::decodeMessage($buffer);
         $this->dispatch(Events::QUERY_RECEIVE, new QueryReceiveEvent($message));
@@ -129,7 +129,7 @@ class Server
             ->setAuthoritative($this->isAuthoritative($message->getQuestions()));
 
         try {
-            $answers = $this->resolver->getAnswer($responseMessage->getQuestions());
+            $answers = $this->resolver->getAnswer($responseMessage->getQuestions(), $client);
             $responseMessage->setAnswers($answers);
             $this->needsAdditionalRecords($responseMessage);
             $this->dispatch(Events::QUERY_RESPONSE, new QueryResponseEvent($responseMessage));

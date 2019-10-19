@@ -25,7 +25,7 @@ interface ResolverInterface
      *
      * @return ResourceRecord[]
      */
-    public function getAnswer(array $queries): array;
+    public function getAnswer(array $queries, ?string $client = null): array;
 
     /**
      * Returns true if resolver supports recursion.
