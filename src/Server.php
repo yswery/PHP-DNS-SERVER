@@ -29,27 +29,27 @@ class Server
     /**
      * @var EventDispatcherInterface
      */
-    private $dispatcher;
+    protected $dispatcher;
 
     /**
      * @var ResolverInterface
      */
-    private $resolver;
+    protected $resolver;
 
     /**
      * @var int
      */
-    private $port;
+    protected $port;
 
     /**
      * @var string
      */
-    private $ip;
+    protected $ip;
 
     /**
      * @var LoopInterface
      */
-    private $loop;
+    protected $loop;
 
     /**
      * Server constructor.
@@ -137,8 +137,8 @@ class Server
             return Encoder::encodeMessage($responseMessage);
         } catch (UnsupportedTypeException $e) {
             $responseMessage
-                    ->setAnswers([])
-                    ->getHeader()->setRcode(Header::RCODE_NOT_IMPLEMENTED);
+                ->setAnswers([])
+                ->getHeader()->setRcode(Header::RCODE_NOT_IMPLEMENTED);
             $this->dispatch(Events::QUERY_RESPONSE, new QueryResponseEvent($responseMessage));
 
             return Encoder::encodeMessage($responseMessage);
@@ -182,7 +182,7 @@ class Server
      *
      * @param Message $message
      */
-    private function needsAdditionalRecords(Message $message): void
+    protected function needsAdditionalRecords(Message $message): void
     {
         foreach ($message->getAnswers() as $answer) {
             $name = null;
@@ -225,7 +225,7 @@ class Server
      *
      * @return bool
      */
-    private function isAuthoritative(array $query): bool
+    protected function isAuthoritative(array $query): bool
     {
         if (empty($query)) {
             return false;
@@ -245,7 +245,7 @@ class Server
      *
      * @return Event|null
      */
-    private function dispatch($eventName, ?Event $event = null): ?Event
+    protected function dispatch($eventName, ?Event $event = null): ?Event
     {
         if (null === $this->dispatcher) {
             return null;
