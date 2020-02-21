@@ -16,16 +16,26 @@ use React\Datagram\SocketInterface;
 use React\EventLoop\LoopInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\Event;
+use yswery\DNS\Config\FileConfig;
 use yswery\DNS\Event\ServerExceptionEvent;
 use yswery\DNS\Event\MessageEvent;
 use yswery\DNS\Event\QueryReceiveEvent;
 use yswery\DNS\Event\QueryResponseEvent;
 use yswery\DNS\Event\ServerStartEvent;
+use yswery\DNS\Resolver\JsonFileSystemResolver;
 use yswery\DNS\Resolver\ResolverInterface;
 use yswery\DNS\Event\Events;
+use yswery\DNS\Filesystem\FilesystemManager;
 
 class Server
 {
+    /**
+     * The version of PhpDnsServer we are running.
+     *
+     * @var string
+     */
+    const VERSION = '1.4.0';
+
     /**
      * @var EventDispatcherInterface
      */
@@ -52,16 +62,39 @@ class Server
     protected $loop;
 
     /**
+     * @var FilesystemManager
+     */
+    private $filesystemManager;
+
+    /**
+     * @var FileConfig
+     */
+    private $config;
+
+    /**
+     * @var bool
+     */
+    private $useFilesystem;
+
+    /**
+     * @var bool
+     */
+    private $isWindows;
+
+    /**
      * Server constructor.
      *
      * @param ResolverInterface        $resolver
      * @param EventDispatcherInterface $dispatcher
+     * @param FileConfig               $config
+     * @param string|null              $storageDirectory
+     * @param bool                     $useFilesystem
      * @param string                   $ip
      * @param int                      $port
      *
      * @throws \Exception
      */
-    public function __construct(ResolverInterface $resolver, ?EventDispatcherInterface $dispatcher = null, string $ip = '0.0.0.0', int $port = 53)
+    public function __construct(?ResolverInterface $resolver = null, ?EventDispatcherInterface $dispatcher = null, ?FileConfig $config = null, string $storageDirectory = null, bool $useFilesystem = false, string $ip = '0.0.0.0', int $port = 53)
     {
         if (!function_exists('socket_create') || !extension_loaded('sockets')) {
             throw new \Exception('Socket extension or socket_create() function not found.');
@@ -69,8 +102,23 @@ class Server
 
         $this->dispatcher = $dispatcher;
         $this->resolver = $resolver;
+        $this->config = $config;
         $this->port = $port;
         $this->ip = $ip;
+        $this->useFilesystem = $useFilesystem;
+
+        // detect os
+        if ('WIN' === strtoupper(substr(PHP_OS, 0, 3))) {
+            $this->isWindows = true;
+        } else {
+            $this->isWindows = false;
+        }
+
+        // only register filesystem if we want to use it
+        if ($useFilesystem) {
+            $this->filesystemManager = new FilesystemManager($storageDirectory);
+            $this->resolver = new JsonFileSystemResolver($this->filesystemManager);
+        }
 
         $this->loop = \React\EventLoop\Factory::create();
         $factory = new \React\Datagram\Factory($this->loop);
@@ -89,6 +137,11 @@ class Server
     {
         set_time_limit(0);
         $this->loop->run();
+    }
+
+    public function run()
+    {
+        $this->start();
     }
 
     /**

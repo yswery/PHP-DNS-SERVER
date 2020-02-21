@@ -118,6 +118,25 @@ Unit tests using PHPUnit are provided. A simple script is located in the root.
 * run `composer install` to install PHPUnit and dependencies
 * run `vendor/bin/phpunit` from the root to run the tests
 
+## Building .phar
+* run `composer run-script build-server` to build the phpdnsserver.phar file, outputs in the bin folder.
+* run `composer run-script build-console` to build the phpdnscli.phar file, outputs in the bin folder.
+* run  `composer run-script build-installer` to build the installer. Windows support for the installer is currently limited.
+
+## Running the .phar files
+To run the new .phar files, download them from the release and move them to the desired folder.
+* `phpdnsserver.phar` to run the phpdnsserver, uses the new filesystem by default
+* `phpdnscli.phar` to run cli commands
+* `phpdnsinstaller.phar` as root to create required folders and default config.
+
+## Supported command line switches
+* `--bind:b` - bind to a specific ip. Uses `0.0.0.0` by default
+* `--port:p` - bind to a specific port. Uses port `53` by default
+* `--config:c` - specify the config file. Uses `phpdns.json` on windows 
+and `/etc/phpdns.json` on unix systems by default
+* `--storage:s` - specify the path to the storage for zones, and logs. Uses `/etc/phpdnsserver` on unix,
+and current working directory on windows.
+
 ## Supported Record Types
 
 * A

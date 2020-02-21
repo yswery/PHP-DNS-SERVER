@@ -51,7 +51,7 @@ class ServerTest extends TestCase
             $xmlResolver,
         ]);
 
-        $this->server = new Server($resolver, new EventDispatcher());
+        $this->server = new Server($resolver, new EventDispatcher(), null, null, false);
     }
 
     /**
