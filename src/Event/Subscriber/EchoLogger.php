@@ -22,6 +22,14 @@ use yswery\DNS\Event\ServerStartEvent;
 
 class EchoLogger extends AbstractLogger implements EventSubscriberInterface
 {
+    /** @var LoggerInterface */
+    protected $logger;
+
+    public function __construct(?LoggerInterface $logger = null)
+    {
+        $this->logger = $logger;
+    }
+    
     public static function getSubscribedEvents(): array
     {
         return [
@@ -60,6 +68,10 @@ class EchoLogger extends AbstractLogger implements EventSubscriberInterface
 
     public function log($level, $message, array $context = [])
     {
-        echo sprintf('[%s] %s: %s'.PHP_EOL, date('c'), $level, $message);
+        if (!is_null($this->logger)) {
+            $this->logger->log($level, sprintf('[%s] %s', date('c'), $message), $context);
+        } else {
+            echo sprintf('[%s] %s: %s'.PHP_EOL, date('c'), $level, $message);
+        }
     }
 }
