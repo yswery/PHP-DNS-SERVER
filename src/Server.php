@@ -14,18 +14,18 @@ namespace yswery\DNS;
 use React\Datagram\Socket;
 use React\Datagram\SocketInterface;
 use React\EventLoop\LoopInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use yswery\DNS\Config\FileConfig;
-use yswery\DNS\Event\ServerExceptionEvent;
+use yswery\DNS\Event\Events;
 use yswery\DNS\Event\MessageEvent;
 use yswery\DNS\Event\QueryReceiveEvent;
 use yswery\DNS\Event\QueryResponseEvent;
+use yswery\DNS\Event\ServerExceptionEvent;
 use yswery\DNS\Event\ServerStartEvent;
+use yswery\DNS\Filesystem\FilesystemManager;
 use yswery\DNS\Resolver\JsonFileSystemResolver;
 use yswery\DNS\Resolver\ResolverInterface;
-use yswery\DNS\Event\Events;
-use yswery\DNS\Filesystem\FilesystemManager;
 
 class Server
 {

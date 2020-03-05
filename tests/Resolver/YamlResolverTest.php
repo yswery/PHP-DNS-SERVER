@@ -12,9 +12,9 @@
 namespace yswery\DNS\Tests\Resolver;
 
 use Symfony\Component\Yaml\Exception\ParseException;
+use yswery\DNS\RecordTypeEnum;
 use yswery\DNS\Resolver\YamlResolver;
 use yswery\DNS\ResourceRecord;
-use yswery\DNS\RecordTypeEnum;
 
 class YamlResolverTest extends AbstractResolverTest
 {

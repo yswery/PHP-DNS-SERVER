@@ -15,9 +15,9 @@ use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use yswery\DNS\Event\Events;
-use yswery\DNS\Event\ServerExceptionEvent;
 use yswery\DNS\Event\QueryReceiveEvent;
 use yswery\DNS\Event\QueryResponseEvent;
+use yswery\DNS\Event\ServerExceptionEvent;
 use yswery\DNS\Event\ServerStartEvent;
 
 class EchoLogger extends AbstractLogger implements EventSubscriberInterface

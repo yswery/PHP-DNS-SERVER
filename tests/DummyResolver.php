@@ -12,8 +12,8 @@
 namespace yswery\DNS\Tests;
 
 use yswery\DNS\RecordTypeEnum;
-use yswery\DNS\ResourceRecord;
 use yswery\DNS\Resolver\ResolverInterface;
+use yswery\DNS\ResourceRecord;
 
 class DummyResolver implements ResolverInterface
 {
