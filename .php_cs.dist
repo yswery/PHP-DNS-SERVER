@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of PHP DNS Server.
+ *
+ * (c) Yif Swery <yiftachswr@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 $header = <<<'EOF'
 This file is part of PHP DNS Server.
 
@@ -17,11 +26,12 @@ $finder = PhpCsFixer\Finder::create()
 
 $config = PhpCsFixer\Config::create()
     ->setRiskyAllowed(true)
-    ->setRules(array(
+    ->setRules([
         '@Symfony' => true,
-        'header_comment' => array('header' => $header),
-        'array_syntax' => array('syntax' => 'short'),
-    ))
+        'header_comment' => ['header' => $header],
+        'array_syntax' => ['syntax' => 'short'],
+        'no_superfluous_phpdoc_tags' => false,
+    ])
     ->setFinder($finder)
 ;
 
