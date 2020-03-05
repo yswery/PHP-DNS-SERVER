@@ -11,9 +11,9 @@
 
 namespace yswery\DNS\Tests\Resolver;
 
+use yswery\DNS\RecordTypeEnum;
 use yswery\DNS\Resolver\JsonResolver;
 use yswery\DNS\ResourceRecord;
-use yswery\DNS\RecordTypeEnum;
 
 class JsonResolverTest extends AbstractResolverTest
 {

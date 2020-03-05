@@ -11,8 +11,8 @@
 
 namespace yswery\DNS\Resolver;
 
-use yswery\DNS\ResourceRecord;
 use yswery\DNS\RecordTypeEnum;
+use yswery\DNS\ResourceRecord;
 use yswery\DNS\UnsupportedTypeException;
 
 abstract class AbstractResolver implements ResolverInterface
@@ -245,9 +245,7 @@ abstract class AbstractResolver implements ResolverInterface
             case RecordTypeEnum::TYPE_ANY:
                 return '';
             default:
-                throw new UnsupportedTypeException(
-                    sprintf('Resource Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
-                );
+                throw new UnsupportedTypeException(sprintf('Resource Record type "%s" is not a supported type.', RecordTypeEnum::getName($type)));
         }
     }
 }

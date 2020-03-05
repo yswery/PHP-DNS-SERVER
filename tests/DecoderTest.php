@@ -11,13 +11,13 @@
 
 namespace yswery\DNS\Tests;
 
+use PHPUnit\Framework\TestCase;
 use yswery\DNS\Decoder;
 use yswery\DNS\Encoder;
+use yswery\DNS\RdataDecoder;
 use yswery\DNS\RdataEncoder;
 use yswery\DNS\RecordTypeEnum;
 use yswery\DNS\ResourceRecord;
-use PHPUnit\Framework\TestCase;
-use yswery\DNS\RdataDecoder;
 
 class DecoderTest extends TestCase
 {
