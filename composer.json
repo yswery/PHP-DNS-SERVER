@@ -30,7 +30,7 @@
     "require": {
         "react/socket": "~1.2",
         "react/datagram": "^1.4",
-        "php": "~7.1",
+        "php": "~7.2",
         "ext-json": "~1.0",
         "ext-simplexml": "*",
         "symfony/event-dispatcher": "~4.0",
