@@ -11,7 +11,7 @@ This class can be used to give DNS responses dynamically based on your pre-exist
 
 ## Requirements
 
-* `PHP 7.1+`
+* `PHP 7.2+`
 * Needs either `sockets` or `socket_create` PHP extension loaded (which they are by default)
 
 ## Example
@@ -61,8 +61,8 @@ $ dig @127.0.0.1 test2.com A +short
 112.112.112.112
 ```
 ## Zone File Storage
-PHP DNS Server supports three zone file formats out-of-the-box: JSON, XML, and YAML; each file format
-is supported by a specialised `Resolver` class: `JsonResolver`, `XmlResolver`, and `YamlResolver`,
+PHP DNS Server supports four zone file formats out-of-the-box: Bind, JSON, XML, and YAML; each file format
+is supported by a specialised `Resolver` class: `BindResolver`, `JsonResolver`, `XmlResolver`, and `YamlResolver`,
 respectively. Example files are in the `example/` directory.
 
 ### JSON zone example
