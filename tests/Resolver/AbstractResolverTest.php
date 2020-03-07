@@ -27,44 +27,39 @@ abstract class AbstractResolverTest extends TestCase
 
     public function testGetAnswer()
     {
-        $soa = (new ResourceRecord())
-            ->setName('example.com.')
-            ->setClass(ClassEnum::INTERNET)
-            ->setTtl(10800)
-            ->setType(RecordTypeEnum::TYPE_SOA)
-            ->setRdata([
-                'mname' => 'example.com.',
-                'rname' => 'postmaster.example.com.',
-                'serial' => 2,
-                'refresh' => 3600,
-                'retry' => 7200,
-                'expire' => 10800,
-                'minimum' => 3600,
-            ]);
-
-        $aaaa = (new ResourceRecord())
-            ->setName('example.com.')
-            ->setClass(ClassEnum::INTERNET)
-            ->setTtl(7200)
-            ->setType(RecordTypeEnum::TYPE_AAAA)
-            ->setRdata('2001:acad:ad::32');
-
-        $soa_query = (new ResourceRecord())
+        $query[] = (new ResourceRecord())
             ->setName('example.com.')
             ->setType(RecordTypeEnum::TYPE_SOA)
             ->setClass(ClassEnum::INTERNET)
             ->setQuestion(true);
 
-        $aaaa_query = (new ResourceRecord())
+        $query[] = (new ResourceRecord())
             ->setName('example.com.')
             ->setType(RecordTypeEnum::TYPE_AAAA)
             ->setClass(ClassEnum::INTERNET)
             ->setQuestion(true);
 
-        $query = [$soa_query, $aaaa_query];
-        $answer = [$soa, $aaaa];
+        $answer = $this->resolver->getAnswer($query);
+        $this->assertCount(2, $answer);
+        list($soa, $aaaa) = $answer;
 
-        $this->assertEquals($answer, $this->resolver->getAnswer($query));
+        $this->assertEquals('example.com.', $soa->getName());
+        $this->assertEquals(ClassEnum::INTERNET, $soa->getClass());
+        $this->assertEquals(10800, $soa->getTtl());
+        $this->assertEquals(RecordTypeEnum::TYPE_SOA, $soa->getType());
+        $this->assertEquals('example.com.', $soa->getRdata()['mname']);
+        $this->assertEquals('postmaster.example.com.', $soa->getRdata()['rname']);
+        $this->assertEquals(2, $soa->getRdata()['serial']);
+        $this->assertEquals(3600, $soa->getRdata()['refresh']);
+        $this->assertEquals(7200, $soa->getRdata()['retry']);
+        $this->assertEquals(10800, $soa->getRdata()['expire']);
+        $this->assertEquals(3600, $soa->getRdata()['minimum']);
+
+        $this->assertEquals('example.com.', $aaaa->getName());
+        $this->assertEquals(ClassEnum::INTERNET, $aaaa->getClass());
+        $this->assertEquals(7200, $aaaa->getTtl());
+        $this->assertEquals(RecordTypeEnum::TYPE_AAAA, $aaaa->getType());
+        $this->assertEquals(inet_pton('2001:acad:ad::32'), inet_pton($aaaa->getRdata()));
     }
 
     public function testUnconfiguredRecordDoesNotResolve()
@@ -84,19 +79,16 @@ abstract class AbstractResolverTest extends TestCase
             ->setType(RecordTypeEnum::TYPE_A)
             ->setQuestion(true);
 
-        $expectation[] = (new ResourceRecord())
-            ->setName('test2.com.')
-            ->setType(RecordTypeEnum::TYPE_A)
-            ->setTtl(300)
-            ->setRdata('111.111.111.111');
-
-        $expectation[] = (new ResourceRecord())
-            ->setName('test2.com.')
-            ->setType(RecordTypeEnum::TYPE_A)
-            ->setTtl(300)
-            ->setRdata('112.112.112.112');
-
-        $this->assertEquals($expectation, $this->resolver->getAnswer($question));
+        $answer = $this->resolver->getAnswer($question);
+        $this->assertCount(2, $answer);
+        $this->assertEquals('test2.com.', $answer[0]->getName());
+        $this->assertEquals(RecordTypeEnum::TYPE_A, $answer[0]->getType());
+        $this->assertEquals('111.111.111.111', (string) $answer[0]->getRdata());
+        $this->assertEquals(300, $answer[0]->getTtl());
+        $this->assertEquals('test2.com.', $answer[1]->getName());
+        $this->assertEquals(RecordTypeEnum::TYPE_A, $answer[1]->getType());
+        $this->assertEquals('112.112.112.112', (string) $answer[1]->getRdata());
+        $this->assertEquals(300, $answer[1]->getTtl());
     }
 
     public function testWildcardDomains()
@@ -106,13 +98,12 @@ abstract class AbstractResolverTest extends TestCase
             ->setType(RecordTypeEnum::TYPE_A)
             ->setQuestion(true);
 
-        $expectation[] = (new ResourceRecord())
-            ->setName('badcow.subdomain.example.com.')
-            ->setType(RecordTypeEnum::TYPE_A)
-            ->setTtl(7200)
-            ->setRdata('192.168.1.42');
-
-        $this->assertEquals($expectation, $this->resolver->getAnswer($question));
+        $answer = $this->resolver->getAnswer($question);
+        $this->assertCount(1, $answer);
+        $this->assertEquals('badcow.subdomain.example.com.', $answer[0]->getName());
+        $this->assertEquals(1, $answer[0]->getType());
+        $this->assertEquals('192.168.1.42', (string) $answer[0]->getRdata());
+        $this->assertEquals(7200, $answer[0]->getTtl());
     }
 
     /**
@@ -137,7 +128,7 @@ abstract class AbstractResolverTest extends TestCase
 
     public function testSrvRdata()
     {
-        $question[] = (new ResourceRecord())
+        $query[] = (new ResourceRecord())
             ->setName('_ldap._tcp.example.com.')
             ->setType(RecordTypeEnum::TYPE_SRV)
             ->setQuestion(true);
@@ -153,6 +144,18 @@ abstract class AbstractResolverTest extends TestCase
                 'target' => 'ldap.example.com.',
             ]);
 
-        $this->assertEquals($expectation, $this->resolver->getAnswer($question));
+        $answer = $this->resolver->getAnswer($query);
+        $this->assertCount(1, $answer);
+
+        $srv = $answer[0];
+        $this->assertEquals('_ldap._tcp.example.com.', $srv->getName());
+        $this->assertEquals(ClassEnum::INTERNET, $srv->getClass());
+        $this->assertEquals(7200, $srv->getTtl());
+        $this->assertEquals(RecordTypeEnum::TYPE_SRV, $srv->getType());
+
+        $this->assertEquals(1, $srv->getRdata()['priority']);
+        $this->assertEquals(5, $srv->getRdata()['weight']);
+        $this->assertEquals(389, $srv->getRdata()['port']);
+        $this->assertEquals('ldap.example.com.', $srv->getRdata()['target']);
     }
 }
