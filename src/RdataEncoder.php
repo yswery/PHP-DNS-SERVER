@@ -10,6 +10,7 @@
  */
 
 namespace yswery\DNS;
+
 use yswery\DNS\Resolver\ArrayRdata;
 
 class RdataEncoder

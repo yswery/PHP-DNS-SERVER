@@ -23,6 +23,7 @@ class BindResolver extends AbstractResolver
      * BindResolver constructor.
      *
      * @param array $files
+     *
      * @throws ParseException
      */
     public function __construct(array $files)
