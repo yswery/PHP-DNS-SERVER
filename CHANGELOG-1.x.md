@@ -1,5 +1,8 @@
 CHANGELOG for 1.4
 =================
+## v1.4.1
+* [PR #102](https://github.com/yswery/PHP-DNS-SERVER/pull/102) Require `symfony/property-access` version `4.3` instead of `5.0`.
+## v1.4.0
 * [PR #90](https://github.com/yswery/PHP-DNS-SERVER/pull/90) Added the beginning of a cli interface for PhpDnsServer, and a filesystem config for loading all .json files from a zones directory.
 * [PR #93](https://github.com/yswery/PHP-DNS-SERVER/pull/93) Change private `Server` properties to protected.
 * [PR #98](https://github.com/yswery/PHP-DNS-SERVER/pull/98) Drop support for PHP 7.1.
