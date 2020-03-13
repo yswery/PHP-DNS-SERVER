@@ -28,18 +28,18 @@
         }
     ],
     "require": {
-        "react/socket": "~1.2",
-        "react/datagram": "^1.4",
         "php": "~7.2",
         "ext-json": "*",
         "ext-SimpleXML": "*",
-        "symfony/event-dispatcher": "~4.0",
-        "psr/log": "^1.0",
-        "symfony/filesystem": "^4.3",
-        "symfony/console": "^4.3",
-        "vanilla/garden-cli": "^2.2",
         "badcow/dns": "^3.4",
-        "symfony/property-access": "^5.0"
+        "psr/log": "^1.0",
+        "react/socket": "~1.2",
+        "react/datagram": "^1.4",
+        "symfony/console": "^4.3",
+        "symfony/event-dispatcher": "^4.3",
+        "symfony/filesystem": "^4.3",
+        "symfony/property-access": "^4.3",
+        "vanilla/garden-cli": "^2.2"
     },
     "autoload": {
         "psr-4": {
