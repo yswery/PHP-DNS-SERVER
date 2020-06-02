@@ -35,10 +35,10 @@
         "psr/log": "^1.0",
         "react/socket": "~1.2",
         "react/datagram": "^1.4",
-        "symfony/console": "^4.3",
-        "symfony/event-dispatcher": "^4.3",
-        "symfony/filesystem": "^4.3",
-        "symfony/property-access": "^4.3",
+        "symfony/console": "^4.3|^5.0",
+        "symfony/event-dispatcher": "^4.3|^5.0",
+        "symfony/filesystem": "^4.3|^5.0",
+        "symfony/property-access": "^4.3|^5.0",
         "vanilla/garden-cli": "^2.2"
     },
     "autoload": {
