@@ -12,7 +12,7 @@
 namespace yswery\DNS\Event;
 
 use React\Datagram\SocketInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class ServerStartEvent extends Event
 {
