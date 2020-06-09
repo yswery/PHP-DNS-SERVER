@@ -11,7 +11,7 @@
 
 namespace yswery\DNS\Event;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 use yswery\DNS\Message;
 
 class QueryReceiveEvent extends Event
