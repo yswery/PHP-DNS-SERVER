@@ -60,16 +60,19 @@ class SystemResolver extends AbstractResolver
      */
     private function getRecordsRecursively(ResourceRecord $query): array
     {
-        $records = dns_get_record($query->getName(), $this->IANA2PHP($query->getType()));
+        // https://bugs.php.net/bug.php?id=73149
         $result = [];
-
-        foreach ($records as $record) {
-            $result[] = (new ResourceRecord())
-                ->setName($query->getName())
-                ->setClass($query->getClass())
-                ->setTtl($record['ttl'])
-                ->setRdata($this->extractPhpRdata($record))
-                ->setType($query->getType());
+        $dns = @dns_get_record($query->getName(), $this->IANA2PHP($query->getType()));
+        if(!empty($dns)){
+            $records = dns_get_record($query->getName(), $this->IANA2PHP($query->getType()));
+            foreach ($records as $record) {
+                $result[] = (new ResourceRecord())
+                    ->setName($query->getName())
+                    ->setClass($query->getClass())
+                    ->setTtl($record['ttl'])
+                    ->setRdata($this->extractPhpRdata($record))
+                    ->setType($query->getType());
+            }
         }
 
         return $result;
