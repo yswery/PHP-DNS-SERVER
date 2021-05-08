@@ -11,8 +11,8 @@
 
 namespace yswery\DNS\Resolver;
 
-use yswery\DNS\ResourceRecord;
 use yswery\DNS\RecordTypeEnum;
+use yswery\DNS\ResourceRecord;
 use yswery\DNS\UnsupportedTypeException;
 
 abstract class AbstractResolver implements ResolverInterface
@@ -26,6 +26,11 @@ abstract class AbstractResolver implements ResolverInterface
      * @var bool
      */
     protected $isAuthoritative;
+
+    /**
+     * @var bool
+     */
+    protected $supportsSaving = false;
 
     /**
      * @var ResourceRecord[]
@@ -45,7 +50,7 @@ abstract class AbstractResolver implements ResolverInterface
      *
      * @return array
      */
-    public function getAnswer(array $queries): array
+    public function getAnswer(array $queries, ?string $client = null): array
     {
         $answers = [];
         foreach ($queries as $query) {
@@ -74,6 +79,14 @@ abstract class AbstractResolver implements ResolverInterface
     public function isAuthority($domain): bool
     {
         return $this->isAuthoritative;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function supportsSaving()
+    {
+        return $this->supportsSaving;
     }
 
     /**
@@ -232,9 +245,7 @@ abstract class AbstractResolver implements ResolverInterface
             case RecordTypeEnum::TYPE_ANY:
                 return '';
             default:
-                throw new UnsupportedTypeException(
-                    sprintf('Resource Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
-                );
+                throw new UnsupportedTypeException(sprintf('Resource Record type "%s" is not a supported type.', RecordTypeEnum::getName($type)));
         }
     }
 }

@@ -12,8 +12,8 @@
 namespace yswery\DNS\Resolver;
 
 use yswery\DNS\ClassEnum;
-use yswery\DNS\ResourceRecord;
 use yswery\DNS\RecordTypeEnum;
+use yswery\DNS\ResourceRecord;
 use yswery\DNS\UnsupportedTypeException;
 
 class XmlResolver extends AbstractResolver

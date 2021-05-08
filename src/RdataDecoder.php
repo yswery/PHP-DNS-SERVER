@@ -42,9 +42,7 @@ class RdataDecoder
     public static function decodeRdata(int $type, string $rdata)
     {
         if (!array_key_exists($type, self::$methodMap)) {
-            throw new UnsupportedTypeException(
-                sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
-            );
+            throw new UnsupportedTypeException(sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type)));
         }
 
         return call_user_func(['self', self::$methodMap[$type]], $rdata);

@@ -11,9 +11,9 @@
 
 namespace yswery\DNS\Resolver;
 
-use yswery\DNS\UnsupportedTypeException;
-use yswery\DNS\ResourceRecord;
 use yswery\DNS\RecordTypeEnum;
+use yswery\DNS\ResourceRecord;
+use yswery\DNS\UnsupportedTypeException;
 
 /**
  * Use the host system's configured DNS.
@@ -39,7 +39,7 @@ class SystemResolver extends AbstractResolver
      *
      * @throws UnsupportedTypeException
      */
-    public function getAnswer(array $queries): array
+    public function getAnswer(array $queries, ?string $client = null): array
     {
         $answer = [];
         foreach ($queries as $query) {
@@ -120,9 +120,7 @@ class SystemResolver extends AbstractResolver
                     'target' => $resourceRecord['target'],
                 ];
             default:
-                throw new UnsupportedTypeException(
-                    sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type))
-                );
+                throw new UnsupportedTypeException(sprintf('Record type "%s" is not a supported type.', RecordTypeEnum::getName($type)));
         }
     }
 

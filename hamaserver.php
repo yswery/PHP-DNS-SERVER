@@ -24,6 +24,10 @@ $eventDispatcher = new \Symfony\Component\EventDispatcher\EventDispatcher();
 $eventDispatcher->addSubscriber(new \yswery\DNS\Event\Subscriber\EchoLogger());
 $eventDispatcher->addSubscriber(new \yswery\DNS\Event\Subscriber\ServerTerminator());
 
-$server = new yswery\DNS\Server($stackableResolver, $eventDispatcher, $vars['SERVER_IP'], $vars['SERVER_PORT'], $vars['ALLOWED_DOMAIN']);
+$server = new yswery\DNS\Server(
+	$stackableResolver, $eventDispatcher,
+	null, null, false,
+	$vars['SERVER_IP'], $vars['SERVER_PORT'], $vars['ALLOWED_DOMAIN']
+);
 
 $server->start();

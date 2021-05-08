@@ -30,7 +30,7 @@ class StackableResolver implements ResolverInterface
      *
      * @return array
      */
-    public function getAnswer(array $question): array
+    public function getAnswer(array $question, ?string $client = null): array
     {
         foreach ($this->resolvers as $resolver) {
             $answer = $resolver->getAnswer($question);

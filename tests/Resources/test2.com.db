@@ -1,0 +1,7 @@
+$origin test2.com.
+$ttl 300
+
+@ IN A 111.111.111.111
+@ IN A 112.112.112.112
+@ IN MX 20 mail-gw1.test2.com.
+@ IN MX 30 mail-gw2.test2.com.

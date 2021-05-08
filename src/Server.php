@@ -14,42 +14,72 @@ namespace yswery\DNS;
 use React\Datagram\Socket;
 use React\Datagram\SocketInterface;
 use React\EventLoop\LoopInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\Event;
-use yswery\DNS\Event\ServerExceptionEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use yswery\DNS\Config\FileConfig;
+use yswery\DNS\Event\Events;
 use yswery\DNS\Event\MessageEvent;
 use yswery\DNS\Event\QueryReceiveEvent;
 use yswery\DNS\Event\QueryResponseEvent;
+use yswery\DNS\Event\ServerExceptionEvent;
 use yswery\DNS\Event\ServerStartEvent;
+use yswery\DNS\Filesystem\FilesystemManager;
+use yswery\DNS\Resolver\JsonFileSystemResolver;
 use yswery\DNS\Resolver\ResolverInterface;
-use yswery\DNS\Event\Events;
 
 class Server
 {
     /**
+     * The version of PhpDnsServer we are running.
+     *
+     * @var string
+     */
+    const VERSION = '1.4.0';
+
+    /**
      * @var EventDispatcherInterface
      */
-    private $dispatcher;
+    protected $dispatcher;
 
     /**
      * @var ResolverInterface
      */
-    private $resolver;
+    protected $resolver;
 
     /**
      * @var int
      */
-    private $port;
+    protected $port;
 
     /**
      * @var string
      */
-    private $ip;
+    protected $ip;
 
     /**
      * @var LoopInterface
      */
-    private $loop;
+    protected $loop;
+
+    /**
+     * @var FilesystemManager
+     */
+    private $filesystemManager;
+
+    /**
+     * @var FileConfig
+     */
+    private $config;
+
+    /**
+     * @var bool
+     */
+    private $useFilesystem;
+
+    /**
+     * @var bool
+     */
+    private $isWindows;
 
     /**
      * Save allowed array of (ips, hostnames and times) of lookup
@@ -61,12 +91,24 @@ class Server
      *
      * @param ResolverInterface        $resolver
      * @param EventDispatcherInterface $dispatcher
+     * @param FileConfig               $config
+     * @param string|null              $storageDirectory
+     * @param bool                     $useFilesystem
      * @param string                   $ip
      * @param int                      $port
      *
      * @throws \Exception
      */
-    public function __construct(ResolverInterface $resolver, ?EventDispatcherInterface $dispatcher = null, string $ip = '0.0.0.0', int $port = 53, $allowedomain = 'all')
+    public function __construct(
+        ResolverInterface $resolver,
+        ?EventDispatcherInterface $dispatcher = null,
+        ?FileConfig $config = null,
+        string $storageDirectory = null,
+        bool $useFilesystem = false,
+        string $ip = '0.0.0.0',
+        int $port = 53,
+        $allowedomain = 'all'
+    )
     {
         if (!function_exists('socket_create') || !extension_loaded('sockets')) {
             throw new \Exception('Socket extension or socket_create() function not found.');
@@ -74,6 +116,7 @@ class Server
 
         $this->dispatcher = $dispatcher;
         $this->resolver = $resolver;
+        $this->config = $config;
         $this->port = $port;
         $this->ip = $ip;
     
@@ -90,6 +133,19 @@ class Server
                     'domain' => trim($domain)
                 );
             }
+        $this->useFilesystem = $useFilesystem;
+
+        // detect os
+        if ('WIN' === strtoupper(substr(PHP_OS, 0, 3))) {
+            $this->isWindows = true;
+        } else {
+            $this->isWindows = false;
+        }
+
+        // only register filesystem if we want to use it
+        if ($useFilesystem) {
+            $this->filesystemManager = new FilesystemManager($storageDirectory);
+            $this->resolver = new JsonFileSystemResolver($this->filesystemManager);
         }
 
         $this->loop = \React\EventLoop\Factory::create();
@@ -111,6 +167,11 @@ class Server
         $this->loop->run();
     }
 
+    public function run()
+    {
+        $this->start();
+    }
+
     /**
      * This methods gets called each time a query is received.
      *
@@ -126,7 +187,7 @@ class Server
         else{
             try {
                 $this->dispatch(Events::MESSAGE, new MessageEvent($socket, $address, $message));
-                $socket->send($this->handleQueryFromStream($message), $address);
+                $socket->send($this->handleQueryFromStream($message, $address), $address);
             } catch (\Exception $exception) {
        	        $this->dispatch(Events::SERVER_EXCEPTION, new ServerExceptionEvent($exception));
             }
@@ -142,7 +203,7 @@ class Server
      *
      * @throws UnsupportedTypeException
      */
-    public function handleQueryFromStream(string $buffer): string
+    public function handleQueryFromStream(string $buffer, ?string $client = null): string
     {
         $message = Decoder::decodeMessage($buffer);
         $this->dispatch(Events::QUERY_RECEIVE, new QueryReceiveEvent($message));
@@ -154,7 +215,7 @@ class Server
             ->setAuthoritative($this->isAuthoritative($message->getQuestions()));
 
         try {
-            $answers = $this->resolver->getAnswer($responseMessage->getQuestions());
+            $answers = $this->resolver->getAnswer($responseMessage->getQuestions(), $client);
             $responseMessage->setAnswers($answers);
             $this->needsAdditionalRecords($responseMessage);
             $this->dispatch(Events::QUERY_RESPONSE, new QueryResponseEvent($responseMessage));
@@ -162,8 +223,8 @@ class Server
             return Encoder::encodeMessage($responseMessage);
         } catch (UnsupportedTypeException $e) {
             $responseMessage
-                    ->setAnswers([])
-                    ->getHeader()->setRcode(Header::RCODE_NOT_IMPLEMENTED);
+                ->setAnswers([])
+                ->getHeader()->setRcode(Header::RCODE_NOT_IMPLEMENTED);
             $this->dispatch(Events::QUERY_RESPONSE, new QueryResponseEvent($responseMessage));
 
             return Encoder::encodeMessage($responseMessage);
@@ -207,7 +268,7 @@ class Server
      *
      * @param Message $message
      */
-    private function needsAdditionalRecords(Message $message): void
+    protected function needsAdditionalRecords(Message $message): void
     {
         foreach ($message->getAnswers() as $answer) {
             $name = null;
@@ -250,7 +311,7 @@ class Server
      *
      * @return bool
      */
-    private function isAuthoritative(array $query): bool
+    protected function isAuthoritative(array $query): bool
     {
         if (empty($query)) {
             return false;
@@ -270,7 +331,7 @@ class Server
      *
      * @return Event|null
      */
-    private function dispatch($eventName, ?Event $event = null): ?Event
+    protected function dispatch($eventName, ?Event $event = null): ?Event
     {
         if (null === $this->dispatcher) {
             return null;
