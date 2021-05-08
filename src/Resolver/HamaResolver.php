@@ -15,7 +15,7 @@ class HamaResolver implements ResolverInterface
 		$this->timeServer = $tsrv;
 	}
 
-	public function getAnswer(array $queries): array{
+	public function getAnswer(array $queries, ?string $client = null): array{
 		$ok = false;
 		foreach( $queries as &$q ){
 			$name = $q->getName();

@@ -133,6 +133,7 @@ class Server
                     'domain' => trim($domain)
                 );
             }
+        }
         $this->useFilesystem = $useFilesystem;
 
         // detect os

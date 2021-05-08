@@ -1,4 +1,4 @@
-FROM php:7-alpine
+FROM php:cli-alpine
 
 # PHP dependencies, create users, allow php (as non root) to open ports
 RUN docker-php-ext-install sockets \ 
@@ -10,8 +10,14 @@ RUN docker-php-ext-install sockets \
 # copy all files
 WORKDIR /home/php/dns/
 COPY --chown=php:php ./src/ /home/php/dns/src/
-COPY --chown=php:php ./vendor/ /home/php/dns/vendor/
-COPY --chown=php:php ./hamaserver.php ./LICENSE.md ./README.md ./VERSION /home/php/dns/
+COPY --chown=php:php ./composer.json ./hamaserver.php ./LICENSE.md ./README.md ./VERSION /home/php/dns/
+
+# install dependencies via composer
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php ./composer-setup.php \
+    && rm ./composer-setup.php \
+    && php ./composer.phar install \
+    && rm ./composer.phar
 
 # set server vars
 ENV SERVER_IP=0.0.0.0 \

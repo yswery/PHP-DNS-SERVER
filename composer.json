@@ -1,15 +1,11 @@
 {
-    "name": "yswery/dns",
-    "description": "A DNS server implementation in pure PHP.",
-    "require-dev": {
-        "phpunit/phpunit": "~7.3",
-        "php-coveralls/php-coveralls": "~2.1",
-        "bamarni/composer-bin-plugin": "^1.3",
-        "humbug/box":  ">=3.6",
-        "friendsofphp/php-cs-fixer": "^2.16"
-    },
+    "name": "kimb-technologies/radio-dns-server",
+    "description": "A DNS server implementation in pure PHP -- adapted for Radio-API",
     "license": "MIT",
     "authors": [
+        {
+            "name": "KIMB-technologies"
+        },
         {
             "name": "Yif Swery",
             "email": "yiftachswr@gmail.com"
@@ -28,32 +24,22 @@
         }
     ],
     "require": {
-        "php": "~7.2",
+        "php": "*",
         "ext-json": "*",
         "ext-SimpleXML": "*",
-        "badcow/dns": "^3.4",
-        "psr/log": "^1.0",
-        "react/socket": "~1.2",
-        "react/datagram": "^1.4",
-        "symfony/console": "^4.3",
-        "symfony/event-dispatcher": "^4.3",
-        "symfony/filesystem": "^4.3",
-        "symfony/property-access": "^4.3",
-        "vanilla/garden-cli": "^2.2"
+        "badcow/dns": "*",
+        "psr/log": "*",
+        "react/socket": "*",
+        "react/datagram": "*",
+        "symfony/console": "*",
+        "symfony/event-dispatcher": "*",
+        "symfony/filesystem": "*",
+        "symfony/property-access": "*",
+        "vanilla/garden-cli": "*"
     },
     "autoload": {
         "psr-4": {
             "yswery\\DNS\\": "src/"
         }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "yswery\\DNS\\Tests\\": "tests/"
-        }
-    },
-    "scripts": {
-        "build-server": "box compile -c server.box.json",
-        "build-console": "box compile -c console.box.json",
-        "build-installer": "box compile -c installer.box.json"
     }
 }
