@@ -1,4 +1,4 @@
-FROM php:cli-alpine
+FROM php:7-cli-alpine
 
 # PHP dependencies, create users, allow php (as non root) to open ports
 RUN docker-php-ext-install sockets \ 

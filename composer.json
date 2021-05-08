@@ -24,18 +24,18 @@
         }
     ],
     "require": {
-        "php": "*",
+        "php": "^7.2",
         "ext-json": "*",
         "ext-SimpleXML": "*",
         "badcow/dns": "*",
-        "psr/log": "*",
-        "react/socket": "*",
-        "react/datagram": "*",
-        "symfony/console": "*",
-        "symfony/event-dispatcher": "*",
-        "symfony/filesystem": "*",
-        "symfony/property-access": "*",
-        "vanilla/garden-cli": "*"
+        "psr/log": "^1.0",
+        "react/socket": "~1.2",
+        "react/datagram": "^1.4",
+        "symfony/console": "^4.3",
+        "symfony/event-dispatcher": "^4.3",
+        "symfony/filesystem": "^4.3",
+        "symfony/property-access": "^4.3",
+        "vanilla/garden-cli": "^2.2"
     },
     "autoload": {
         "psr-4": {
