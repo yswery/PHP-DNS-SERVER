@@ -1,5 +1,8 @@
+dist: focal
+
 services:
   - docker
+
 jobs:
   include:
     - stage: build docker image
