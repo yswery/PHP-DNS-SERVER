@@ -1,20 +1,14 @@
-# Don't use this file for production, only for self building and running!
-# See prebuild image and example file at:
-#   https://hub.docker.com/r/kimbtechnologies/radio_dns
-
 version: "2"
 
 services:
   dns:
     container_name: radio_dns
-    network_mode: host
-    build:
-      context: .
-      dockerfile: Dockerfile
+    network_mode: host	# we need to know the originating ip of requests, else ALLOWED_DOMAIN cloud not be used, can be removed if used with ALLOWED_DOMAIN=all 
+    image: kimbtechnologies/radio_dns:latest
     environment:
-      - SERVER_IP=0.0.0.0
-      - SERVER_PORT=53
-      - RADIO_DOMAIN=radio.example.com
-      - ALLOWED_DOMAIN=home.example.com,home2.example.com 
-      - TIME_SERVER=ntp0.fau.de
-    restart: always
+      - SERVER_IP=0.0.0.0 # the ip to bind on, 0.0.0.0 for all interfaces
+      - SERVER_PORT=53 # the dns port, should be 53
+      - RADIO_DOMAIN=radio.example.com # the place where https://github.com/KIMB-technologies/Radio-API ist hosted
+      - ALLOWED_DOMAIN=home.example.com,home2.example.com # the domains of the home routers (DynDNS) as list divided by ',' or 'all' to allow all sources for the requests
+      - TIME_SERVER=ntp0.fau.de # the NTP time server used by the radio (may be changed)
+    restart: unless-stopped
