@@ -21,5 +21,7 @@ Run using the [**Docker-compose Example**](./docker-compose.yml)!
 - Ubuntu [Docker Image](https://hub.docker.com/_/ubuntu)
 - [Python 3](https://www.python.org/)
 - Python [DnsLib](https://pypi.org/project/dnslib/)
-- Code inspired by [DNSServer](https://github.com/samuelcolvin/dnserver)
-  - Copyright (c) 2017 Samuel Colvin, [MIT License](https://github.com/samuelcolvin/dnserver/blob/master/LICENSE)
+- Code inspired from [DNSServer](https://github.com/samuelcolvin/dnserver)  
+  MIT License, Copyright (c) 2017 Samuel Colvin
+- Regex Pattern from [Validators](https://github.com/kvesteri/validators/) used  
+  MIT License, Copyright (c) 2013-2014 Konsta Vesterinen

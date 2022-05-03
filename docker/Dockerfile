@@ -6,14 +6,16 @@ ARG H_UID=1000
 RUN apt update && \
 	apt install -y \
 		python3 \
-		python3-pip 
+		python3-pip \
+		libcap2-bin
 
 RUN python3 -m pip install --no-cache-dir --upgrade pip
 
 # sytem and user setup 
 RUN ln -s /usr/bin/python3 /usr/local/bin/python \
 	&& addgroup --gid $H_GID user \
-	&& adduser user --uid $H_UID --ingroup user --gecos "" --home /home/user/ --disabled-password
+	&& adduser user --uid $H_UID --ingroup user --gecos "" --home /home/user/ --disabled-password \
+	&& setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/python3.10
 
  # install python packages
 RUN pip3 install --no-cache-dir \
