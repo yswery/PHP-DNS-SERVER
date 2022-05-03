@@ -7,8 +7,11 @@ services:
     build:
       context: .
       dockerfile: ./docker/Dockerfile
+    volumes:
+      - ./dns:/home/user/dns
     environment:
-      - SERVER_IP=0.0.0.0
+      - DEVMODE=true
+      - SERVER_BIND=0.0.0.0
       - SERVER_UPSTREAM=8.8.8.8
       - SERVER_PORT=53
       - RADIO_DOMAIN=radio.example.com

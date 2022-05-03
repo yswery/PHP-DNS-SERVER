@@ -6,7 +6,7 @@ services:
     network_mode: host	# we need to know the originating ip of requests, else ALLOWED_DOMAIN cloud not be used, can be removed if used with ALLOWED_DOMAIN=all 
     image: kimbtechnologies/radio_dns:latest
     environment:
-      - SERVER_IP=0.0.0.0 # the ip to bind on, 0.0.0.0 for all interfaces
+      - SERVER_BIND=0.0.0.0 # the ip to bind on, 0.0.0.0 for all interfaces
       - SERVER_PORT=53 # the dns port, should be 53
       - SERVER_UPSTREAM=8.8.8.8 # the upstream dns server
       - RADIO_DOMAIN=radio.example.com # the place where https://github.com/KIMB-technologies/Radio-API ist hosted

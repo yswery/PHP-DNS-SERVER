@@ -23,13 +23,7 @@ RUN pip3 install --no-cache-dir \
 COPY ./docker/setup.py /home/user/
 RUN pip3 install -e /home/user/
 
-ENV SERVER_IP=0.0.0.0 \
-    SERVER_PORT=53 \
-    SERVER_UPSTREAM=8.8.8.8 \
-    RADIO_DOMAIN=radio.example.com \
-    ALLOWED_DOMAIN=all \
-    TIME_SERVER=ntp0.fau.de \
-    PYTHONUNBUFFERED=1 
+ENV PYTHONUNBUFFERED=1 
 
 # open port
 EXPOSE 53/udp

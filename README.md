@@ -8,7 +8,7 @@ for https://github.com/KIMB-technologies/Radio-API
 
 The configuration is done using env variables.
 
-- `SERVER_IP` *(optional)* The IP address the server binds on, if not set, 0.0.0.0 is used to bind on all interfaces.
+- `SERVER_BIND` *(optional)* The IP address the server binds on, if not set, 0.0.0.0 is used to bind on all interfaces.
 - `SERVER_PORT` *(optional)* The port which is used for the DNS server, should always be the default 53 (unless for testing).
 - `SERVER_UPSTREAM` *(optional)* The upstream DNS server, where DNS answers are fetched from 
 - `RADIO_DOMAIN` *(required)* The domain where the [Radio-API](https://github.com/KIMB-technologies/Radio-API) can be found. The DNS server will return the `A` record of this domain for all queries containing `wifiradiofrontier.com`. 
