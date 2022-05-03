@@ -35,6 +35,5 @@ class Resolver(ProxyResolver):
 		
 		else:
 			print("Clients IP not allowed, send empty answer!")
-			print(request.__dict__)
 			return request.reply()
 

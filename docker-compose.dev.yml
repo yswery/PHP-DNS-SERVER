@@ -14,8 +14,7 @@ services:
       - SERVER_BIND=0.0.0.0
       - SERVER_UPSTREAM=8.8.8.8
       - SERVER_PORT=53
-      - RADIO_DOMAIN=radio.example.com
+      - RADIO_DOMAIN=example.com
       - ALLOWED_DOMAIN=all
-      #home.example.com,home2.example.com 
       - TIME_SERVER=ntp0.fau.de
     restart: always
