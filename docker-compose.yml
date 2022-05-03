@@ -8,6 +8,7 @@ services:
     environment:
       - SERVER_IP=0.0.0.0 # the ip to bind on, 0.0.0.0 for all interfaces
       - SERVER_PORT=53 # the dns port, should be 53
+      - SERVER_UPSTREAM=8.8.8.8 # the upstream dns server
       - RADIO_DOMAIN=radio.example.com # the place where https://github.com/KIMB-technologies/Radio-API ist hosted
       - ALLOWED_DOMAIN=home.example.com,home2.example.com # the domains of the home routers (DynDNS) as list divided by ',' or 'all' to allow all sources for the requests
       - TIME_SERVER=ntp0.fau.de # the NTP time server used by the radio (may be changed)

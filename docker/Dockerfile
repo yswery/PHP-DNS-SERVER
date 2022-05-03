@@ -15,7 +15,7 @@ RUN ln -s /usr/bin/python3 /usr/local/bin/python \
 	&& addgroup --gid $H_GID user \
 	&& adduser user --uid $H_UID --ingroup user --gecos "" --home /home/user/ --disabled-password
 
- # install pythin packages
+ # install python packages
 RUN pip3 install --no-cache-dir \
 	dnslib
 
@@ -25,17 +25,20 @@ RUN pip3 install -e /home/user/
 
 ENV SERVER_IP=0.0.0.0 \
     SERVER_PORT=53 \
+    SERVER_UPSTREAM=8.8.8.8 \
     RADIO_DOMAIN=radio.example.com \
     ALLOWED_DOMAIN=all \
-    TIME_SERVER=ntp0.fau.de
+    TIME_SERVER=ntp0.fau.de \
+    PYTHONUNBUFFERED=1 
 
 # open port
 EXPOSE 53/udp
 
 # add source
 COPY --chown=user:user ./dns /home/user/dns/
-COPY --chown=user:user ./server.py /home/user/
+COPY --chown=user:user ./run.py /home/user/
 
 # run
 USER user
-CMD ["/usr/bin/python3","/home/user/server.py"]
+WORKDIR /home/user/
+CMD ["/usr/bin/python3","/home/user/run.py"]

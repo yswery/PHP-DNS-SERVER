@@ -8,7 +8,5 @@ if __name__ == "__main__":
 
 	d = Demo()
 
-
-while True:
-	time.sleep(1)
-	
+	while True:
+		time.sleep(1)
